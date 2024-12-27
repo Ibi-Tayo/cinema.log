@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using cinema.log.server.Models;
 
 #nullable disable
 
-namespace cinema.log.server.Migrations
+namespace cinema.log.server.Repositories.Migrations
 {
     [DbContext(typeof(CinemaLogContext))]
-    partial class CinemaLogContextModelSnapshot : ModelSnapshot
+    [Migration("20241227204745_Update2")]
+    partial class Update2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,7 +46,7 @@ namespace cinema.log.server.Migrations
                     b.Property<bool>("WasEqual")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("WinningFilmFilmId")
+                    b.Property<Guid>("WinningFilmFilmId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("ComparisonHistoryId");
@@ -202,7 +205,8 @@ namespace cinema.log.server.Migrations
                     b.HasOne("cinema.log.server.Models.Entities.Film", "WinningFilm")
                         .WithMany()
                         .HasForeignKey("WinningFilmFilmId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("FilmA");
 

@@ -7,19 +7,18 @@ public class ComparisonHistory
 {
     public Guid ComparisonHistoryId { get; set; }
 
-    public User User { get; set; }
+    public required User User { get; set; }
     
     [DeleteBehavior(DeleteBehavior.NoAction)]
     [Required]
-    public Film FilmA { get; set; }
+    public required Film FilmA { get; set; }
     
     [DeleteBehavior(DeleteBehavior.NoAction)]
     [Required]
-    public Film FilmB { get; set; }
+    public required Film FilmB { get; set; }
     
     [DeleteBehavior(DeleteBehavior.NoAction)]
-    [Required]
-    public Film WinningFilm { get; set; }
+    public Film? WinningFilm { get; set; }
     
     public DateTime ComparisonDate { get; set; } = DateTime.UtcNow;
     
