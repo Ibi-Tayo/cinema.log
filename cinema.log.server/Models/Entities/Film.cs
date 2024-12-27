@@ -4,7 +4,6 @@ namespace cinema.log.server.Models.Entities;
 
 public class Film
 {
-    [Required]
     public Guid FilmId { get; set; }
     
     [Required]
@@ -16,6 +15,8 @@ public class Film
     
     public string? Director { get; set; }
     
+    public int? ReleaseYear { get; set; }
+
     public string? PosterUrl { get; set; }
     
     public ICollection<Review>? Reviews { get; set; }

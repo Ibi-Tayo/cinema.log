@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using cinema.log.server.Models;
 
 #nullable disable
 
-namespace cinema.log.server.Migrations
+namespace cinema.log.server.Repositories.Migrations
 {
     [DbContext(typeof(CinemaLogContext))]
-    partial class CinemaLogContextModelSnapshot : ModelSnapshot
+    [Migration("20241227161211_FilmComparison")]
+    partial class FilmComparison
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,9 +79,6 @@ namespace cinema.log.server.Migrations
 
                     b.Property<string>("PosterUrl")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ReleaseYear")
-                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
