@@ -1,3 +1,4 @@
+using cinema.log.server.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace cinema.log.server.Models;

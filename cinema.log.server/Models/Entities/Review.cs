@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace cinema.log.server.Models;
+namespace cinema.log.server.Models.Entities;
 
 public class Review
 {

@@ -109,7 +109,7 @@ namespace cinema.log.server.Migrations
             modelBuilder.Entity("cinema.log.server.Models.Review", b =>
                 {
                     b.HasOne("cinema.log.server.Models.Film", "Film")
-                        .WithMany()
+                        .WithMany("Reviews")
                         .HasForeignKey("FilmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -123,6 +123,11 @@ namespace cinema.log.server.Migrations
                     b.Navigation("Film");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("cinema.log.server.Models.Film", b =>
+                {
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.User", b =>
