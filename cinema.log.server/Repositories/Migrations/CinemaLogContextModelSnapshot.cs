@@ -56,7 +56,7 @@ namespace cinema.log.server.Migrations
 
                     b.HasIndex("WinningFilmFilmId");
 
-                    b.ToTable("ComparisonHistories");
+                    b.ToTable("ComparisonHistories", (string)null);
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.Film", b =>
@@ -86,7 +86,7 @@ namespace cinema.log.server.Migrations
 
                     b.HasKey("FilmId");
 
-                    b.ToTable("Films");
+                    b.ToTable("Films", (string)null);
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.Review", b =>
@@ -117,7 +117,7 @@ namespace cinema.log.server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Review");
+                    b.ToTable("Review", (string)null);
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.User", b =>
@@ -143,7 +143,7 @@ namespace cinema.log.server.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.UserFilmRating", b =>
@@ -176,7 +176,7 @@ namespace cinema.log.server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserFilmRatings");
+                    b.ToTable("UserFilmRatings", (string)null);
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.ComparisonHistory", b =>
