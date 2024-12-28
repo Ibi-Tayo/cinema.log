@@ -1,26 +1,29 @@
 using cinema.log.server.Abstractions.Interfaces;
+using cinema.log.server.Models;
 using cinema.log.server.Models.Entities;
 
 namespace cinema.log.server.Repositories;
 
-public class FilmRepository : IFilmRepository
+public class FilmRepository(CinemaLogContext context) : IFilmRepository
 {
-    public Film CreateFilm(Film film)
+    private CinemaLogContext _context = context;
+
+    public async Task<Film> CreateFilm(Film film)
     {
         throw new NotImplementedException();
     }
 
-    public Film GetFilmById(Guid id)
+    public async Task<Film> GetFilmById(Guid id)
     {
         throw new NotImplementedException();
     }
 
-    public Film UpdateFilm(Film film)
+    public async Task<Film> UpdateFilm(Film film)
     {
         throw new NotImplementedException();
     }
 
-    public Film DeleteFilmById(Guid id)
+    public async Task<Film> DeleteFilmById(Guid id)
     {
         throw new NotImplementedException();
     }

@@ -4,8 +4,8 @@ namespace cinema.log.server.Abstractions.Interfaces;
 
 public interface IFilmRepository
 {
-    Film CreateFilm(Film film);
-    Film GetFilmById(Guid id);
-    Film UpdateFilm(Film film);
-    Film DeleteFilmById(Guid id);
+    Task<Film> CreateFilm(Film film);
+    Task<Film> GetFilmById(Guid id);
+    Task<Film> UpdateFilm(Film film);
+    Task<Film> DeleteFilmById(Guid id);
 }
