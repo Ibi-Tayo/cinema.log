@@ -1,6 +1,7 @@
 using cinema.log.server.Abstractions.Interfaces;
 using cinema.log.server.Models;
 using cinema.log.server.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace cinema.log.server.Repositories;
 
@@ -32,6 +33,12 @@ public class FilmRepository: IFilmRepository
     public async Task<Film?> GetFilmById(Guid id)
     {
         return await _context.Films.FindAsync(id);
+    }
+
+    public async Task<List<Film>> GetFilmByTitle(string title)
+    {
+        return await _context.Films
+            .Where(film => film.Title.ToLower() == title.ToLower()).ToListAsync();
     }
 
     public async Task<Film?> UpdateFilm(Film film)

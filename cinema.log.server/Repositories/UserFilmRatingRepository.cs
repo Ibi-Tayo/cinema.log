@@ -30,6 +30,12 @@ public class UserFilmRatingRepository(CinemaLogContext context, ILogger<UserFilm
         return await _context.UserFilmRatings.FindAsync(id);
     }
 
+    public async Task<UserFilmRating?> GetRatingFilmUserId(Guid userId, Guid filmId)
+    {
+        return await _context.UserFilmRatings.FirstOrDefaultAsync(ufr => ufr.User.UserId == userId &&
+                                                                         ufr.Film.FilmId == filmId);
+    }
+
     public async Task<UserFilmRating?> UpdateRating(UserFilmRating rating)
     {
         try
