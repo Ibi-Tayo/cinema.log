@@ -4,9 +4,8 @@ namespace cinema.log.server.Abstractions.Interfaces;
 
 public interface IUserRepository
 { 
-    User CreateUser(User user);
-    User GetUserById(Guid id);
-    User UpdateUser(User user);
-    User DeleteUserById(Guid id);
-    ICollection<Review> GetUserReviews(Guid userId);
+    Task<User?> CreateUser(User user);
+    Task<User?> GetUserById(Guid id);
+    Task<User?> UpdateUser(User user);
+    Task<User?> DeleteUserById(Guid id);
 }

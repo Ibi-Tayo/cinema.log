@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using cinema.log.server.Models;
 
 #nullable disable
 
-namespace cinema.log.server.Migrations
+namespace cinema.log.server.Repositories.Migrations
 {
     [DbContext(typeof(CinemaLogContext))]
-    partial class CinemaLogContextModelSnapshot : ModelSnapshot
+    [Migration("20241227205830_Update3")]
+    partial class Update3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,7 +59,7 @@ namespace cinema.log.server.Migrations
 
                     b.HasIndex("WinningFilmFilmId");
 
-                    b.ToTable("ComparisonHistories", (string)null);
+                    b.ToTable("ComparisonHistories");
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.Film", b =>
@@ -86,7 +89,7 @@ namespace cinema.log.server.Migrations
 
                     b.HasKey("FilmId");
 
-                    b.ToTable("Films", (string)null);
+                    b.ToTable("Films");
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.Review", b =>
@@ -117,7 +120,7 @@ namespace cinema.log.server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Review", (string)null);
+                    b.ToTable("Review");
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.User", b =>
@@ -143,7 +146,7 @@ namespace cinema.log.server.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.UserFilmRating", b =>
@@ -176,7 +179,7 @@ namespace cinema.log.server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserFilmRatings", (string)null);
+                    b.ToTable("UserFilmRatings");
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.ComparisonHistory", b =>

@@ -1,6 +1,56 @@
+using cinema.log.server.Abstractions.Interfaces;
+using cinema.log.server.Models;
+using cinema.log.server.Models.Entities;
+
 namespace cinema.log.server.Repositories;
 
-public class ReviewRepository
+public class ReviewRepository(CinemaLogContext context, ILogger<ReviewRepository> logger) : IReviewRepository
 {
+    private CinemaLogContext _context = context;
+    private ILogger<ReviewRepository> _logger = logger;
     
+    public async Task<Review?> CreateReview(Review review)
+    {
+        try
+        {
+            await _context.Reviews.AddAsync(review);
+            await _context.SaveChangesAsync();
+            return review;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            return null;
+        }
+    }
+
+    public async Task<Review?> GetReviewById(Guid id)
+    {
+        return await _context.Reviews.FindAsync(id);
+    }
+
+    public async Task<Review?> UpdateReview(Review review)
+    {
+        try
+        {
+            _context.Reviews.Update(review);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            return null;
+        }
+
+        return review;
+    }
+
+    public async Task<Review?> DeleteReviewById(Guid id)
+    {
+        var foundReview = await _context.Reviews.FindAsync(id);
+        if (foundReview == null) return null;
+        _context.Reviews.Remove(foundReview);
+        await _context.SaveChangesAsync();
+        return foundReview;
+    }
 }

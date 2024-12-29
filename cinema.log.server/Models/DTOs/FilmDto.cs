@@ -1,23 +1,12 @@
-using System.ComponentModel.DataAnnotations;
+namespace cinema.log.server.Models.DTOs;
 
-namespace cinema.log.server.Models.Entities;
-
-public class Film
+public class FilmDto
 {
     public Guid FilmId { get; set; }
-    
-    [Required]
-    public string Title { get; set; }
-    
+    public required string Title { get; set; }
     public string? Description { get; set; }
-    
     public string? Genre { get; set; }
-    
     public string? Director { get; set; }
-    
     public int? ReleaseYear { get; set; }
-
     public string? PosterUrl { get; set; }
-    
-    public ICollection<Review>? Reviews { get; set; }
 }

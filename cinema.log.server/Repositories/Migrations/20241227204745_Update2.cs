@@ -5,7 +5,7 @@
 namespace cinema.log.server.Repositories.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateMigrations : Migration
+    public partial class Update2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
