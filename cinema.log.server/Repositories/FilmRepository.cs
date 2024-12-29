@@ -4,27 +4,57 @@ using cinema.log.server.Models.Entities;
 
 namespace cinema.log.server.Repositories;
 
-public class FilmRepository(CinemaLogContext context) : IFilmRepository
+public class FilmRepository: IFilmRepository
 {
-    private CinemaLogContext _context = context;
+    CinemaLogContext _context;
+    ILogger<FilmRepository> _logger;
 
-    public async Task<Film> CreateFilm(Film film)
+    public FilmRepository(CinemaLogContext context, ILogger<FilmRepository> logger)
     {
-        throw new NotImplementedException();
+        _context = context;
+        _logger = logger;
+    }
+    public async Task<Film?> CreateFilm(Film film)
+    {
+        try
+        {
+            await _context.Films.AddAsync(film);
+            await _context.SaveChangesAsync();
+            return film;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            return null;
+        }
     }
 
-    public async Task<Film> GetFilmById(Guid id)
+    public async Task<Film?> GetFilmById(Guid id)
     {
-        throw new NotImplementedException();
+        return await _context.Films.FindAsync(id);
     }
 
-    public async Task<Film> UpdateFilm(Film film)
+    public async Task<Film?> UpdateFilm(Film film)
     {
-        throw new NotImplementedException();
+        try
+        {
+            _context.Films.Update(film);
+            await _context.SaveChangesAsync();
+            return film;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            return null;
+        }
     }
 
-    public async Task<Film> DeleteFilmById(Guid id)
+    public async Task<Film?> DeleteFilmById(Guid id)
     {
-        throw new NotImplementedException();
+        var foundFilm = await _context.Films.FindAsync(id);
+        if (foundFilm == null) return null;
+        _context.Films.Remove(foundFilm);
+        await _context.SaveChangesAsync();
+        return foundFilm;
     }
 }

@@ -7,6 +7,7 @@ public class CinemaLogContext(DbContextOptions<CinemaLogContext> options) : DbCo
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Film> Films { get; set; }
+    public DbSet<Review> Reviews { get; set; }
     public DbSet<UserFilmRating> UserFilmRatings { get; set; }
     public DbSet<ComparisonHistory> ComparisonHistories { get; set; }
     
