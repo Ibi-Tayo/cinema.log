@@ -1,4 +1,7 @@
+using cinema.log.server.Abstractions.Interfaces;
 using cinema.log.server.Models;
+using cinema.log.server.Repositories;
+using cinema.log.server.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +11,18 @@ builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<CinemaLogContext>(opt 
     => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Repositories for dependency injection
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IFilmRepository, FilmRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IUserFilmRatingRepository, UserFilmRatingRepository>();
+
+// Services for dependency injection
+builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IFilmService, FilmService>();
+builder.Services.AddTransient<IReviewService, ReviewService>();
+builder.Services.AddTransient<IUserFilmRatingService, UserFilmRatingService>();
 
 var app = builder.Build();
 
@@ -23,7 +38,6 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
-// need to run migrations first before this can connect to database
 using (var serviceScope = app.Services.CreateScope())
 {
     var context = serviceScope.ServiceProvider.GetRequiredService<CinemaLogContext>();
