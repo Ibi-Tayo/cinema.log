@@ -1,3 +1,4 @@
+using System.Text;
 using cinema.log.server.Abstractions.Interfaces;
 using cinema.log.server.Models.DTOs;
 using cinema.log.server.Models.Entities;
@@ -90,70 +91,47 @@ public class UserService : IUserService
     {
         var username = user.Username;
         var name = user.Name;
-
+        var sb = new StringBuilder();
+        
         if (string.IsNullOrWhiteSpace(username))
         {
-            return new Response<UserDto>()
-            {
-                StatusCode = 400,
-                StatusMessage = "Username is required",
-            };
+            sb.Append("Username is required");
         }
         if (username.Any(char.IsPunctuation))
         {
-            return new Response<UserDto>()
-            {
-                StatusCode = 400,
-                StatusMessage = "Username cannot contain punctuation",
-            };
+            sb.Append(" Username cannot contain punctuation");
         }
         if (username.Any(char.IsDigit))
         {
-            return new Response<UserDto>()
-            {
-                StatusCode = 400,
-                StatusMessage = "Username cannot contain digits",
-            };
+            sb.Append(" Username cannot contain digits");
         }
         if (username.Length is > 20 or < 3)
         {
-            return new Response<UserDto>()
-            {
-                StatusCode = 400,
-                StatusMessage = "Username must be between 3 and 20 characters",
-            };
+            sb.Append(" Username must be between 3 and 20 characters");
         }
-
         if (string.IsNullOrWhiteSpace(name))
         {
-            return new Response<UserDto>()
-            {
-                StatusCode = 400,
-                StatusMessage = "Name is required",
-            };
+            sb.Append("Name is required");
         }
         if (name.Any(char.IsPunctuation))
         {
-            return new Response<UserDto>()
-            {
-                StatusCode = 400,
-                StatusMessage = "Name cannot contain punctuation",
-            };
+            sb.Append(" Name cannot contain punctuation");
         }
         if (name.Any(char.IsDigit))
         {
-            return new Response<UserDto>()
-            {
-                StatusCode = 400,
-                StatusMessage = "Name cannot contain digits",
-            };
+            sb.Append(" Name cannot contain digits");
         }
         if (name.Length is > 40 or < 3)
+        {
+            sb.Append(" Name must be between 3 and 40 characters");
+        }
+
+        if (sb.Length > 0)
         {
             return new Response<UserDto>()
             {
                 StatusCode = 400,
-                StatusMessage = "Name must be between 3 and 40 characters",
+                StatusMessage = sb.ToString(),
             };
         }
 
