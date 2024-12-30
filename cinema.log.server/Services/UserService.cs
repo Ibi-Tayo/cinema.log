@@ -42,10 +42,24 @@ public class UserService : IUserService
         return response;
     }
 
-    public async Task<UserDto> UpdateUser(UserDto user)
+    public async Task<Response<UserDto>> UpdateUser(UserDto user)
     {
-        // validation
-        throw new NotImplementedException();
+        var response = ValidateUser(user);
+        if (response.StatusCode == 200)
+        {
+            var newUser = MapDtoToUser(user);
+            var responseUser = await _userRepository.UpdateUser(newUser);
+            if (responseUser != null)
+            {
+                response.Data = user;
+            }
+            else
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "Internal Server Error";
+            }
+        }
+        return response;
     }
 
     public async Task<bool> DeleteUser(Guid userId)
@@ -89,42 +103,10 @@ public class UserService : IUserService
 
     private Response<UserDto> ValidateUser(UserDto user)
     {
-        var username = user.Username;
-        var name = user.Name;
         var sb = new StringBuilder();
-        
-        if (string.IsNullOrWhiteSpace(username))
-        {
-            sb.Append("Username is required");
-        }
-        if (username.Any(char.IsPunctuation))
-        {
-            sb.Append(" Username cannot contain punctuation");
-        }
-        if (username.Any(char.IsDigit))
-        {
-            sb.Append(" Username cannot contain digits");
-        }
-        if (username.Length is > 20 or < 3)
-        {
-            sb.Append(" Username must be between 3 and 20 characters");
-        }
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            sb.Append("Name is required");
-        }
-        if (name.Any(char.IsPunctuation))
-        {
-            sb.Append(" Name cannot contain punctuation");
-        }
-        if (name.Any(char.IsDigit))
-        {
-            sb.Append(" Name cannot contain digits");
-        }
-        if (name.Length is > 40 or < 3)
-        {
-            sb.Append(" Name must be between 3 and 40 characters");
-        }
+
+        ValidateString(user.Username, "Username", 3, 20);
+        ValidateString(user.Name, "Name", 3, 40);
 
         if (sb.Length > 0)
         {
@@ -140,7 +122,28 @@ public class UserService : IUserService
             StatusCode = 200,
             StatusMessage = "Success",
         };
+
+        void ValidateString(string value, string fieldName, int minLength, int maxLength)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                sb.Append($"{fieldName} is required");
+            }
+            if (value.Any(char.IsPunctuation))
+            {
+                sb.Append($" {fieldName} cannot contain punctuation");
+            }
+            if (value.Any(char.IsDigit))
+            {
+                sb.Append($" {fieldName} cannot contain digits");
+            }
+            if (value.Length < minLength || value.Length > maxLength)
+            {
+                sb.Append($" {fieldName} must be between {minLength} and {maxLength} characters");
+            }
+        }
     }
+
     #endregion
     
 
