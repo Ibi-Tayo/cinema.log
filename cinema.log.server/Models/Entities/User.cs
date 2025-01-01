@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using cinema.log.server.Models.DTOs;
 
 namespace cinema.log.server.Models.Entities;
 
@@ -20,4 +21,5 @@ public class User
     public string? ProfilePicUrl { get; set; }
     
     public ICollection<Review>? Reviews { get; set; }
+    
 }

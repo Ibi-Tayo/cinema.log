@@ -57,7 +57,7 @@ public class UserRepository(CinemaLogContext context, ILogger<UserRepository> lo
     public async Task<List<Review>> GetUserReviews(Guid userId)
     {
         var reviews = await _context.Reviews
-            .Where(review => review.User.UserId == userId)
+            .Where(review => review.UserId == userId)
             .ToListAsync();
 
         return reviews;

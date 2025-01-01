@@ -32,8 +32,8 @@ public class UserFilmRatingRepository(CinemaLogContext context, ILogger<UserFilm
 
     public async Task<UserFilmRating?> GetRatingFilmUserId(Guid userId, Guid filmId)
     {
-        return await _context.UserFilmRatings.FirstOrDefaultAsync(ufr => ufr.User.UserId == userId &&
-                                                                         ufr.Film.FilmId == filmId);
+        return await _context.UserFilmRatings.FirstOrDefaultAsync(ufr => ufr.UserId == userId &&
+                                                                         ufr.FilmId == filmId);
     }
 
     public async Task<UserFilmRating?> UpdateRating(UserFilmRating rating)
@@ -64,8 +64,8 @@ public class UserFilmRatingRepository(CinemaLogContext context, ILogger<UserFilm
     {
         var rating = await _context.UserFilmRatings
             .FirstOrDefaultAsync(r =>
-                r.Film.FilmId == filmId &&
-                r.User.UserId == userId);
+                r.FilmId == filmId &&
+                r.UserId == userId);
            
         return rating?.EloRating;
     }
@@ -73,7 +73,7 @@ public class UserFilmRatingRepository(CinemaLogContext context, ILogger<UserFilm
     public async Task<List<UserFilmRating>> GetAllUserFilmRatingsRanked(Guid userId)
     {
         var ratings = await _context.UserFilmRatings
-            .Where(r => r.User.UserId == userId)
+            .Where(r => r.UserId == userId)
             .OrderByDescending(r => r.EloRating)
             .ToListAsync();
 

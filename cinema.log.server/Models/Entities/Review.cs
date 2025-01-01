@@ -16,8 +16,8 @@ public class Review
     public float Rating { get; set; }
     
     [Required]
-    public required Film Film { get; set; }
+    public required Guid FilmId { get; set; }
     
     [Required]
-    public required User User { get; set; }
+    public required Guid UserId { get; set; }
 }
