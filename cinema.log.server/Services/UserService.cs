@@ -9,12 +9,11 @@ public class UserService : IUserService
 {
     private IUserRepository _userRepository;
     private IFilmRepository _filmRepository;
-    private ILogger _logger;
-    public UserService(IUserRepository userRepository, IFilmRepository filmRepository, ILogger logger)
+
+    public UserService(IUserRepository userRepository, IFilmRepository filmRepository)
     {
         _userRepository = userRepository;
         _filmRepository = filmRepository;
-        _logger = logger;
     }
     public async Task<Response<UserDto>> GetUser(Guid userId)
     {
@@ -31,15 +30,16 @@ public class UserService : IUserService
     public async Task<Response<UserDto>> AddUser(UserDto user)
     {
         var response = ValidateUser(user);
-        if (response.StatusCode == 200)
+        if (response.StatusMessage == "Success")
         {
             var newUser = Mapper<UserDto, User>.Map(user);
             var responseUser = await _userRepository.CreateUser(newUser);
             if (responseUser != null)
             {
-                return Response<UserDto>.BuildResponse(200, "Success", user);
+                var responseDto = Mapper<User, UserDto>.Map(responseUser);
+                return Response<UserDto>.BuildResponse(StatusCodes.Status201Created, "Success", responseDto);
             }
-            return Response<UserDto>.BuildResponse(500, "Internal Server Error", null);
+            return Response<UserDto>.BuildResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", null);
         }
         return response;
     }
@@ -47,15 +47,16 @@ public class UserService : IUserService
     public async Task<Response<UserDto>> UpdateUser(UserDto user)
     {
         var response = ValidateUser(user);
-        if (response.StatusCode == 200)
+        if (response.StatusMessage == "Success")
         {
             var newUser = Mapper<UserDto, User>.Map(user);
             var responseUser = await _userRepository.UpdateUser(newUser);
             if (responseUser != null)
             {
-                return Response<UserDto>.BuildResponse(200, "Success", user);
+                var responseDto = Mapper<User, UserDto>.Map(responseUser);
+                return Response<UserDto>.BuildResponse(StatusCodes.Status200OK, "Success", responseDto);
             }
-            return Response<UserDto>.BuildResponse(500, "Internal Server Error", null);
+            return Response<UserDto>.BuildResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", null);
         }
         return response;
     }
@@ -65,10 +66,10 @@ public class UserService : IUserService
         var deletedUser = await _userRepository.DeleteUserById(userId);
         if (deletedUser == null)
         {
-            return Response<UserDto>.BuildResponse(404, "User not found", null);
+            return Response<UserDto>.BuildResponse(StatusCodes.Status404NotFound, "User not found", null);
         }
         
-        return Response<UserDto>.BuildResponse(200, "Success", null);
+        return Response<UserDto>.BuildResponse(StatusCodes.Status204NoContent, "Success", null);
     }
 
     public async Task<Response<List<ReviewDto>>> GetUserReviews(Guid userId)
@@ -80,10 +81,10 @@ public class UserService : IUserService
 
         if (responseReviews.Count == 0)
         {
-            return Response<List<ReviewDto>>.BuildResponse(404, "User reviews not found", null);
+            return Response<List<ReviewDto>>.BuildResponse(StatusCodes.Status404NotFound, "User reviews not found", null);
         }
         
-        return Response<List<ReviewDto>>.BuildResponse(200, "Success", responseReviews);
+        return Response<List<ReviewDto>>.BuildResponse(StatusCodes.Status200OK, "Success", responseReviews);
     }
 
     public async Task<Response<List<FilmDto>>> GetFilmsReviewedByUser(Guid userId)
@@ -97,10 +98,10 @@ public class UserService : IUserService
         }
         if (userFilmsWatchedResponse.Count == 0)
         {
-            return Response<List<FilmDto>>.BuildResponse(404, "User list of films reviewed not found", null);
+            return Response<List<FilmDto>>.BuildResponse(StatusCodes.Status404NotFound, "User list of films reviewed not found", null);
         }
 
-        return Response<List<FilmDto>>.BuildResponse(200, "Success", userFilmsWatchedResponse);
+        return Response<List<FilmDto>>.BuildResponse(StatusCodes.Status200OK, "Success", userFilmsWatchedResponse);
     }
 
     #region Helper methods
@@ -121,11 +122,7 @@ public class UserService : IUserService
             };
         }
 
-        return new Response<UserDto>()
-        {
-            StatusCode = 200,
-            StatusMessage = "Success",
-        };
+        return new Response<UserDto>() { StatusMessage = "Success" };
 
         void ValidateString(string value, string fieldName, int minLength, int maxLength, bool isName = false)
         {

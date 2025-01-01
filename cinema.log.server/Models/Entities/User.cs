@@ -16,7 +16,6 @@ public class User
     [MaxLength(20, ErrorMessage = "Username is too long")]
     public required string Username { get; set; }
     
-    [Required]
     [MaxLength(500, ErrorMessage = "Url is too long")]
     public string? ProfilePicUrl { get; set; }
     
