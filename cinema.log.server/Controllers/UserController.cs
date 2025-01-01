@@ -6,12 +6,11 @@ namespace cinema.log.server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class TestController : ControllerBase
+public class UserController : ControllerBase
 {
-    
     IUserService _userService;
 
-    public TestController(IUserService userService)
+    public UserController(IUserService userService)
     {
         _userService = userService;
     }
