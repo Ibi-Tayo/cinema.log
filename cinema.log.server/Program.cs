@@ -44,10 +44,13 @@ using (var serviceScope = app.Services.CreateScope())
     var connectionString = context.Database.GetDbConnection().ConnectionString;
     if (!context.Database.CanConnect())
     {
-        throw new Exception($"Cannot connect to database: {connectionString}");
+        Console.Error.WriteLine($"Cannot connect to database: {connectionString}");
     }
-    Console.WriteLine($"Database connection established: {connectionString}");
-    context.Database.Migrate();
+    else
+    {
+        Console.WriteLine($"Database connection established: {connectionString}");
+    }
+
 }
 
 app.UseCors(b => b
