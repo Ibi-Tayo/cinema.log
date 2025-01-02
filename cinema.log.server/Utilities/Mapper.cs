@@ -1,4 +1,4 @@
-namespace cinema.log.server.Models.DTOs;
+namespace cinema.log.server.Utilities;
 
 public abstract class Mapper<TSource, TDestination>
 {

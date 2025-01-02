@@ -1,6 +1,8 @@
+using cinema.log.server.Abstractions.Interfaces;
+
 namespace cinema.log.server.Services;
 
-public class EloCalculationService
+public class EloCalculationService: ICalculationService
 {
     /*
     Calculate expected result
@@ -25,5 +27,14 @@ public class EloCalculationService
     Sa is actual result of match up (0 for loss, 0.5 for draw, 1 for win)
     Ea is expected result (Ea = 1 / (1 + 10^(Rb - Ra)/400)) 
     */
-    
+
+    public float CalculateExpectedResult(float filmARating, float filmBRating)
+    {
+        throw new NotImplementedException();
+    }
+
+    public float RecalculateFilmRating(float actualResult, float currentRating)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -1,25 +1,19 @@
 using cinema.log.server.Abstractions.Interfaces;
 using cinema.log.server.Models.DTOs;
+using cinema.log.server.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace cinema.log.server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UserController : ControllerBase
+public class UserController(IUserService userService) : ControllerBase
 {
-    IUserService _userService;
-
-    public UserController(IUserService userService)
-    {
-        _userService = userService;
-    }
-
     [HttpGet]
     [Route("{userId}")]
     public async Task<ActionResult<Response<UserDto>>> GetUser(Guid userId)
     {
-        var resp = await _userService.GetUser(userId);
+        var resp = await userService.GetUser(userId);
         return resp.StatusCode switch
         {
             StatusCodes.Status200OK => Ok(resp),
@@ -32,7 +26,7 @@ public class UserController : ControllerBase
     [Route("AddUser")]
     public async Task<ActionResult<Response<UserDto>>> AddUser(UserDto newUser)
     {
-        var resp = await _userService.AddUser(newUser);
+        var resp = await userService.AddUser(newUser);
         return resp.StatusCode switch
         {
             StatusCodes.Status201Created => CreatedAtAction("AddUser", resp),
@@ -46,7 +40,7 @@ public class UserController : ControllerBase
     [Route("UpdateUser")]
     public async Task<ActionResult<Response<UserDto>>> UpdateUser(UserDto existingUser)
     {
-        var resp = await _userService.UpdateUser(existingUser);
+        var resp = await userService.UpdateUser(existingUser);
         return resp.StatusCode switch
         {
             StatusCodes.Status200OK => Ok(resp),
@@ -59,7 +53,7 @@ public class UserController : ControllerBase
     [Route("DeleteUser")]
     public async Task<ActionResult<Response<UserDto>>> DeleteUser(Guid userId)
     {
-        var response = await _userService.DeleteUser(userId);
+        var response = await userService.DeleteUser(userId);
         return response.StatusCode switch
         {
             StatusCodes.Status204NoContent => StatusCode(204, response),

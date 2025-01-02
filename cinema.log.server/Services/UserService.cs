@@ -2,6 +2,7 @@ using System.Text;
 using cinema.log.server.Abstractions.Interfaces;
 using cinema.log.server.Models.DTOs;
 using cinema.log.server.Models.Entities;
+using cinema.log.server.Utilities;
 
 namespace cinema.log.server.Services;
 

@@ -1,4 +1,4 @@
-namespace cinema.log.server.Models.DTOs;
+namespace cinema.log.server.Utilities;
 
 public class Response<T>
 {
