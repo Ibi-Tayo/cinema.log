@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<CinemaLogContext>(opt 
-    => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    => opt.UseSqlServer(builder.Configuration["LocalDbConnectionString"]));
 
 // Repositories for dependency injection
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -41,14 +41,14 @@ app.UseSwaggerUI(options =>
 using (var serviceScope = app.Services.CreateScope())
 {
     var context = serviceScope.ServiceProvider.GetRequiredService<CinemaLogContext>();
-    var connectionString = context.Database.GetDbConnection().ConnectionString;
+    var dbName = context.Database.GetDbConnection().Database;
     if (!context.Database.CanConnect())
     {
-        Console.Error.WriteLine($"Cannot connect to database: {connectionString}");
+        Console.Error.WriteLine($"Cannot connect to database: {dbName}");
     }
     else
     {
-        Console.WriteLine($"Database connection established: {connectionString}");
+        Console.WriteLine($"Database connection established: {dbName}");
     }
 
 }
