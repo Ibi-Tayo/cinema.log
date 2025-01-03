@@ -24,12 +24,11 @@ builder.Services.AddTransient<IFilmService, FilmService>();
 builder.Services.AddTransient<IReviewService, ReviewService>();
 builder.Services.AddTransient<IUserFilmRatingService, UserFilmRatingService>();
 
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+if (app.Environment.IsDevelopment()) { app.MapOpenApi(); }
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>
@@ -50,7 +49,6 @@ using (var serviceScope = app.Services.CreateScope())
     {
         Console.WriteLine($"Database connection established: {dbName}");
     }
-
 }
 
 app.UseCors(b => b
@@ -59,9 +57,6 @@ app.UseCors(b => b
     .AllowAnyHeader());   
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

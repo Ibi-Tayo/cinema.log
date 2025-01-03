@@ -9,6 +9,6 @@ public interface IFilmService
     Task<bool> AddFilmToDb(int id);
     Task<Response<FilmDto>> UpdateFilmInDb(FilmDto film);
     Task<Response<FilmDto>>  DeleteFilmInDb(Guid filmId);
-    Task<Response<List<FilmDto>>> SearchFilmFromExternal(string searchTerm);
+    Task<Response<List<FilmSearchResultDto>>> SearchFilmFromExternal(string searchTerm);
     Task<Response<List<FilmImageDto>>> GetFilmImagesFromExternal(int externalId);
 }

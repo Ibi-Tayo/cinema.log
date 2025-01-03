@@ -35,7 +35,6 @@ public class UserController(IUserService userService) : ControllerBase
         };
     }
     
-    // this updated user needs an existing id, or else we wouldnt know what user to update
     [HttpPut]
     [Route("UpdateUser")]
     public async Task<ActionResult<Response<UserDto>>> UpdateUser(UserDto existingUser)
