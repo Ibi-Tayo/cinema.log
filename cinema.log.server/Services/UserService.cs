@@ -129,20 +129,18 @@ public class UserService : IUserService
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                sb.Append($"{fieldName} is required");
+                sb.AppendLine($"{fieldName} is required");
             }
             if (isName && value.Any(char.IsDigit))
             {
-                sb.Append($" {fieldName} cannot contain digits");
+                sb.AppendLine($"{fieldName} cannot contain digits");
             }
             if (value.Length < minLength || value.Length > maxLength)
             {
-                sb.Append($" {fieldName} must be between {minLength} and {maxLength} characters");
+                sb.AppendLine($" {fieldName} must be between {minLength} and {maxLength} characters");
             }
         }
     }
 
     #endregion
-    
-
 }

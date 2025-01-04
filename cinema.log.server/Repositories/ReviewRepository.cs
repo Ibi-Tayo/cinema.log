@@ -1,6 +1,7 @@
 using cinema.log.server.Abstractions.Interfaces;
 using cinema.log.server.Models;
 using cinema.log.server.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace cinema.log.server.Repositories;
 
@@ -52,5 +53,22 @@ public class ReviewRepository(CinemaLogContext context, ILogger<ReviewRepository
         _context.Reviews.Remove(foundReview);
         await _context.SaveChangesAsync();
         return foundReview;
+    }
+
+    public async Task<Review?> GetReviewByUserAndFilm(Guid userId, Guid filmId)
+    {
+        var foundReview = await _context.Reviews.FirstOrDefaultAsync(review => review.UserId == userId && 
+                                                                               review.FilmId == filmId);
+        return foundReview;
+    }
+
+    public async Task<List<Review>> GetReviewsByFilmId(Guid filmId)
+    {
+        return await _context.Reviews.Where(review => review.FilmId == filmId).ToListAsync();
+    }
+    
+    public async Task<List<Review>> GetReviewsByUserId(Guid userId)
+    {
+        return await _context.Reviews.Where(review => review.UserId == userId).ToListAsync();
     }
 }
