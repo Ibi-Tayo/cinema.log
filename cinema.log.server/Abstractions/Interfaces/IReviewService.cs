@@ -10,4 +10,5 @@ public interface IReviewService
     Task<Response<ReviewDto>> AddReview(ReviewDto review);
     Task<Response<ReviewDto>> UpdateReview(ReviewDto review);
     Task<Response<ReviewDto>> DeleteReview(Guid reviewId);
+    Task<Response<List<ReviewDto>>> GetReviewsByFilmId(Guid filmId);
 }

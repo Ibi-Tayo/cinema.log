@@ -11,58 +11,79 @@ namespace cinema.log.server.Services;
 public class FilmService : IFilmService
 {
     private readonly IConfiguration _config;
+    private readonly IFilmRepository _filmRepository;
+
     private static HttpClient _client = new()
     {
         BaseAddress = new Uri("https://api.themoviedb.org/3/")
     };
 
-    public FilmService(IConfiguration config)
+    public FilmService(IConfiguration config, IFilmRepository filmRepository)
     {
         _config = config;
+        _filmRepository = filmRepository;
         // Ensure all outgoing requests have this header
         _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
     
+    // Important method to ensure filmId is always present for every film that is selected, reviewed etc.
+    public async Task<Response<Guid?>> GetFilmIdUsingDetails(string title, int externalId, string? director, int? releaseYear)
+    {
+        // Check if film exists in the film table
+        var id = await _filmRepository.GetFilmId(title, director, releaseYear);
+        if (id != null) return Response<Guid?>.BuildResponse(200, "Success, film exists", id);
+
+        // If not, then add to the table using externalId to search for film details
+        var film = await AddFilmToDb(externalId);
+        if (film != null)
+        {
+            return Response<Guid?>.BuildResponse(200, "Success, new film added", film.FilmId);
+        }
+        return Response<Guid?>.BuildResponse(500, "Internal Server Error", null);
+    }
+
     public async Task<Response<FilmDto>> GetFilmFromDb(Guid filmId)
     {
-        throw new NotImplementedException();
+        var film = await _filmRepository.GetFilmById(filmId);
+        if (film is null)
+        {
+            return Response<FilmDto>.BuildResponse(404, "Film not found", null);
+        }
+
+        var responseFilm = Mapper<Film, FilmDto>.Map(film);
+        return Response<FilmDto>.BuildResponse(200, "Success", responseFilm);
     }
 
-    // this will have to get called server side - probably in the review service when a user leaves a review
-    public async Task<bool> AddFilmToDb(int externalId)
+    public async Task<Film?> AddFilmToDb(int externalId)
     {
-        // call GetFilmDetailsByExternalId() 
-        // use the film we get back to add to db using repository
-        throw new NotImplementedException();
+        var film = await GetFilmDetailsByExternalId(externalId);
+        if (film is null) return null;
+        var addedFilm = await _filmRepository.CreateFilm(film);
+        return addedFilm;
     }
 
-    public async Task<Response<FilmDto>> UpdateFilmInDb(FilmDto film)
+    public async Task<Response<FilmDto>> UpdateFilmPosterInDb(string posterUrl, Guid filmId)
     {
-        throw new NotImplementedException();
+        var film = await _filmRepository.GetFilmById(filmId);
+        if (film == null) return Response<FilmDto>.BuildResponse(404, "Film not found", null);
+        film.PosterUrl = posterUrl;
+        var updatedFilmDto = Mapper<Film, FilmDto>.Map(film);
+        return Response<FilmDto>.BuildResponse(200, "Success", updatedFilmDto);
     }
 
-    public async Task<Response<FilmDto>> DeleteFilmInDb(Guid filmId)
-    {
-        throw new NotImplementedException();
-    }
-
-    // To remember:
-    // 'External' basically means im sending an api call to tmdb
-    // External id is the movie_id param that is an integer, obviously not to be confused with my own GUID
-    
     public async Task<Response<List<FilmSearchResultDto>>> SearchFilmFromExternal(string searchTerm)
     {
         var films = new List<FilmSearchResultDto>();
         var key = _config["TmdbApiKey"];
         var reqUrl = $"search/movie?query={searchTerm}&include_adult=false&language=en-US&page=1&api_key={key}";
-        
+
         using (var response = await _client.GetAsync(reqUrl))
         {
             response.EnsureSuccessStatusCode();
             var body = await response.Content.ReadAsStringAsync();
             var json = JsonSerializer.Deserialize<JsonElement>(body);
             json.TryGetProperty("results", out var results);
-            
+
             foreach (var result in results.EnumerateArray())
             {
                 result.TryGetProperty("id", out var id);
@@ -71,7 +92,7 @@ public class FilmService : IFilmService
                 result.TryGetProperty("overview", out var description);
                 result.TryGetProperty("release_date", out var releaseDate);
                 result.TryGetProperty("poster_path", out var poster);
-             
+
                 films.Add(new FilmSearchResultDto()
                 {
                     ExternalId = id.GetInt32(),
@@ -84,30 +105,55 @@ public class FilmService : IFilmService
         }
         return Response<List<FilmSearchResultDto>>.BuildResponse(200, "Success", films);
     }
-
+    
     public async Task<Response<List<FilmImageDto>>> GetFilmImagesFromExternal(int externalId)
     {
-        // call the tmdb api and hit images endpoint, get all the backdrops and all the posters
-        // map these to the dtos and make a list
-        
-        throw new NotImplementedException();
+        var key = _config["TmdbApiKey"];
+        var reqUrl = $"movie/{externalId}/images?api_key={key}";
+
+        using var response = await _client.GetAsync(reqUrl);
+        response.EnsureSuccessStatusCode();
+    
+        var json = JsonSerializer.Deserialize<JsonElement>(await response.Content.ReadAsStringAsync());
+        var images = new List<FilmImageDto>();
+
+        if (json.TryGetProperty("backdrops", out var backdrops))
+            images.AddRange(ProcessImageArray(backdrops, FilmImageType.Backdrop));
+    
+        if (json.TryGetProperty("posters", out var posters))
+            images.AddRange(ProcessImageArray(posters, FilmImageType.Poster));
+    
+        if (json.TryGetProperty("logos", out var logos))
+            images.AddRange(ProcessImageArray(logos, FilmImageType.Logo));
+
+        return Response<List<FilmImageDto>>.BuildResponse(200, "Success", images);
     }
     
-    // flow: when user has found a film, they should have the film details, when they leave a review, instead of sending all of this back
-    // they just need to ping the server with the tmdb movie_id. this method will call tmdb and then map to our entity
-    // then the entity will end up getting put in the db - see 'AddFilmToDb' above
+    private List<FilmImageDto> ProcessImageArray(JsonElement imagesArray, FilmImageType imageType)
+    {
+        return imagesArray.EnumerateArray()
+            .Where(img => img.TryGetProperty("file_path", out _))
+            .Select(img => new FilmImageDto
+            {
+                ImageType = imageType,
+                AspectRatio = img.GetProperty("aspect_ratio").GetSingle(),
+                Height = img.GetProperty("height").GetInt32(),
+                Width = img.GetProperty("width").GetInt32(),
+                Url = img.GetProperty("file_path").GetString()
+            })
+            .ToList();
+    }
+    
     private async Task<Film?> GetFilmDetailsByExternalId(int externalId)
     {
-        // this method will get called in AddFilmToDb
-        
         var key = _config["TmdbApiKey"];
         var reqUrl = $"movie/{externalId}?api_key={key}";
         using var response = await _client.GetAsync(reqUrl);
         response.EnsureSuccessStatusCode();
-        
+
         var body = await response.Content.ReadAsStringAsync();
         var json = JsonSerializer.Deserialize<JsonElement>(body);
-            
+
         if (!json.TryGetProperty("original_title", out var title)) return null;
         json.TryGetProperty("overview", out var description);
         json.TryGetProperty("release_date", out var releaseDate);
@@ -121,7 +167,7 @@ public class FilmService : IFilmService
             genreString.Append(name.GetString());
             genreString.Append(',');
         }
-                
+
         return new Film()
         {
             FilmId = Guid.NewGuid(),
@@ -140,13 +186,13 @@ public class FilmService : IFilmService
         var reqUrl = $"movie/{externalId}/credits?api_key={key}";
         using var response = await _client.GetAsync(reqUrl);
         response.EnsureSuccessStatusCode();
-        
+
         var body = await response.Content.ReadAsStringAsync();
         var json = JsonSerializer.Deserialize<JsonElement>(body);
         if (!json.TryGetProperty("crew", out var crew)) return null;
         foreach (var crewMember in crew.EnumerateArray())
         {
-            if (crewMember.TryGetProperty("job", out var job) && 
+            if (crewMember.TryGetProperty("job", out var job) &&
                 string.Equals(job.GetString(), "Director", StringComparison.OrdinalIgnoreCase))
             {
                 return crewMember.TryGetProperty("name", out var name) ? name.GetString() : null;

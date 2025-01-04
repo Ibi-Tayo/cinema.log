@@ -25,4 +25,9 @@ public class ReviewService : IReviewService
     {
         throw new NotImplementedException();
     }
+
+    public async Task<Response<List<ReviewDto>>> GetReviewsByFilmId(Guid filmId)
+    {
+        throw new NotImplementedException();
+    }
 }

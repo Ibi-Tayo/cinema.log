@@ -8,4 +8,5 @@ public interface IFilmRepository
     Task<Film?> GetFilmById(Guid id);
     Task<Film?> UpdateFilm(Film film);
     Task<Film?> DeleteFilmById(Guid id);
+    Task<Guid?> GetFilmId(string title, string? director, int? releaseYear);
 }
