@@ -79,10 +79,9 @@ public class UserFilmRatingService : IUserFilmRatingService
         // Sort allFilms by similarity to contestFilmGenres, Take up to the first 10
         var sortedFilms = AssignGenrePriority(allFilms, contestFilmGenres).Take(10).ToList();
         
-        // Convert films into film dtos and return the list (up to 10 films)
-        var dtoList = sortedFilms.Select(sortedFilm => Mapper<Film, FilmDto>.Map(sortedFilm.Item1)).ToList();
-        
-        return Response<List<FilmDto>>.BuildResponse(200, "Success", dtoList);
+        // Convert films into film dtos and return the list 
+        return Response<List<FilmDto>>.BuildResponse(200, "Success", 
+            sortedFilms.Select(Mapper<Film, FilmDto>.Map).ToList());
     }
 
     public async Task<Response<(UserFilmRatingDto, UserFilmRatingDto)>> FilmContest(
@@ -207,7 +206,7 @@ public class UserFilmRatingService : IUserFilmRatingService
         }
     }
 
-    private List<(Film, int)> AssignGenrePriority(List<Film> films, string[]? contestFilmGenres)
+    private List<Film> AssignGenrePriority(List<Film> films, string[]? contestFilmGenres)
     {
         var r = new Random();
         var filmsArray = films.ToArray();
@@ -215,11 +214,16 @@ public class UserFilmRatingService : IUserFilmRatingService
         
         if (contestFilmGenres == null || contestFilmGenres.Length == 0)
         {
-            // No priority so return the randomised list of tuples
-            return filmsArray.Select(film => (film, 0)).ToList();
+            // No priority so return the randomised list
+            return filmsArray.ToList();
         }
         
+        var normalizedContestFilmGenres = contestFilmGenres
+            .Select(g => g.Trim().ToLowerInvariant())
+            .ToHashSet();
+        
         var filmPriority = new List<(Film, int)>();
+        
         // Go through each film and get the array of genres
         foreach (var film in filmsArray)
         {
@@ -230,15 +234,16 @@ public class UserFilmRatingService : IUserFilmRatingService
             }
             
             // Count how many genres match with the contestFilmGenres Array
-            var count = 0;
-            foreach (var genre in film.Genre.Split(","))
-            {
-                if (contestFilmGenres.Contains(genre)) count++;
-            }
+            var count = film.Genre
+                .Split(',')
+                .Select(g => g.Trim().ToLowerInvariant())
+                .Count(genre => normalizedContestFilmGenres.Contains(genre));
+            
             filmPriority.Add((film, count));
         }
         // Sort by int (descending order)
-        return filmPriority.OrderByDescending(x => x.Item2).ToList();
+        var sorted = filmPriority.OrderByDescending(x => x.Item2).ToList();
+        return sorted.Select(x => x.Item1).ToList();
     }
     #endregion
 }
