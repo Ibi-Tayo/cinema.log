@@ -4,6 +4,7 @@ using cinema.log.server.Models.Entities;
 using cinema.log.server.Repositories;
 using cinema.log.server.Utilities;
 
+
 namespace cinema.log.server.Services;
 
 public class UserFilmRatingService : IUserFilmRatingService
@@ -11,15 +12,18 @@ public class UserFilmRatingService : IUserFilmRatingService
     private readonly IUserFilmRatingRepository _userFilmRatingRepository;
     private readonly IUserRepository _userRepository;
     private readonly IFilmRepository _filmRepository;
+    private readonly IReviewRepository _reviewRepository;
     private readonly ICalculationService _calculationService;
 
     public UserFilmRatingService(IUserFilmRatingRepository userFilmRatingRepository,
-        ICalculationService calculationService, UserRepository userRepository, IFilmRepository filmRepository)
+        ICalculationService calculationService, UserRepository userRepository, 
+        IFilmRepository filmRepository, IReviewRepository reviewRepository)
     {
         _userFilmRatingRepository = userFilmRatingRepository;
         _calculationService = calculationService;
         _userRepository = userRepository;
         _filmRepository = filmRepository;
+        _reviewRepository = reviewRepository;
     }
 
     public async Task<Response<UserFilmRatingDto>> GetUserFilmRating(Guid userId, Guid filmId)
@@ -57,12 +61,28 @@ public class UserFilmRatingService : IUserFilmRatingService
     // Client sends id of film that we want to match up against other films
     public async Task<Response<List<FilmDto>>> GetFilmsForContest(Guid userId, Guid contestFilmId)
     {
-        throw new NotImplementedException();
-        // Use the contest film id to get the film information from the film table (we'll need this later)
-        // We'll need to go into the Review table and get all film ratings by the userId (note that I could do this from the UserFilmRating table but my review repository has the method I need)
-        // Then we'll use all the film id's from these reviews and get the films from the film table
-        // Here we implement some logic to try and prioritise by genre or some other metric using the contest film information
+        // Use the contest film id to get the film information from the film table
+        var contestFilm = await _filmRepository.GetFilmById(contestFilmId);
+        if (contestFilm == null) return Response<List<FilmDto>>.BuildResponse(404, "Film Id for contest not found", null);
+        
+        // We'll need to go into the UserFilmRating table and get all film ratings by the userId
+        var allFilmsRated = await _userFilmRatingRepository.GetAllRatings(userId);
+        if (allFilmsRated.Count == 0) return Response<List<FilmDto>>.BuildResponse(404, "No rated films found", null);
+        
+        // Then we'll use all the film id's from these ratings and get the films from the film table
+        var filmIds = allFilmsRated.Select(f => f.FilmId).ToList();
+        var allFilms = await _filmRepository.GetFilmsByIds(filmIds);
+        
+        // Here we implement some logic to try and prioritise by genre using the contest film information
+        var contestFilmGenres = contestFilm.Genre?.Split(',');
+        
+        // Sort allFilms by similarity to contestFilmGenres, Take up to the first 10
+        var sortedFilms = AssignGenrePriority(allFilms, contestFilmGenres).Take(10).ToList();
+        
         // Convert films into film dtos and return the list (up to 10 films)
+        var dtoList = sortedFilms.Select(sortedFilm => Mapper<Film, FilmDto>.Map(sortedFilm.Item1)).ToList();
+        
+        return Response<List<FilmDto>>.BuildResponse(200, "Success", dtoList);
     }
 
     public async Task<Response<(UserFilmRatingDto, UserFilmRatingDto)>> FilmContest(
@@ -138,7 +158,6 @@ public class UserFilmRatingService : IUserFilmRatingService
         return Response<bool>.BuildResponse(200, "Success", true);
     }
     
-
     #region Helper Methods
 
     private async Task<Response<UserFilmRatingDto>> ValidateRating(UserFilmRatingDto filmRating)
@@ -186,6 +205,40 @@ public class UserFilmRatingService : IUserFilmRatingService
             filmAResult = 0.5f;
             filmBResult = 0.5f;
         }
+    }
+
+    private List<(Film, int)> AssignGenrePriority(List<Film> films, string[]? contestFilmGenres)
+    {
+        var r = new Random();
+        var filmsArray = films.ToArray();
+        r.Shuffle(filmsArray); 
+        
+        if (contestFilmGenres == null || contestFilmGenres.Length == 0)
+        {
+            // No priority so return the randomised list of tuples
+            return filmsArray.Select(film => (film, 0)).ToList();
+        }
+        
+        var filmPriority = new List<(Film, int)>();
+        // Go through each film and get the array of genres
+        foreach (var film in filmsArray)
+        {
+            if (film.Genre == null)
+            {
+                filmPriority.Add((film, 0));
+                continue;
+            }
+            
+            // Count how many genres match with the contestFilmGenres Array
+            var count = 0;
+            foreach (var genre in film.Genre.Split(","))
+            {
+                if (contestFilmGenres.Contains(genre)) count++;
+            }
+            filmPriority.Add((film, count));
+        }
+        // Sort by int (descending order)
+        return filmPriority.OrderByDescending(x => x.Item2).ToList();
     }
     #endregion
 }

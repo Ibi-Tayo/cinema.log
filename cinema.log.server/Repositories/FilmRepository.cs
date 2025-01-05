@@ -36,12 +36,11 @@ public class FilmRepository : IFilmRepository
         return await _context.Films.FindAsync(id);
     }
 
-    public async Task<List<Film>> GetFilmByTitle(string title)
+    public async Task<List<Film>> GetFilmsByIds(List<Guid> ids)
     {
-        return await _context.Films
-            .Where(film => film.Title.ToLower() == title.ToLower()).ToListAsync();
+        return await _context.Films.Where(f => ids.Contains(f.FilmId)).ToListAsync();
     }
-
+    
     public async Task<Film?> UpdateFilm(Film film)
     {
         try
