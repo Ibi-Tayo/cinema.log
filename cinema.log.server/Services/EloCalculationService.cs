@@ -28,12 +28,12 @@ public class EloCalculationService: ICalculationService
     Ea is expected result (Ea = 1 / (1 + 10^(Rb - Ra)/400)) 
     */
 
-    public float CalculateExpectedResult(float filmARating, float filmBRating)
+    public float CalculateExpectedResult(float? filmARating, float? filmBRating)
     {
         throw new NotImplementedException();
     }
 
-    public float RecalculateFilmRating(float actualResult, float currentRating)
+    public float RecalculateFilmRating(float expectedResult, float actualResult, float? currentRating)
     {
         throw new NotImplementedException();
     }

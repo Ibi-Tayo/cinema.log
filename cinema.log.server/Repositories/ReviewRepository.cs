@@ -46,13 +46,13 @@ public class ReviewRepository(CinemaLogContext context, ILogger<ReviewRepository
         return review;
     }
 
-    public async Task<Review?> DeleteReviewById(Guid id)
+    public async Task<bool> DeleteReviewById(Guid id)
     {
         var foundReview = await _context.Reviews.FindAsync(id);
-        if (foundReview == null) return null;
+        if (foundReview == null) return false;
         _context.Reviews.Remove(foundReview);
         await _context.SaveChangesAsync();
-        return foundReview;
+        return true;
     }
 
     public async Task<Review?> GetReviewByUserAndFilm(Guid userId, Guid filmId)

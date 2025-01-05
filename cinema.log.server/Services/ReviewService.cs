@@ -152,21 +152,21 @@ public class ReviewService : IReviewService
             responseDto);
     }
 
-    public async Task<Response<ReviewDto>> DeleteReview(Guid reviewId)
+    public async Task<Response<bool>> DeleteReview(Guid reviewId)
     {
         var deletedReview = await _reviewRepository.DeleteReviewById(reviewId);
-        if (deletedReview == null)
+        if (!deletedReview)
         {
-            return Response<ReviewDto>.BuildResponse(
+            return Response<bool>.BuildResponse(
                 StatusCodes.Status404NotFound,
                 "Review not found",
-                null);
+                false);
         }
 
-        return Response<ReviewDto>.BuildResponse(
+        return Response<bool>.BuildResponse(
             StatusCodes.Status204NoContent,
             "Success",
-            null);
+            true);
     }
 
     #region Helper Methods

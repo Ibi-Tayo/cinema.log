@@ -30,6 +30,11 @@ public class UserFilmRatingRepository(CinemaLogContext context, ILogger<UserFilm
         return await _context.UserFilmRatings.FindAsync(id);
     }
 
+    public async Task<List<UserFilmRating>> GetAllRatings(Guid userId)
+    {
+        return await _context.UserFilmRatings.Where(x => x.UserId == userId).ToListAsync();
+    }
+
     public async Task<UserFilmRating?> GetRatingFilmUserId(Guid userId, Guid filmId)
     {
         return await _context.UserFilmRatings.FirstOrDefaultAsync(ufr => ufr.UserId == userId &&
@@ -58,6 +63,16 @@ public class UserFilmRatingRepository(CinemaLogContext context, ILogger<UserFilm
         _context.UserFilmRatings.Remove(foundRating);
         await _context.SaveChangesAsync();
         return foundRating;
+    }
+
+    public async Task<bool> DeleteRatingByUserFilmId(Guid userId, Guid filmId)
+    {
+        var rating = await _context.UserFilmRatings
+            .FirstOrDefaultAsync(ufr => ufr.UserId == userId && ufr.FilmId == filmId);
+        if (rating == null) return false;
+        _context.UserFilmRatings.Remove(rating);
+        await _context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<float?> GetUserFilmRating(Guid userId, Guid filmId)
