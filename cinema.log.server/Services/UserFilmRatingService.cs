@@ -12,18 +12,16 @@ public class UserFilmRatingService : IUserFilmRatingService
     private readonly IUserFilmRatingRepository _userFilmRatingRepository;
     private readonly IUserRepository _userRepository;
     private readonly IFilmRepository _filmRepository;
-    private readonly IReviewRepository _reviewRepository;
     private readonly ICalculationService _calculationService;
 
     public UserFilmRatingService(IUserFilmRatingRepository userFilmRatingRepository,
         ICalculationService calculationService, UserRepository userRepository, 
-        IFilmRepository filmRepository, IReviewRepository reviewRepository)
+        IFilmRepository filmRepository)
     {
         _userFilmRatingRepository = userFilmRatingRepository;
         _calculationService = calculationService;
         _userRepository = userRepository;
         _filmRepository = filmRepository;
-        _reviewRepository = reviewRepository;
     }
 
     public async Task<Response<UserFilmRatingDto>> GetUserFilmRating(Guid userId, Guid filmId)
@@ -70,22 +68,21 @@ public class UserFilmRatingService : IUserFilmRatingService
         if (allFilmsRated.Count == 0) return Response<List<FilmDto>>.BuildResponse(404, "No rated films found", null);
         
         // Then we'll use all the film id's from these ratings and get the films from the film table
-        var filmIds = allFilmsRated.Select(f => f.FilmId).ToList();
+        var filmIds = allFilmsRated.Select(f => f.FilmId);
         var allFilms = await _filmRepository.GetFilmsByIds(filmIds);
         
         // Here we implement some logic to try and prioritise by genre using the contest film information
         var contestFilmGenres = contestFilm.Genre?.Split(',');
         
         // Sort allFilms by similarity to contestFilmGenres, Take up to the first 10
-        var sortedFilms = AssignGenrePriority(allFilms, contestFilmGenres).Take(10).ToList();
+        var sortedFilms = AssignGenrePriority(allFilms, contestFilmGenres).Take(10);
         
         // Convert films into film dtos and return the list 
         return Response<List<FilmDto>>.BuildResponse(200, "Success", 
             sortedFilms.Select(Mapper<Film, FilmDto>.Map).ToList());
     }
 
-    public async Task<Response<(UserFilmRatingDto, UserFilmRatingDto)>> FilmContest(
-        Guid userId,
+    public async Task<Response<(UserFilmRatingDto?, UserFilmRatingDto?)>> FilmContest(Guid userId,
         Guid filmA, Guid filmB,
         Guid winnerId)
     {
@@ -97,8 +94,9 @@ public class UserFilmRatingService : IUserFilmRatingService
         var filmBRating = await _userFilmRatingRepository.GetRatingFilmUserId(userId, filmB);
 
         if (filmARating == null || filmBRating == null)
-            return Response<(UserFilmRatingDto, UserFilmRatingDto)>.BuildResponse(404,
-                "Film Rating not found for one or both films", (null, null)!);
+            return Response<(UserFilmRatingDto, UserFilmRatingDto)>
+                .BuildNullableResponse<UserFilmRatingDto, UserFilmRatingDto>(404,
+                "Film Rating not found for one or both films", (null, null));
 
         // Calculate expected result for film A and film B
         var filmAExpectedResult = _calculationService
@@ -126,13 +124,14 @@ public class UserFilmRatingService : IUserFilmRatingService
         var resB = await _userFilmRatingRepository.UpdateRating(filmBRating);
 
         if (resA == null || resB == null)
-            return Response<(UserFilmRatingDto, UserFilmRatingDto)>.BuildResponse(500,
-                "Internal server error, Film ratings couldn't get updated", (null, null)!);
+            return Response<(UserFilmRatingDto, UserFilmRatingDto)>
+                .BuildNullableResponse<UserFilmRatingDto, UserFilmRatingDto>(500,
+                "Internal server error, Film ratings couldn't get updated", (null, null));
 
         var resADto = Mapper<UserFilmRating, UserFilmRatingDto>.Map(resA);
         var resBDto = Mapper<UserFilmRating, UserFilmRatingDto>.Map(resB);
 
-        return Response<(UserFilmRatingDto, UserFilmRatingDto)>
+        return Response<(UserFilmRatingDto?, UserFilmRatingDto?)>
             .BuildResponse(200, "Success", (resADto, resBDto));
     }
 
@@ -206,7 +205,7 @@ public class UserFilmRatingService : IUserFilmRatingService
         }
     }
 
-    private List<Film> AssignGenrePriority(List<Film> films, string[]? contestFilmGenres)
+    private List<Film> AssignGenrePriority(IEnumerable<Film> films, string[]? contestFilmGenres)
     {
         var r = new Random();
         var filmsArray = films.ToArray();

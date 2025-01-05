@@ -9,7 +9,8 @@ public interface IUserFilmRatingService
 {
     Task<Response<UserFilmRatingDto>> GetUserFilmRating(Guid userId, Guid filmId);
     Task<Response<UserFilmRatingDto>> AddUserFilmRating(UserFilmRatingDto filmRating);
-    Task<Response<(UserFilmRatingDto, UserFilmRatingDto)>> FilmContest(Guid userId, Guid filmA, Guid filmB, Guid winnerId);
+    Task<Response<(UserFilmRatingDto?, UserFilmRatingDto?)>> FilmContest(Guid userId, Guid filmA, Guid filmB,
+        Guid winnerId);
     Task<Response<List<FilmDto>>> GetFilmsForContest(Guid userId, Guid filmIdToContestAgainst);
     Task<Response<bool>> ResetAllRatings(Guid userId);
     Task<Response<bool>> DeleteRatingByUserAndFilmId(Guid userId, Guid filmId);

@@ -15,4 +15,14 @@ public class Response<T>
             Data = data
         };
     }
+    
+    public static Response<(T1?, T2?)> BuildNullableResponse<T1, T2>(int statusCode, string message, (T1?, T2?) data)
+    {
+        return new Response<(T1?, T2?)>
+        {
+            StatusCode = statusCode, 
+            StatusMessage= message,
+            Data = data
+        };
+    }
 }

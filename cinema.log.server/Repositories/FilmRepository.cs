@@ -36,7 +36,7 @@ public class FilmRepository : IFilmRepository
         return await _context.Films.FindAsync(id);
     }
 
-    public async Task<List<Film>> GetFilmsByIds(List<Guid> ids)
+    public async Task<List<Film>> GetFilmsByIds(IEnumerable<Guid> ids)
     {
         return await _context.Films.Where(f => ids.Contains(f.FilmId)).ToListAsync();
     }
