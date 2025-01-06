@@ -35,6 +35,26 @@ public class UserFilmRatingRepository(CinemaLogContext context, ILogger<UserFilm
         return await _context.UserFilmRatings.Where(x => x.UserId == userId).ToListAsync();
     }
 
+    public async Task<List<Guid>> GetAllFilmIds(Guid userId)
+    {
+        return await _context.UserFilmRatings
+            .Where(ufr => ufr.UserId == userId)
+            .Select(rating => rating.FilmId).ToListAsync();
+    }
+
+    public async Task<List<Film>> GetAllFilmsRatedByUserId(Guid userId)
+    {
+        return await _context.UserFilmRatings
+            .Where(ufr => ufr.UserId == userId)
+            .Join(
+                _context.Films,
+                ufr => ufr.FilmId,
+                film => film.FilmId,
+                (ufr, film) => film
+            )
+            .ToListAsync();
+    }
+
     public async Task<UserFilmRating?> GetRatingFilmUserId(Guid userId, Guid filmId)
     {
         return await _context.UserFilmRatings.FirstOrDefaultAsync(ufr => ufr.UserId == userId &&

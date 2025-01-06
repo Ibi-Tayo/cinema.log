@@ -13,6 +13,7 @@ public class UserFilmRatingService : IUserFilmRatingService
     private readonly IUserRepository _userRepository;
     private readonly IFilmRepository _filmRepository;
     private readonly ICalculationService _calculationService;
+    private const int NumberOfFilmsForContest = 10;
 
     public UserFilmRatingService(IUserFilmRatingRepository userFilmRatingRepository,
         ICalculationService calculationService, UserRepository userRepository, 
@@ -59,25 +60,16 @@ public class UserFilmRatingService : IUserFilmRatingService
     // Client sends id of film that we want to match up against other films
     public async Task<Response<List<FilmDto>>> GetFilmsForContest(Guid userId, Guid contestFilmId)
     {
-        // Use the contest film id to get the film information from the film table
         var contestFilm = await _filmRepository.GetFilmById(contestFilmId);
         if (contestFilm == null) return Response<List<FilmDto>>.BuildResponse(404, "Film Id for contest not found", null);
         
-        // We'll need to go into the UserFilmRating table and get all film ratings by the userId
-        var allFilmsRated = await _userFilmRatingRepository.GetAllRatings(userId);
-        if (allFilmsRated.Count == 0) return Response<List<FilmDto>>.BuildResponse(404, "No rated films found", null);
-        
-        // Then we'll use all the film id's from these ratings and get the films from the film table
-        var filmIds = allFilmsRated.Select(f => f.FilmId);
-        var allFilms = await _filmRepository.GetFilmsByIds(filmIds);
+        var allFilms = await _userFilmRatingRepository.GetAllFilmsRatedByUserId(userId);
+        if (allFilms.Count == 0) return Response<List<FilmDto>>.BuildResponse(404, "No rated films found", null);
         
         // Here we implement some logic to try and prioritise by genre using the contest film information
         var contestFilmGenres = contestFilm.Genre?.Split(',');
+        var sortedFilms = AssignGenrePriority(allFilms, contestFilmGenres).Take(NumberOfFilmsForContest);
         
-        // Sort allFilms by similarity to contestFilmGenres, Take up to the first 10
-        var sortedFilms = AssignGenrePriority(allFilms, contestFilmGenres).Take(10);
-        
-        // Convert films into film dtos and return the list 
         return Response<List<FilmDto>>.BuildResponse(200, "Success", 
             sortedFilms.Select(Mapper<Film, FilmDto>.Map).ToList());
     }
