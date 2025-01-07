@@ -24,6 +24,7 @@ builder.Services.AddTransient<IFilmService, FilmService>();
 builder.Services.AddTransient<IReviewService, ReviewService>();
 builder.Services.AddTransient<IUserFilmRatingService, UserFilmRatingService>();
 builder.Services.AddTransient<ICalculationService, EloCalculationService>();
+builder.Services.AddTransient<ISoundtrackService, SoundtrackService>();
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
