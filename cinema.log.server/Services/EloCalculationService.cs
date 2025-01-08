@@ -14,7 +14,10 @@ public class EloCalculationService: ICalculationService
     Rb is current rating of film b
     */
     
-    
+    public double CalculateExpectedResult(double filmARating, double filmBRating)
+    {
+        return (1 / (1 + Math.Pow(10, (filmBRating - filmARating) / 400)));
+    }
     
     /*
     Recalculate elo rating
@@ -27,14 +30,10 @@ public class EloCalculationService: ICalculationService
     Sa is actual result of match up (0 for loss, 0.5 for draw, 1 for win)
     Ea is expected result (Ea = 1 / (1 + 10^(Rb - Ra)/400)) 
     */
-
-    public float CalculateExpectedResult(float? filmARating, float? filmBRating)
+    
+    public double RecalculateFilmRating(double expectedResult, double actualResult,
+        double currentRating, double filmKConstantValue)
     {
-        throw new NotImplementedException();
-    }
-
-    public float RecalculateFilmRating(float expectedResult, float actualResult, float? currentRating)
-    {
-        throw new NotImplementedException();
+        return currentRating + filmKConstantValue * (actualResult - expectedResult);
     }
 }

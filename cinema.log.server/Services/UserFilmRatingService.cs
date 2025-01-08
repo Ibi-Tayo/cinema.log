@@ -46,8 +46,6 @@ public class UserFilmRatingService : IUserFilmRatingService
             UserId = filmRating.UserId,
             FilmId = filmRating.FilmId,
             EloRating = GetInitialEloRating(filmRating.InitialRating),
-            NumberOfComparisons = 0,
-            LastUpdated = DateTime.Now,
             InitialRating = filmRating.InitialRating
         };
         var addedFilmRating = await _userFilmRatingRepository.CreateRating(newFilmRating);
@@ -95,13 +93,17 @@ public class UserFilmRatingService : IUserFilmRatingService
             .CalculateExpectedResult(filmARating.EloRating, filmBRating.EloRating);
         var filmBExpectedResult = _calculationService
             .CalculateExpectedResult(filmBRating.EloRating, filmARating.EloRating);
+        
+        // TODO: As the number of comparisons increase, the KConstant value should decrease
+        // TODO: Add a function that reduces K based on what comparisons number is
+        // TODO: Its default to 40, see the UserFilmRating class
 
         // Recalculate film rating for film A and film B
         var filmANewRating = _calculationService
-            .RecalculateFilmRating(filmAExpectedResult, filmAResult, filmARating.EloRating);
+            .RecalculateFilmRating(filmAExpectedResult, filmAResult, filmARating.EloRating, filmARating.KConstantValue);
         var filmBNewRating = _calculationService
-            .RecalculateFilmRating(filmBExpectedResult, filmBResult, filmBRating.EloRating);
-
+            .RecalculateFilmRating(filmBExpectedResult, filmBResult, filmBRating.EloRating, filmBRating.KConstantValue);
+        
         // Update film A
         filmARating.EloRating = filmANewRating;
         filmARating.LastUpdated = DateTime.Now;

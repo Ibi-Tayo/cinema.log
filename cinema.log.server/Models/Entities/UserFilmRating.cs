@@ -7,8 +7,9 @@ public class UserFilmRating
     public required Guid UserId { get; set; }
     public Film Film { get; set; }
     public required Guid FilmId { get; set; }
-    public float? EloRating { get; set; }
+    public double EloRating { get; set; }
     public int NumberOfComparisons { get; set; }
+    public double KConstantValue { get; set; } = 40;
     public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
     public float InitialRating { get; set; }
 }
