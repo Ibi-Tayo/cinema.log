@@ -8,4 +8,5 @@ public interface IUserRepository
     Task<User?> GetUserById(Guid id);
     Task<User?> UpdateUser(User user);
     Task<User?> DeleteUserById(Guid id);
+    Task<List<Review>> GetUserReviews(Guid id);
 }

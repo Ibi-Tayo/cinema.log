@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using cinema.log.server.Models;
 
 #nullable disable
 
-namespace cinema.log.server.Migrations
+namespace cinema.log.server.Repositories.Migrations
 {
     [DbContext(typeof(CinemaLogContext))]
-    partial class CinemaLogContextModelSnapshot : ModelSnapshot
+    [Migration("20241229135807_Update4")]
+    partial class Update4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -132,6 +135,7 @@ namespace cinema.log.server.Migrations
                         .HasColumnType("nvarchar(40)");
 
                     b.Property<string>("ProfilePicUrl")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -214,17 +218,21 @@ namespace cinema.log.server.Migrations
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.Review", b =>
                 {
-                    b.HasOne("cinema.log.server.Models.Entities.Film", null)
+                    b.HasOne("cinema.log.server.Models.Entities.Film", "Film")
                         .WithMany("Reviews")
                         .HasForeignKey("FilmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("cinema.log.server.Models.Entities.User", null)
+                    b.HasOne("cinema.log.server.Models.Entities.User", "User")
                         .WithMany("Reviews")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Film");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.UserFilmRating", b =>

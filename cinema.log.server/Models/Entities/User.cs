@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using cinema.log.server.Models.DTOs;
 
 namespace cinema.log.server.Models.Entities;
 
@@ -15,9 +16,9 @@ public class User
     [MaxLength(20, ErrorMessage = "Username is too long")]
     public required string Username { get; set; }
     
-    [Required]
     [MaxLength(500, ErrorMessage = "Url is too long")]
     public string? ProfilePicUrl { get; set; }
     
     public ICollection<Review>? Reviews { get; set; }
+    
 }

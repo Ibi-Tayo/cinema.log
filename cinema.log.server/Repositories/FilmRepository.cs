@@ -1,10 +1,11 @@
 using cinema.log.server.Abstractions.Interfaces;
 using cinema.log.server.Models;
 using cinema.log.server.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace cinema.log.server.Repositories;
 
-public class FilmRepository: IFilmRepository
+public class FilmRepository : IFilmRepository
 {
     CinemaLogContext _context;
     ILogger<FilmRepository> _logger;
@@ -14,6 +15,7 @@ public class FilmRepository: IFilmRepository
         _context = context;
         _logger = logger;
     }
+
     public async Task<Film?> CreateFilm(Film film)
     {
         try
@@ -34,6 +36,11 @@ public class FilmRepository: IFilmRepository
         return await _context.Films.FindAsync(id);
     }
 
+    public async Task<List<Film>> GetFilmsByIds(IEnumerable<Guid> ids)
+    {
+        return await _context.Films.Where(f => ids.Contains(f.FilmId)).ToListAsync();
+    }
+    
     public async Task<Film?> UpdateFilm(Film film)
     {
         try
@@ -56,5 +63,32 @@ public class FilmRepository: IFilmRepository
         _context.Films.Remove(foundFilm);
         await _context.SaveChangesAsync();
         return foundFilm;
+    }
+
+    public async Task<Guid?> GetFilmId(string title, string? director, int? releaseYear)
+    {
+        Film? film;
+        if (director != null && releaseYear != null)
+        {
+            film = await _context.Films.FirstOrDefaultAsync(f => f.Title.ToLower() == title.ToLower()
+                                                                 && f.Director == director
+                                                                 && f.ReleaseYear == releaseYear);
+        }
+        else if (director != null && releaseYear == null)
+        {
+            film = await _context.Films.FirstOrDefaultAsync(f => f.Title.ToLower() == title.ToLower()
+                                                                 && f.Director == director);
+        }
+        else if (director == null && releaseYear != null)
+        {
+            film = await _context.Films.FirstOrDefaultAsync(f => f.Title.ToLower() == title.ToLower()
+                                                                 && f.ReleaseYear == releaseYear);
+        }
+        else
+        {
+            film = await _context.Films.FirstOrDefaultAsync(f => f.Title.ToLower() == title.ToLower());
+        }
+
+        return film?.FilmId;
     }
 }

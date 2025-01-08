@@ -1,4 +1,7 @@
+using cinema.log.server.Abstractions.Interfaces;
 using cinema.log.server.Models;
+using cinema.log.server.Repositories;
+using cinema.log.server.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,14 +10,26 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<CinemaLogContext>(opt 
-    => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    => opt.UseSqlServer(builder.Configuration["LocalDbConnectionString"]));
+
+// Repositories for dependency injection
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IFilmRepository, FilmRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IUserFilmRatingRepository, UserFilmRatingRepository>();
+
+// Services for dependency injection
+builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IFilmService, FilmService>();
+builder.Services.AddTransient<IReviewService, ReviewService>();
+builder.Services.AddTransient<IUserFilmRatingService, UserFilmRatingService>();
+builder.Services.AddTransient<ICalculationService, EloCalculationService>();
+
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+if (app.Environment.IsDevelopment()) { app.MapOpenApi(); }
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>
@@ -23,17 +38,18 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
-// need to run migrations first before this can connect to database
 using (var serviceScope = app.Services.CreateScope())
 {
     var context = serviceScope.ServiceProvider.GetRequiredService<CinemaLogContext>();
-    var connectionString = context.Database.GetDbConnection().ConnectionString;
+    var dbName = context.Database.GetDbConnection().Database;
     if (!context.Database.CanConnect())
     {
-        throw new Exception($"Cannot connect to database: {connectionString}");
+        Console.Error.WriteLine($"Cannot connect to database: {dbName}");
     }
-    Console.WriteLine($"Database connection established: {connectionString}");
-    context.Database.Migrate();
+    else
+    {
+        Console.WriteLine($"Database connection established: {dbName}");
+    }
 }
 
 app.UseCors(b => b
@@ -42,9 +58,6 @@ app.UseCors(b => b
     .AllowAnyHeader());   
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

@@ -1,6 +1,8 @@
+using cinema.log.server.Abstractions.Interfaces;
+
 namespace cinema.log.server.Services;
 
-public class EloCalculationService
+public class EloCalculationService: ICalculationService
 {
     /*
     Calculate expected result
@@ -12,7 +14,10 @@ public class EloCalculationService
     Rb is current rating of film b
     */
     
-    
+    public double CalculateExpectedResult(double filmARating, double filmBRating)
+    {
+        return (1 / (1 + Math.Pow(10, (filmBRating - filmARating) / 400)));
+    }
     
     /*
     Recalculate elo rating
@@ -26,4 +31,9 @@ public class EloCalculationService
     Ea is expected result (Ea = 1 / (1 + 10^(Rb - Ra)/400)) 
     */
     
+    public double RecalculateFilmRating(double expectedResult, double actualResult,
+        double currentRating, double filmKConstantValue)
+    {
+        return currentRating + filmKConstantValue * (actualResult - expectedResult);
+    }
 }

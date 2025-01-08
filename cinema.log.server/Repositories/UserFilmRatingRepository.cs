@@ -30,6 +30,37 @@ public class UserFilmRatingRepository(CinemaLogContext context, ILogger<UserFilm
         return await _context.UserFilmRatings.FindAsync(id);
     }
 
+    public async Task<List<UserFilmRating>> GetAllRatings(Guid userId)
+    {
+        return await _context.UserFilmRatings.Where(x => x.UserId == userId).ToListAsync();
+    }
+
+    public async Task<List<Guid>> GetAllFilmIds(Guid userId)
+    {
+        return await _context.UserFilmRatings
+            .Where(ufr => ufr.UserId == userId)
+            .Select(rating => rating.FilmId).ToListAsync();
+    }
+
+    public async Task<List<Film>> GetAllFilmsRatedByUserId(Guid userId)
+    {
+        return await _context.UserFilmRatings
+            .Where(ufr => ufr.UserId == userId)
+            .Join(
+                _context.Films,
+                ufr => ufr.FilmId,
+                film => film.FilmId,
+                (ufr, film) => film
+            )
+            .ToListAsync();
+    }
+
+    public async Task<UserFilmRating?> GetRatingFilmUserId(Guid userId, Guid filmId)
+    {
+        return await _context.UserFilmRatings.FirstOrDefaultAsync(ufr => ufr.UserId == userId &&
+                                                                         ufr.FilmId == filmId);
+    }
+
     public async Task<UserFilmRating?> UpdateRating(UserFilmRating rating)
     {
         try
@@ -54,20 +85,20 @@ public class UserFilmRatingRepository(CinemaLogContext context, ILogger<UserFilm
         return foundRating;
     }
 
-    public async Task<float?> GetUserFilmRating(Guid userId, Guid filmId)
+    public async Task<bool> DeleteRatingByUserFilmId(Guid userId, Guid filmId)
     {
         var rating = await _context.UserFilmRatings
-            .FirstOrDefaultAsync(r =>
-                r.Film.FilmId == filmId &&
-                r.User.UserId == userId);
-           
-        return rating?.EloRating;
+            .FirstOrDefaultAsync(ufr => ufr.UserId == userId && ufr.FilmId == filmId);
+        if (rating == null) return false;
+        _context.UserFilmRatings.Remove(rating);
+        await _context.SaveChangesAsync();
+        return true;
     }
-
+    
     public async Task<List<UserFilmRating>> GetAllUserFilmRatingsRanked(Guid userId)
     {
         var ratings = await _context.UserFilmRatings
-            .Where(r => r.User.UserId == userId)
+            .Where(r => r.UserId == userId)
             .OrderByDescending(r => r.EloRating)
             .ToListAsync();
 

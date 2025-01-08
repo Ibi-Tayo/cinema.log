@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using cinema.log.server.Models;
 
 #nullable disable
 
-namespace cinema.log.server.Migrations
+namespace cinema.log.server.Repositories.Migrations
 {
     [DbContext(typeof(CinemaLogContext))]
-    partial class CinemaLogContextModelSnapshot : ModelSnapshot
+    [Migration("20250101102247_UpgradeA")]
+    partial class UpgradeA
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
