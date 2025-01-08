@@ -46,8 +46,6 @@ public class UserFilmRatingService : IUserFilmRatingService
             UserId = filmRating.UserId,
             FilmId = filmRating.FilmId,
             EloRating = GetInitialEloRating(filmRating.InitialRating),
-            NumberOfComparisons = 0,
-            LastUpdated = DateTime.Now,
             InitialRating = filmRating.InitialRating
         };
         var addedFilmRating = await _userFilmRatingRepository.CreateRating(newFilmRating);
@@ -64,11 +62,13 @@ public class UserFilmRatingService : IUserFilmRatingService
         if (contestFilm == null) return Response<List<FilmDto>>.BuildResponse(404, "Film Id for contest not found", null);
         
         var allFilms = await _userFilmRatingRepository.GetAllFilmsRatedByUserId(userId);
+        var allRatings = await _userFilmRatingRepository.GetAllRatings(userId);
+        
         if (allFilms.Count == 0) return Response<List<FilmDto>>.BuildResponse(404, "No rated films found", null);
         
         // Here we implement some logic to try and prioritise by genre using the contest film information
         var contestFilmGenres = contestFilm.Genre?.Split(',');
-        var sortedFilms = AssignGenrePriority(allFilms, contestFilmGenres).Take(NumberOfFilmsForContest);
+        var sortedFilms = AssignFilmPriority(allFilms, allRatings, contestFilmGenres).Take(NumberOfFilmsForContest);
         
         return Response<List<FilmDto>>.BuildResponse(200, "Success", 
             sortedFilms.Select(Mapper<Film, FilmDto>.Map).ToList());
@@ -96,12 +96,16 @@ public class UserFilmRatingService : IUserFilmRatingService
         var filmBExpectedResult = _calculationService
             .CalculateExpectedResult(filmBRating.EloRating, filmARating.EloRating);
 
+        // Check constant
+        filmARating.KConstantValue = VerifyKConstantValue(filmARating);
+        filmBRating.KConstantValue = VerifyKConstantValue(filmBRating);
+
         // Recalculate film rating for film A and film B
         var filmANewRating = _calculationService
-            .RecalculateFilmRating(filmAExpectedResult, filmAResult, filmARating.EloRating);
+            .RecalculateFilmRating(filmAExpectedResult, filmAResult, filmARating.EloRating, filmARating.KConstantValue);
         var filmBNewRating = _calculationService
-            .RecalculateFilmRating(filmBExpectedResult, filmBResult, filmBRating.EloRating);
-
+            .RecalculateFilmRating(filmBExpectedResult, filmBResult, filmBRating.EloRating, filmBRating.KConstantValue);
+        
         // Update film A
         filmARating.EloRating = filmANewRating;
         filmARating.LastUpdated = DateTime.Now;
@@ -197,7 +201,7 @@ public class UserFilmRatingService : IUserFilmRatingService
         }
     }
 
-    private List<Film> AssignGenrePriority(IEnumerable<Film> films, string[]? contestFilmGenres)
+    private List<Film> AssignFilmPriority(IEnumerable<Film> films, IEnumerable<UserFilmRating> ratings, string[]? contestFilmGenres)
     {
         var r = new Random();
         var filmsArray = films.ToArray();
@@ -205,8 +209,12 @@ public class UserFilmRatingService : IUserFilmRatingService
         
         if (contestFilmGenres == null || contestFilmGenres.Length == 0)
         {
-            // No priority so return the randomised list
-            return filmsArray.ToList();
+            // No priority so return the list with the least compared films at the start of the list
+            return filmsArray
+                .OrderBy(film => ratings
+                    .Where(ufr => ufr.FilmId == film.FilmId)
+                    .Sum(u => u.NumberOfComparisons))
+                .ToList();
         }
         
         var normalizedContestFilmGenres = contestFilmGenres
@@ -232,9 +240,31 @@ public class UserFilmRatingService : IUserFilmRatingService
             
             filmPriority.Add((film, count));
         }
-        // Sort by int (descending order)
-        var sorted = filmPriority.OrderByDescending(x => x.Item2).ToList();
-        return sorted.Select(x => x.Item1).ToList();
+        
+        // Sort by int (descending order) to prioritise genre
+        // But then also sort to prioritise the least compared films
+        var sort = filmPriority
+            .OrderByDescending(x => x.Item2)
+            .ThenBy(film => ratings
+                .Where(ufr => ufr.FilmId == film.Item1.FilmId)
+                .Sum(u => u.NumberOfComparisons))
+            .Select(x => x.Item1)
+            .ToList();
+
+        return sort;
+    }
+
+    private double VerifyKConstantValue(UserFilmRating filmRating)
+    {
+        var numberOfComparisons = filmRating.NumberOfComparisons;
+        return numberOfComparisons switch
+        {
+            >= 0 and < 5 => 40,
+            >= 5 and < 10  => 20,
+            >= 10 => 10,
+            _ => 40,
+        };
+        
     }
     #endregion
 }

@@ -94,17 +94,7 @@ public class UserFilmRatingRepository(CinemaLogContext context, ILogger<UserFilm
         await _context.SaveChangesAsync();
         return true;
     }
-
-    public async Task<float?> GetUserFilmRating(Guid userId, Guid filmId)
-    {
-        var rating = await _context.UserFilmRatings
-            .FirstOrDefaultAsync(r =>
-                r.FilmId == filmId &&
-                r.UserId == userId);
-           
-        return rating?.EloRating;
-    }
-
+    
     public async Task<List<UserFilmRating>> GetAllUserFilmRatingsRanked(Guid userId)
     {
         var ratings = await _context.UserFilmRatings
