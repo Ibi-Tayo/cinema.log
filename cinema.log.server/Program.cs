@@ -1,5 +1,6 @@
 using cinema.log.server.Abstractions.Interfaces;
 using cinema.log.server.Models;
+using cinema.log.server.Models.Entities;
 using cinema.log.server.Repositories;
 using cinema.log.server.Services;
 using Microsoft.EntityFrameworkCore;
