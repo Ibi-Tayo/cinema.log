@@ -16,7 +16,7 @@ public class UserFilmRatingService : IUserFilmRatingService
     private const int NumberOfFilmsForContest = 10;
 
     public UserFilmRatingService(IUserFilmRatingRepository userFilmRatingRepository,
-        ICalculationService calculationService, UserRepository userRepository, 
+        ICalculationService calculationService, IUserRepository userRepository, 
         IFilmRepository filmRepository)
     {
         _userFilmRatingRepository = userFilmRatingRepository;

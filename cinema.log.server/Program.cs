@@ -28,6 +28,7 @@ builder.Services.AddTransient<ICalculationService, EloCalculationService>();
 builder.Services.AddTransient<ISoundtrackService, SoundtrackService>();
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
