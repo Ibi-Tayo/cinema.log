@@ -24,9 +24,11 @@ public class SoundtrackService : ISoundtrackService
         _configuration = configuration;
     }
 
-    public Response<FilmSoundtrackDto> GetSoundtrackByFilmId(Guid filmId)
+    public async Task<Response<FilmSoundtrackDto>> GetSoundtrackByFilmId(Guid filmId)
     {
-        throw new NotImplementedException();
+        // for testing purposes
+        var dto = new FilmSoundtrackDto() { SoundtrackName = await GetAccessToken() };
+        return Response<FilmSoundtrackDto>.BuildResponse(200, "Success", dto);
     }
 
     // use user id to get all liked tracks from liked track table
@@ -92,12 +94,10 @@ public class SoundtrackService : ISoundtrackService
         }
 
         if (DateTime.UtcNow < existingToken.ExpiryDate) return existingToken.AccessToken;
-        
+        // expired token so request new one
         var resp = await RequestAccessToken();
         return resp.Item1;
     }
-    
-
     #endregion
 
 }
