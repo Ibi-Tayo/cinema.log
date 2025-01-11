@@ -12,7 +12,6 @@ public class SoundtrackService : ISoundtrackService
 {
     private readonly CinemaLogContext _context;
     private readonly HttpClient _httpClient;
-
     private readonly IConfiguration _configuration;
 
     // use film Id to get data from film table,
@@ -29,26 +28,71 @@ public class SoundtrackService : ISoundtrackService
         // for testing purposes
         var dto = new FilmSoundtrackDto() { SoundtrackName = await GetAccessToken() };
         return Response<FilmSoundtrackDto>.BuildResponse(200, "Success", dto);
+        
+        // Use Id to get film name
+        // Use film name in search api call to spotify - returns array of results
+        // Find a match in array where the title includes 1. Film name, 2. "Soundtrack" or "Score"
+        // Get Spotify Album Id and use in api call to get album
+        // Use data to populate film soundtrack dto and return
     }
 
-    // use user id to get all liked tracks from liked track table
-    public Response<List<LikedTrackDto>> GetLikedTracksByUserId(Guid userId)
+    // use user id to get all liked tracks from all films
+    public async Task<Response<List<LikedTrackDto>>> GetLikedTracksByUserId(Guid userId)
     {
-        throw new NotImplementedException();
+        var res = await _context.LikedTracks.Where(lt => lt.UserId == userId).ToListAsync();
+        var dto = res.Select(Mapper<LikedTrack, LikedTrackDto>.Map).ToList();
+        return Response<List<LikedTrackDto>>.BuildResponse(200, "Success", dto);
+    }
+    
+    // When looking at film rating, get all liked songs in specific film
+    public async Task<Response<List<LikedTrackDto>>> GetLikedTracksFromFilmRatingId(Guid filmRatingId)
+    {
+        var res = await _context.LikedTracks
+            .Where(lt => lt.UserFilmSoundtrackRatingId == filmRatingId).ToListAsync();
+        var dto = res.Select(Mapper<LikedTrack, LikedTrackDto>.Map).ToList();
+        return Response<List<LikedTrackDto>>.BuildResponse(200, "Success", dto);
     }
 
     // use dto to add new liked track to liked track table
     // (user needs to make sure they have the film soundtrack rating id)
     // (they'd get that by calling GetSoundtrackByFilmId)
-    public Response<LikedTrackDto> SetLikedTrack(LikedTrackDto likedTrack)
+    public async Task<Response<LikedTrackDto?>> SetLikedTrack(LikedTrackDto likedTrack)
     {
-        throw new NotImplementedException();
+        var user = await _context.Users.FindAsync(likedTrack.UserId);
+        if (user == null) 
+            return Response<LikedTrackDto?>.BuildResponse(404, "User not found", null);
+        
+        var soundtrackRating = await _context.UserFilmSoundtrackRatings.FindAsync(likedTrack.UserFilmSoundtrackRatingId);
+        if (soundtrackRating == null) 
+            return Response<LikedTrackDto?>.BuildResponse(404, 
+                "Soundtrack rating not found", null);
+       
+        likedTrack.Id = Guid.NewGuid(); // set liked track id here
+
+        var entity = _context.LikedTracks.Add(Mapper<LikedTrackDto, LikedTrack>.Map(likedTrack)).Entity;
+        await _context.SaveChangesAsync();
+        return Response<LikedTrackDto?>.BuildResponse(200, "Success", 
+            Mapper<LikedTrack, LikedTrackDto>.Map(entity));
     }
 
-    // Self-explanatory
-    public Response<bool> DeleteLikedTrack(LikedTrackDto likedTrack)
+    public async Task<Response<bool>> DeleteLikedTrack(LikedTrackDto likedTrack)
     {
-        throw new NotImplementedException();
+        var track = await _context.LikedTracks.FindAsync(likedTrack.Id);
+        if (track == null)
+            return Response<bool>.BuildResponse(404, "Track not found", false);
+        
+        var user = await _context.Users.FindAsync(likedTrack.UserId);
+        if (user == null)
+            return Response<bool>.BuildResponse(404, "User not found", false);
+        
+        var soundtrackRating = await _context.UserFilmSoundtrackRatings.FindAsync(likedTrack.UserFilmSoundtrackRatingId);
+        if (soundtrackRating == null)
+            return Response<bool>.BuildResponse(404, "Soundtrack rating not found", false);
+        
+        _context.LikedTracks.Remove(Mapper<LikedTrackDto, LikedTrack>.Map(likedTrack));
+        await _context.SaveChangesAsync();
+        return Response<bool>.BuildResponse(200, "Success", true);
+        
     }
 
     #region AccessToken Methods
