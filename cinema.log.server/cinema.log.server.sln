@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cinema.log.server", "cinema.log.server.csproj", "{3B5E7D69-DF68-45B0-8E7E-8907D7276CBB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cinema.log.test", "cinema.log.test\cinema.log.test.csproj", "{918725DB-DEA4-4FC8-9238-B46CB4015783}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{3B5E7D69-DF68-45B0-8E7E-8907D7276CBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B5E7D69-DF68-45B0-8E7E-8907D7276CBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B5E7D69-DF68-45B0-8E7E-8907D7276CBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{918725DB-DEA4-4FC8-9238-B46CB4015783}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{918725DB-DEA4-4FC8-9238-B46CB4015783}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{918725DB-DEA4-4FC8-9238-B46CB4015783}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{918725DB-DEA4-4FC8-9238-B46CB4015783}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
