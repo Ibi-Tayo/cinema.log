@@ -1,5 +1,6 @@
 using cinema.log.server.Abstractions.Interfaces;
 using cinema.log.server.Models;
+using cinema.log.server.Models.Entities;
 using cinema.log.server.Repositories;
 using cinema.log.server.Services;
 using Microsoft.EntityFrameworkCore;
@@ -24,8 +25,10 @@ builder.Services.AddTransient<IFilmService, FilmService>();
 builder.Services.AddTransient<IReviewService, ReviewService>();
 builder.Services.AddTransient<IUserFilmRatingService, UserFilmRatingService>();
 builder.Services.AddTransient<ICalculationService, EloCalculationService>();
+builder.Services.AddTransient<ISoundtrackService, SoundtrackService>();
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 

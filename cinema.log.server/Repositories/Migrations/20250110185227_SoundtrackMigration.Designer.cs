@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using cinema.log.server.Models;
 using cinema.log.server.Models.Entities;
 
 #nullable disable
@@ -13,8 +12,8 @@ using cinema.log.server.Models.Entities;
 namespace cinema.log.server.Repositories.Migrations
 {
     [DbContext(typeof(CinemaLogContext))]
-    [Migration("20241229135807_Update4")]
-    partial class Update4
+    [Migration("20250110185227_SoundtrackMigration")]
+    partial class SoundtrackMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -93,6 +92,29 @@ namespace cinema.log.server.Repositories.Migrations
                     b.ToTable("Films");
                 });
 
+            modelBuilder.Entity("cinema.log.server.Models.Entities.LikedTrack", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TrackTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserFilmSoundtrackRatingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserFilmSoundtrackRatingId");
+
+                    b.ToTable("LikedTracks");
+                });
+
             modelBuilder.Entity("cinema.log.server.Models.Entities.Review", b =>
                 {
                     b.Property<Guid>("ReviewId")
@@ -124,6 +146,24 @@ namespace cinema.log.server.Repositories.Migrations
                     b.ToTable("Reviews");
                 });
 
+            modelBuilder.Entity("cinema.log.server.Models.Entities.Spotify", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccessToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SpotifyApi");
+                });
+
             modelBuilder.Entity("cinema.log.server.Models.Entities.User", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -136,7 +176,6 @@ namespace cinema.log.server.Repositories.Migrations
                         .HasColumnType("nvarchar(40)");
 
                     b.Property<string>("ProfilePicUrl")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -156,14 +195,17 @@ namespace cinema.log.server.Repositories.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<float?>("EloRating")
-                        .HasColumnType("real");
+                    b.Property<double>("EloRating")
+                        .HasColumnType("float");
 
                     b.Property<Guid>("FilmId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<float>("InitialRating")
                         .HasColumnType("real");
+
+                    b.Property<double>("KConstantValue")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
@@ -181,6 +223,26 @@ namespace cinema.log.server.Repositories.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserFilmRatings");
+                });
+
+            modelBuilder.Entity("cinema.log.server.Models.Entities.UserFilmSoundtrackRating", b =>
+                {
+                    b.Property<Guid>("UserFilmSoundtrackRatingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FilmId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserFilmSoundtrackRatingId");
+
+                    b.ToTable("UserFilmSoundtrackRatings");
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.ComparisonHistory", b =>
@@ -217,23 +279,30 @@ namespace cinema.log.server.Repositories.Migrations
                     b.Navigation("WinningFilm");
                 });
 
+            modelBuilder.Entity("cinema.log.server.Models.Entities.LikedTrack", b =>
+                {
+                    b.HasOne("cinema.log.server.Models.Entities.UserFilmSoundtrackRating", "UserFilmSoundtrackRating")
+                        .WithMany("LikedTracks")
+                        .HasForeignKey("UserFilmSoundtrackRatingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserFilmSoundtrackRating");
+                });
+
             modelBuilder.Entity("cinema.log.server.Models.Entities.Review", b =>
                 {
-                    b.HasOne("cinema.log.server.Models.Entities.Film", "Film")
+                    b.HasOne("cinema.log.server.Models.Entities.Film", null)
                         .WithMany("Reviews")
                         .HasForeignKey("FilmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("cinema.log.server.Models.Entities.User", "User")
+                    b.HasOne("cinema.log.server.Models.Entities.User", null)
                         .WithMany("Reviews")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Film");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("cinema.log.server.Models.Entities.UserFilmRating", b =>
@@ -263,6 +332,11 @@ namespace cinema.log.server.Repositories.Migrations
             modelBuilder.Entity("cinema.log.server.Models.Entities.User", b =>
                 {
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("cinema.log.server.Models.Entities.UserFilmSoundtrackRating", b =>
+                {
+                    b.Navigation("LikedTracks");
                 });
 #pragma warning restore 612, 618
         }
