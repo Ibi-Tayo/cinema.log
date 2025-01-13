@@ -18,14 +18,22 @@ public class UserService : IUserService
     }
     public async Task<Response<UserDto>> GetUser(Guid userId)
     {
-        var user = await _userRepository.GetUserById(userId);
-        if (user == null)
+        try
         {
-            return Response<UserDto>.BuildResponse(404, "User not found", null);
-        }
+            var user = await _userRepository.GetUserById(userId);
+            if (user == null)
+            {
+                return Response<UserDto>.BuildResponse(404, "User not found", null);
+            }
 
-        var responseUser = Mapper<User, UserDto>.Map(user);
-        return Response<UserDto>.BuildResponse(200, "Success", responseUser);
+            var responseUser = Mapper<User, UserDto>.Map(user);
+            return Response<UserDto>.BuildResponse(200, "Success", responseUser);
+        }
+        catch (Exception e)
+        {
+            return Response<UserDto>.BuildResponse(500, 
+                "An error occurred while processing your request", null);
+        }
     }
     
     public async Task<Response<UserDto>> AddUser(UserDto user)
