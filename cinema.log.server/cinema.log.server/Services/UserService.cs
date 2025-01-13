@@ -38,19 +38,26 @@ public class UserService : IUserService
     
     public async Task<Response<UserDto>> AddUser(UserDto user)
     {
-        var response = ValidateUser(user);
-        if (response.StatusMessage == "Success")
+        try
         {
-            var newUser = Mapper<UserDto, User>.Map(user);
-            var responseUser = await _userRepository.CreateUser(newUser);
-            if (responseUser != null)
+            var response = ValidateUser(user);
+            if (response.StatusMessage == "Success")
             {
-                var responseDto = Mapper<User, UserDto>.Map(responseUser);
-                return Response<UserDto>.BuildResponse(StatusCodes.Status201Created, "Success", responseDto);
+                var newUser = Mapper<UserDto, User>.Map(user);
+                var responseUser = await _userRepository.CreateUser(newUser);
+                if (responseUser != null)
+                {
+                    var responseDto = Mapper<User, UserDto>.Map(responseUser);
+                    return Response<UserDto>.BuildResponse(StatusCodes.Status201Created, "Success", responseDto);
+                }
+                return Response<UserDto>.BuildResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", null);
             }
+            return response;
+        }
+        catch (Exception e)
+        {
             return Response<UserDto>.BuildResponse(StatusCodes.Status500InternalServerError, "Internal Server Error", null);
         }
-        return response;
     }
 
     public async Task<Response<UserDto>> UpdateUser(UserDto user)
