@@ -4,3 +4,6 @@ cinema.log.server/bin
 *.user
 .DS_Store
 cinema.log.server/cinema.log.test/obj
+cinema.log.server/.vs
+cinema.log.server/Test/bin
+cinema.log.server/Test/obj
