@@ -14,9 +14,10 @@ public class EloCalculationService: ICalculationService
     Rb is current rating of film b
     */
     
-    public double CalculateExpectedResult(double filmARating, double filmBRating)
+    public double CalculateExpectedResult(double expectedResultFilmRating, double filmBRating)
     {
-        return (1 / (1 + Math.Pow(10, (filmBRating - filmARating) / 400)));
+        var rawCalc = (1 / (1 + Math.Pow(10, (filmBRating - expectedResultFilmRating) / 400)));
+        return Math.Round(rawCalc, 2);
     }
     
     /*
@@ -34,6 +35,9 @@ public class EloCalculationService: ICalculationService
     public double RecalculateFilmRating(double expectedResult, double actualResult,
         double currentRating, double filmKConstantValue)
     {
-        return currentRating + filmKConstantValue * (actualResult - expectedResult);
+        var rawCalc = currentRating + filmKConstantValue * (actualResult - expectedResult);
+        if (rawCalc <= 100) return 100; // once you hit 100, you cant have decrease to your rating
+
+        return Math.Round(rawCalc, 0);
     }
 }
