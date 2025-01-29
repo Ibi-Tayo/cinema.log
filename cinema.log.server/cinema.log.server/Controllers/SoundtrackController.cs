@@ -14,8 +14,7 @@ public class SoundtrackController(ISoundtrackService soundtrackService) : Contro
     [Route("/test")]
     public async Task<ActionResult> Test()
     {
-        var res = await soundtrackService.GetSoundtrackByFilmId(Guid.Empty);
-        return Ok(res);
+        return Ok();
     }
     
 }

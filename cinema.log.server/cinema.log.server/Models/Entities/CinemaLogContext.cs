@@ -12,5 +12,6 @@ public class CinemaLogContext(DbContextOptions<CinemaLogContext> options) : DbCo
     public DbSet<UserFilmSoundtrackRating> UserFilmSoundtrackRatings { get; set; }
     public DbSet<LikedTrack> LikedTracks { get; set; }
     public DbSet<Spotify> SpotifyApi { get; set; }
+    public DbSet<CachedSoundtrack> CachedSoundtracks { get; set; }
     
 }

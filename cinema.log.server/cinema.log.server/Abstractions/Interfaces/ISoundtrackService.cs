@@ -5,7 +5,7 @@ namespace cinema.log.server.Abstractions.Interfaces;
 
 public interface ISoundtrackService
 {
-    Task<Response<FilmSoundtrackDto>> GetSoundtrackByFilmId(Guid filmId);
+    Task<Response<FilmSoundtrackDto>> GetSoundtrackByFilmId(Guid filmId, Guid userId);
     Task<Response<List<LikedTrackDto>>> GetLikedTracksByUserId(Guid userId);
     Task<Response<List<LikedTrackDto>>> GetLikedTracksFromFilmRatingId(Guid filmRatingId);
     Task<Response<LikedTrackDto?>> SetLikedTrack(LikedTrackDto likedTrack);
