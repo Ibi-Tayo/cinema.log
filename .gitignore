@@ -11,3 +11,6 @@ cinema.log.server/cinema.log.server/.idea
 cinema.log.server/cinema.log.server/bin
 cinema.log.server/cinema.log.server/obj
 cinema.log.server/cinema.log.test/bin
+cinema.log.client/node_modules
+cinema.log.client/.angular
+cinema.log.client/.vscode
