@@ -1,0 +1,23 @@
+.parent {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: 0.5fr repeat(4, 1fr) 0.3fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  height: 100vh;
+  width: 100vw;
+  }
+
+  .navbar {
+    grid-area: 1 / 1 / 2 / 7;
+    background-color: aqua;
+  }
+  .main-content {
+    grid-area: 2 / 1 / 6 / 7;
+    overflow-y: scroll;
+    background-color: aquamarine;
+  }
+  .footer {
+    grid-area: 6 / 1 / 7 / 7;
+    background-color: beige;
+   }
