@@ -14,7 +14,6 @@ public class SoundtrackService : ISoundtrackService
     private readonly CinemaLogContext _context;
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
-    // TODO: I've forgotten to add the soundtrack rating of the film to the Filmsoundtrack DTO
     public SoundtrackService(CinemaLogContext context, HttpClient httpClient, IConfiguration configuration)
     {
         _context = context;
@@ -29,7 +28,7 @@ public class SoundtrackService : ISoundtrackService
             .FirstOrDefaultAsync(cs => cs.FilmId == filmId);
         if (cachedSoundtrack != null)
         {
-            var ufr = await GetUserFilmRating(filmId, userId);
+            var ufr = await GetOrDefaultUserFilmSoundtrackRating(filmId, userId);
             var fsDto = MapCachedToDto(cachedSoundtrack, ufr);
             return Response<FilmSoundtrackDto>.BuildResponse(200, "Success", fsDto);
         }
@@ -61,9 +60,9 @@ public class SoundtrackService : ISoundtrackService
             return Response<FilmSoundtrackDto>
                 .BuildResponse(404, "Album Id not found in spotify", null);
         
-        var userFilmRating = await GetUserFilmRating(filmId, userId);
+        var userFilmRating = await GetOrDefaultUserFilmSoundtrackRating(filmId, userId);
 
-        var dto = await BuildFilmSoundtrackDto(filmId, userFilmRating, filmTitle, album);
+        var dto = await CreateFilmSoundtrackDto(filmId, userFilmRating, filmTitle, album);
         return Response<FilmSoundtrackDto>.BuildResponse(200, "Success", dto);
     }
 
@@ -123,6 +122,14 @@ public class SoundtrackService : ISoundtrackService
             return Response<bool>.BuildResponse(404, "Soundtrack rating not found", false);
 
         _context.LikedTracks.Remove(Mapper<LikedTrackDto, LikedTrack>.Map(likedTrack));
+        await _context.SaveChangesAsync();
+        return Response<bool>.BuildResponse(200, "Success", true);
+    }
+
+    public async Task<Response<bool>> UpdateSoundtrackRating(Guid filmId, Guid userId, int rating)
+    {
+        var userSoundtrackRating = await GetOrDefaultUserFilmSoundtrackRating(filmId, userId);
+        userSoundtrackRating.Rating = rating;
         await _context.SaveChangesAsync();
         return Response<bool>.BuildResponse(200, "Success", true);
     }
@@ -215,7 +222,7 @@ public class SoundtrackService : ISoundtrackService
         return responseObj;
     }
 
-    private async Task<UserFilmSoundtrackRating> GetUserFilmRating(Guid filmId, Guid userId)
+    private async Task<UserFilmSoundtrackRating> GetOrDefaultUserFilmSoundtrackRating(Guid filmId, Guid userId)
     {
         var userFilmRating = _context.UserFilmSoundtrackRatings
             .SingleOrDefault(filmSoundtrackRating => filmSoundtrackRating.FilmId == filmId &&
@@ -235,7 +242,7 @@ public class SoundtrackService : ISoundtrackService
         return userFilmRating;
     }
 
-    private async Task<FilmSoundtrackDto> BuildFilmSoundtrackDto(
+    private async Task<FilmSoundtrackDto> CreateFilmSoundtrackDto(
         Guid filmId, UserFilmSoundtrackRating userFilmRating,
         string filmTitle, Album album)
     {
@@ -255,6 +262,7 @@ public class SoundtrackService : ISoundtrackService
             UserFilmSoundtrackRatingId = userFilmRating.UserFilmSoundtrackRatingId, FilmId = filmId,
             FilmName = filmTitle, Artists = string.Join(", ", album.Artists.Select(artist => artist.Name)),
             SoundtrackName = album.Name, AlbumArtUrl = album.Images[0].Url, 
+            Rating = userFilmRating.Rating,
             Tracks = album.Tracks.Items.Select(track => new TrackDto
             {
                 ArtistName = string.Join(", ", track.Artists.Select(artist => artist.Name)),
@@ -282,6 +290,7 @@ public class SoundtrackService : ISoundtrackService
             UserFilmSoundtrackRatingId = userFilmRating.UserFilmSoundtrackRatingId, FilmId = cachedSoundtrack.FilmId,
             FilmName = cachedSoundtrack.FilmTitle, Artists = cachedSoundtrack.Artists,
             SoundtrackName = cachedSoundtrack.SoundtrackName, AlbumArtUrl = cachedSoundtrack.AlbumArtUrl,
+            Rating = userFilmRating.Rating,
             Tracks = tracks?.Select(track => new TrackDto
             {
                 // Extract artist names from deserialized Track objects

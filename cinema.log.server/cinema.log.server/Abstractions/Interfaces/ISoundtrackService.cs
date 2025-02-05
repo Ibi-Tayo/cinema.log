@@ -10,4 +10,5 @@ public interface ISoundtrackService
     Task<Response<List<LikedTrackDto>>> GetLikedTracksFromFilmRatingId(Guid filmRatingId);
     Task<Response<LikedTrackDto?>> SetLikedTrack(LikedTrackDto likedTrack);
     Task<Response<bool>> DeleteLikedTrack(LikedTrackDto likedTrack);
+    Task<Response<bool>> UpdateSoundtrackRating(Guid filmId, Guid userId, int rating);
 }
