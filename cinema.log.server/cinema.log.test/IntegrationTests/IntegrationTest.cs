@@ -14,7 +14,7 @@ public abstract class IntegrationTest
     private const string Username = "sa";
     private const string Password = "$trongPassword";
     private const ushort MsSqlPort = 1433;
-    private WebApplicationFactory<IApiMarker> _factory;
+    internal WebApplicationFactory<IApiMarker> Factory;
     internal HttpClient Client;
     private IContainer _container;
 
@@ -39,7 +39,7 @@ public abstract class IntegrationTest
         // Replace connection string in DbContext
         var connectionString =
             $"Server={host},{port};Database={Database};User Id={Username};Password={Password};TrustServerCertificate=True";
-        _factory = new WebApplicationFactory<IApiMarker>()
+        Factory = new WebApplicationFactory<IApiMarker>()
             .WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
@@ -49,9 +49,9 @@ public abstract class IntegrationTest
                 });
             });
 
-        Client = _factory.CreateClient();
+        Client = Factory.CreateClient();
         // Initialize database
-        using var scope = _factory.Services.CreateScope();
+        var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<CinemaLogContext>();
         await dbContext.Database.MigrateAsync();
     }
@@ -62,6 +62,6 @@ public abstract class IntegrationTest
         await _container.StopAsync();
         await _container.DisposeAsync();
         Client.Dispose();
-        await _factory.DisposeAsync();
+        await Factory.DisposeAsync();
     }
 }
