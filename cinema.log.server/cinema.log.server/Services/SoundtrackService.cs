@@ -33,8 +33,10 @@ public class SoundtrackService : ISoundtrackService
             return Response<FilmSoundtrackDto>.BuildResponse(200, "Success", fsDto);
         }
 
-        // Use id to get film name
-        var filmTitle = _context.Films.SingleOrDefault(film => film.FilmId == filmId)?.Title;
+        // Use id to get film name / details
+        var film = _context.Films.SingleOrDefault(film => film.FilmId == filmId);
+        var filmTitle = film?.Title;
+        
         if (string.IsNullOrEmpty(filmTitle))
             return Response<FilmSoundtrackDto>
                 .BuildResponse(404, "Film not found", null);
@@ -44,12 +46,15 @@ public class SoundtrackService : ISoundtrackService
 
         // Find a match in array where the title includes 1. Film name, 2. "Soundtrack" or "Score" etc
         var soundtrack = albums?.FirstOrDefault(album =>
-                             album.Name.Contains(filmTitle, StringComparison.OrdinalIgnoreCase) &&
-                             (album.Name.Contains("Score") ||
-                              album.Name.Contains("Soundtrack") ||
-                              album.Name.Contains("Motion Picture")))
+                             album.Name.Contains(filmTitle, StringComparison.OrdinalIgnoreCase) 
+                             && (DateTime.Parse(album.ReleaseDate).Year == film.ReleaseYear)
+                             && (album.Name.Contains("Score") ||
+                                 album.Name.Contains("Soundtrack") ||
+                                 album.Name.Contains("Motion Picture")))
                          // try searching just film title
-                         ?? albums?.FirstOrDefault(a => a.Name.Contains(filmTitle, StringComparison.OrdinalIgnoreCase));
+                         ?? albums?.FirstOrDefault(album => 
+                             album.Name.Contains(filmTitle, StringComparison.OrdinalIgnoreCase)
+                             && (DateTime.Parse(album.ReleaseDate).Year == film.ReleaseYear));
         if (soundtrack == null)
             return Response<FilmSoundtrackDto>
                 .BuildResponse(404, "Soundtrack not found in spotify search", null);
