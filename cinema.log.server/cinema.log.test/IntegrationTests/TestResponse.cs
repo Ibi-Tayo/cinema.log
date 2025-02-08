@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace cinema.log.test.IntegrationTests;
 
-public class TestResponse
+public class TestResponse<T>
 {
     [JsonPropertyName("statusCode")]
     public int? StatusCode { get; set; }
@@ -11,5 +11,5 @@ public class TestResponse
     public string? StatusMessage { get; set; }
     
     [JsonPropertyName("data")]
-    public object? Data { get; set; }
+    public T? Data { get; set; }
 }
