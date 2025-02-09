@@ -24,6 +24,13 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
+    - name: Debug Environment Variables
+      run: |
+        if [ -n "$TmdbApiKey" ]; then
+          echo "TmdbApiKey is set"
+        else
+          echo "TmdbApiKey is NOT set"
+        fi
     - name: Restore dependencies
       run: dotnet restore ./cinema.log.server/cinema.log.server.sln
     - name: Build
