@@ -13,6 +13,10 @@ jobs:
   build-and-test:
 
     runs-on: ubuntu-latest
+    env:
+      TmdbApiKey: ${{ secrets.TMDBAPIKEY }}
+      SpotifyClientId: ${{ secrets.SPOTIFYCLIENTID }}
+      SpotifyClientSecret: ${{ secrets.SPOTIFYCLIENTSECRET }}
 
     steps:
     - uses: actions/checkout@v4
