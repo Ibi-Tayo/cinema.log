@@ -144,32 +144,9 @@ public class FilmService : IFilmService
             .ToList();
     }
     
-    private string GetApiKey()
-    {
-        // Try environment variable first (for CI/CD)
-        var key = Environment.GetEnvironmentVariable("TmdbApiKey");
-        Console.WriteLine($"Environment Variable Path: Key exists = {!string.IsNullOrEmpty(key)}");
-    
-        // Fall back to user secrets/configuration
-        if (string.IsNullOrEmpty(key))
-        {
-            key = _config["TmdbApiKey"];
-            Console.WriteLine($"Configuration Path: Key exists = {!string.IsNullOrEmpty(key)}");
-        }
-
-        if (string.IsNullOrEmpty(key))
-        {
-            throw new InvalidOperationException(
-                "TMDB API key not found. Ensure it's set in user secrets for local development " +
-                "or as an environment variable 'TmdbApiKey' for CI/CD.");
-        }
-
-        return key;
-    }
-    
     private async Task<Film?> GetFilmDetailsByExternalId(int externalId)
     {
-        var key = GetApiKey();
+        var key = _config["TmdbApiKey"];
         var reqUrl = $"movie/{externalId}?api_key={key}";
         using var response = await _client.GetAsync(reqUrl);
         response.EnsureSuccessStatusCode();
