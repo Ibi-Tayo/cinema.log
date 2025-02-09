@@ -8,14 +8,29 @@ namespace cinema.log.server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class SoundtrackController(ISoundtrackService soundtrackService) : ControllerBase
+public class SoundtrackController(ISoundtrackService soundtrackService, 
+    IFilmService filmService, IUserService userService) : ControllerBase
 {
     [HttpGet]
-    [Route("/test")]
-    public async Task<ActionResult> Test()
+    [Route("/soundtrack-integration-test")]
+    public async Task<Response<FilmSoundtrackDto>> CanGetSoundtrackFromFilmId()
     {
-        var res = await soundtrackService.GetSoundtrackByFilmId(Guid.Empty);
-        return Ok(res);
+        // make film for test (by searching to increase test coverage)
+        var results = await filmService.SearchFilmFromExternal("inception");
+        var extId = results.Data
+            .FirstOrDefault(q => q.Title.Contains("inception", StringComparison.OrdinalIgnoreCase))
+            .ExternalId;
+        var film = await filmService.AddFilmToDb(extId);
+        // make user
+        var user = await userService.AddUser(new UserDto()
+        {
+            Name = "ibitayotest",
+            Username = "user",
+        });
+
+        // test
+        var resp = await soundtrackService.GetSoundtrackByFilmId(film.FilmId, user.Data.UserId);
+        return resp;
     }
     
 }

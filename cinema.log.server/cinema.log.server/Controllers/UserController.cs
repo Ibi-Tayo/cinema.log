@@ -34,7 +34,7 @@ public class UserController(IUserService userService) : ControllerBase
             _ => StatusCode(StatusCodes.Status500InternalServerError, resp)
         };
     }
-    
+
     [HttpPut]
     [Route("UpdateUser")]
     public async Task<ActionResult<Response<UserDto>>> UpdateUser(UserDto existingUser)
@@ -47,7 +47,7 @@ public class UserController(IUserService userService) : ControllerBase
             _ => StatusCode(StatusCodes.Status500InternalServerError, resp)
         };
     }
-
+    
     [HttpDelete]
     [Route("DeleteUser")]
     public async Task<ActionResult<Response<UserDto>>> DeleteUser(Guid userId)
