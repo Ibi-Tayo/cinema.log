@@ -1,0 +1,74 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.nav-wrapper {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: auto 1fr auto;
+}
+
+.navbar {
+  grid-area: 1 / 1 / 2 / 7;
+  padding: 1rem 2rem;
+  background-color: get-color(backgroundColor);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+
+  .nav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-family: "VT323", serif;
+    font-size: 2rem;
+    font-weight: bold;
+    color: get-color(neutral, 500)
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+
+    a {
+      text-decoration: none;
+      color: get-color(neutral, 500);
+      font-weight: 500;
+
+      &:hover {
+        color: #ffffff;
+      }
+
+      &.sign-in {
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        transition: background-color 0.4s ease-in-out;
+
+      }
+      &.sign-in:hover {
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        background-color: get-color(primary, 500);
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar .nav-links {
+    display: none;
+  }
+
+  .main-content .hero-section {
+    h1 {
+      font-size: 2.5rem;
+    }
+
+    .floating-elements {
+      display: none;
+    }
+  }
+}

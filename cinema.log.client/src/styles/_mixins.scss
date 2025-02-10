@@ -1,0 +1,66 @@
+@use 'variables' as *;
+// Get color from the color map
+@function get-color($color-name, $shade: 500) {
+  @if type-of(map-get($colors, $color-name)) == "map" {
+    @return map-get(map-get($colors, $color-name), $shade);
+  }
+  @return map-get($colors, $color-name);
+}
+
+// Media query mixins
+@mixin breakpoint($breakpoint) {
+  $size: map-get($breakpoints, $breakpoint);
+  @media screen and (min-width: $size) {
+    @content;
+  }
+}
+
+// Typography mixins
+@mixin typography($size, $weight: normal, $line-height: 1.5) {
+  font-size: map-get($font-sizes, $size);
+  font-weight: $weight;
+  line-height: $line-height;
+}
+
+// Spacing helper
+@mixin spacing($property, $size) {
+  #{$property}: map-get($spacing, $size);
+}
+
+// Flex helpers
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// Container
+@mixin container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: map-get($spacing, 4);
+  padding-right: map-get($spacing, 4);
+
+  @include breakpoint(sm) {
+    max-width: map-get($breakpoints, sm);
+  }
+
+  @include breakpoint(md) {
+    max-width: map-get($breakpoints, md);
+  }
+
+  @include breakpoint(lg) {
+    max-width: map-get($breakpoints, lg);
+  }
+
+  @include breakpoint(xl) {
+    max-width: map-get($breakpoints, xl);
+  }
+}

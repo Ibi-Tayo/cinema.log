@@ -1,0 +1,123 @@
+// Color System
+$colors: (
+  // Primary Colors
+  primary: (
+    100: #F5E9F9,
+    200: #EBD5F4,
+    300: #D0B5DF,
+    400: #AE92C0,
+    500: #816797,  // Primary brand color
+    600: #654B81,
+    700: #4C336C,
+    800: #352057,
+    900: #241348
+  ),
+
+  // Secondary Colors
+  secondary: (
+    100: #E6E9F8,
+    200: #CFD3F2,
+    300: #A9AED8,
+    400: #8286B1,
+    500: #51557E,  // Secondary brand color
+    600: #3B3F6C,
+    700: #282C5A,
+    800: #191C49,
+    900: #0F113C
+  ),
+
+  // Neutral Colors
+  neutral: (
+    100: #FCFCF2,
+    200: #FAFAE5,
+    300: #F2F2D3,
+    400: #E6E5C1,
+    500: #D6D5A8,
+    600: #b5b491,
+    700: #9c9b74,
+    800: #818062,
+    900: #64634b
+  ),
+
+  // background
+  backgroundColor: #1B2430,
+
+  // Semantic Colors
+  success: #10b981,
+  error: #ef4444,
+  warning: #f59e0b,
+  info: #3b82f6
+);
+
+// Typography
+$font-family-primary: "Teachers", serif;
+$font-family-logo: "VT323", serif;
+
+$font-sizes: (
+  xs: 0.75rem,    // 12px
+  sm: 0.875rem,   // 14px
+  base: 1rem,     // 16px
+  lg: 1.125rem,   // 18px
+  xl: 1.25rem,    // 20px
+  '2xl': 1.5rem,  // 24px
+  '3xl': 1.875rem,// 30px
+  '4xl': 2.25rem, // 36px
+  '5xl': 3rem,    // 48px
+);
+
+// Spacing
+$spacing: (
+  0: 0,
+  1: 0.25rem,
+  2: 0.5rem,
+  3: 0.75rem,
+  4: 1rem,
+  5: 1.25rem,
+  6: 1.5rem,
+  8: 2rem,
+  10: 2.5rem,
+  12: 3rem,
+  16: 4rem,
+  20: 5rem,
+);
+
+// Breakpoints
+$breakpoints: (
+  sm: 640px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1280px,
+  '2xl': 1536px,
+);
+
+// Border Radius
+$border-radius: (
+  none: 0,
+  sm: 0.125rem,
+  base: 0.25rem,
+  md: 0.375rem,
+  lg: 0.5rem,
+  xl: 0.75rem,
+  '2xl': 1rem,
+  full: 9999px,
+);
+
+// Z-index
+$z-index: (
+  0: 0,
+  10: 10,
+  20: 20,
+  30: 30,
+  40: 40,
+  50: 50,
+  auto: auto,
+);
+
+// Shadows
+$shadows: (
+  sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+  base: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+  md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+  lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+  xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+);

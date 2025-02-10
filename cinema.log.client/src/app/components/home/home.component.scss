@@ -1,0 +1,117 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.parent {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  width: 100%;
+  background-color: get-color(backgroundColor);
+}
+
+.main-content {
+  grid-area: 2 / 1 / 3 / 7;
+  overflow-y: auto;
+
+  .hero-section {
+    display: grid;
+    grid-template-columns: 1fr minmax(auto, 800px) 1fr;
+    padding: 4rem 2rem;
+    position: relative;
+
+    .content-wrapper {
+      grid-column: 2;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 500;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+      color: get-color(neutral, 500);
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: get-color(neutral, 700);
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+
+      button {
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.2s;
+
+        &:hover {
+          transform: translateY(-2px);
+        }
+      }
+
+      .primary-btn {
+        background-color: get-color(primary, 500);;
+        color: white;
+        border: none;
+      }
+
+      .secondary-btn {
+        background-color: get-color(secondary, 500);
+        color: white;
+        border: none;
+      }
+    }
+
+    .trust-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      color: get-color(secondary, 400);;
+    }
+
+  }
+
+  .floating-elements {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 200px;
+    opacity: 0.6;
+
+    &.left {
+      left: 0;
+      //background: url('path-to-your-elements.png') repeat-y left center;
+    }
+
+    &.right {
+      right: 0;
+     // background: url('path-to-your-elements.png') repeat-y right center;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content .hero-section {
+    h1 {
+      font-size: 2.5rem;
+    }
+
+    .floating-elements {
+      display: none;
+    }
+  }
+}

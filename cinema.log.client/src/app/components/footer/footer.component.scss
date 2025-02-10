@@ -1,0 +1,14 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.footer-wrapper {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: auto 1fr auto;
+}
+
+.footer {
+  grid-area: 3 / 1 / 4 / 7;
+  background-color: get-color(success);
+  padding: 2rem;
+}
