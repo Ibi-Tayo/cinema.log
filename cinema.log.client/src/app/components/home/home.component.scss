@@ -5,7 +5,6 @@
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: auto 1fr auto;
-  min-height: 100vh;
   width: 100%;
   background-color: get-color(backgroundColor);
 }
