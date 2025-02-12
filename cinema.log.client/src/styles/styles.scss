@@ -1,8 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Teachers:ital,wght@0,400..800;1,400..800&family=VT323&display=swap');
+
+html {
+  background-color: #1B2430;
+}
+
 body {
   margin: 0;
-  overflow: hidden;
 }
 
 * {

@@ -1,11 +1,30 @@
-import { Component } from '@angular/core';
+import {
+  Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
+import { FooterComponent } from '../footer/footer.component';
+
+import { defineElement } from '@lordicon/element';
+import lottie from 'lottie-web';
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [FooterComponent],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.scss'
+  styleUrl: './home.component.scss',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class HomeComponent {
+  @ViewChild('musicIcon') musicIconElement!: ElementRef;
 
+  constructor() {
+    defineElement(lottie.loadAnimation);
+  }
+
+  playAnimation(el: ElementRef) {
+    const element = el.nativeElement;
+    element.playerInstance.playFromBeginning();
+  }
 }

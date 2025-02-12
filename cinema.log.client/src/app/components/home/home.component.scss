@@ -1,12 +1,12 @@
-@use 'variables' as *;
-@use 'mixins' as *;
+@use "variables" as *;
+@use "mixins" as *;
 
 .parent {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: auto 1fr auto;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   background-color: get-color(backgroundColor);
 }
 
@@ -50,7 +50,8 @@
       margin-bottom: 2rem;
 
       button {
-        padding: 1rem 2rem;
+        display: flex;
+        padding: 1rem 1rem;
         border-radius: 8px;
         font-size: 1.1rem;
         font-weight: 500;
@@ -63,13 +64,15 @@
       }
 
       .primary-btn {
-        background-color: get-color(primary, 500);;
+        background-color: get-color(primary, 500);
+        align-items: center;
         color: white;
         border: none;
       }
 
       .secondary-btn {
         background-color: get-color(secondary, 500);
+        align-items: center;
         color: white;
         border: none;
       }
@@ -81,9 +84,8 @@
       justify-content: center;
       gap: 0.5rem;
       margin-bottom: 2rem;
-      color: get-color(secondary, 400);;
+      color: get-color(secondary, 400);
     }
-
   }
 
   .floating-elements {
@@ -100,7 +102,7 @@
 
     &.right {
       right: 0;
-     // background: url('path-to-your-elements.png') repeat-y right center;
+      // background: url('path-to-your-elements.png') repeat-y right center;
     }
   }
 }
