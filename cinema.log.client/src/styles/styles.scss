@@ -1,8 +1,16 @@
 /* You can add global styles to this file, and also import other style files */
-@import url('https://fonts.googleapis.com/css2?family=Teachers:ital,wght@0,400..800;1,400..800&family=VT323&display=swap');
+@use "variables" as *;
+@use "mixins" as *;
+
+@import url("https://fonts.googleapis.com/css2?family=Teachers:ital,wght@0,400..800;1,400..800&family=VT323&display=swap");
+
+:root {
+  --lord-icon-primary: #{get-color(neutral, 500)};
+  --lord-icon-secondary: #{get-color(neutral, 700)};
+}
 
 html {
-  background-color: #1B2430;
+  background-color: #{get-color(backgroundColor)};
 }
 
 body {
@@ -11,4 +19,5 @@ body {
 
 * {
   font-family: "Teachers", serif;
-  font-optical-sizing: auto;}
+  font-optical-sizing: auto;
+}

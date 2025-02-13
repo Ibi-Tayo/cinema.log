@@ -11,7 +11,18 @@
         </p>
 
         <div class="cta-buttons">
-          <button class="primary-btn">I like films</button>
+          <button
+            class="primary-btn"
+            (mouseenter)="playAnimation(filmIconElement)"
+          >
+            I like films
+            <lord-icon
+              #filmIcon
+              src="https://cdn.lordicon.com/ugllxeyl.json"
+              trigger="hover"
+              style="width: 50px; height: 50px"
+            />
+          </button>
           <button
             class="secondary-btn"
             (mouseenter)="playAnimation(musicIconElement)"
@@ -19,7 +30,7 @@
             I like music
             <lord-icon
               #musicIcon
-              src="https://cdn.lordicon.com/wdskumse.json"
+              src="https://cdn.lordicon.com/gcupmfyg.json"
               trigger="hover"
               style="width: 50px; height: 50px"
             />
@@ -27,8 +38,14 @@
         </div>
 
         <div class="trust-indicator">
-          <div class="lock-icon">🔒</div>
-          <span>Verified critic reviews only</span>
+          <lord-icon
+            src="https://cdn.lordicon.com/hmzvkifi.json"
+            trigger="hover"
+            state="hover-pinch"
+            style="width: 40px; height: 40px"
+          >
+          </lord-icon>
+          <span class="effect-shine">Verified critic reviews only</span>
         </div>
       </div>
       <div class="floating-elements right"></div>

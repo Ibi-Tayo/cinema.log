@@ -5,7 +5,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FooterComponent } from '../footer/footer.component';
-
 import { defineElement } from '@lordicon/element';
 import lottie from 'lottie-web';
 
@@ -18,6 +17,7 @@ import lottie from 'lottie-web';
 })
 export class HomeComponent {
   @ViewChild('musicIcon') musicIconElement!: ElementRef;
+  @ViewChild('filmIcon') filmIconElement!: ElementRef;
 
   constructor() {
     defineElement(lottie.loadAnimation);
