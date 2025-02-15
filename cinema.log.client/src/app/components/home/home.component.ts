@@ -4,13 +4,12 @@ import {
   ElementRef,
   ViewChild,
 } from '@angular/core';
-import { FooterComponent } from '../footer/footer.component';
 import { defineElement } from '@lordicon/element';
 import lottie from 'lottie-web';
 
 @Component({
   selector: 'app-home',
-  imports: [FooterComponent],
+  imports: [],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

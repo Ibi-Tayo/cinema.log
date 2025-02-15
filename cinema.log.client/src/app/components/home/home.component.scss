@@ -90,19 +90,19 @@
 
   .floating-elements {
     position: absolute;
-    top: 0;
+    top: 40%;
     bottom: 0;
     width: 200px;
     opacity: 0.6;
 
     &.left {
       left: 0;
-      //background: url('path-to-your-elements.png') repeat-y left center;
+      padding-left: 2em;
     }
 
     &.right {
       right: 0;
-      // background: url('path-to-your-elements.png') repeat-y right center;
+      padding-right: 4em;
     }
   }
 }
@@ -112,10 +112,12 @@
     h1 {
       font-size: 2.5rem;
     }
+  }
+}
 
-    .floating-elements {
-      display: none;
-    }
+@media (max-width: 1000px) {
+  .floating-elements {
+    display: none;
   }
 }
 
