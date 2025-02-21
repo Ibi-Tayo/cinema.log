@@ -1,0 +1,74 @@
+<div class="parent">
+  <main class="main-content">
+    <div class="hero-section">
+      <div class="floating-elements left">
+        <lord-icon
+          src="https://cdn.lordicon.com/ripqtsik.json"
+          trigger="in"
+          delay="1500"
+          state="in-reveal"
+          style="width: 250px; height: 250px"
+        >
+        </lord-icon>
+      </div>
+
+      <div class="content-wrapper">
+        <h1>Your personal hub<br />for film and soundtrack review</h1>
+        <p class="subtitle">
+          Join our private community of film enthusiasts. Share your thoughts on
+          the latest releases. Review films and soundtracks with like-minded
+          individuals.
+        </p>
+
+        <div class="cta-buttons">
+          <button
+            class="primary-btn"
+            (mouseenter)="playAnimation(filmIconElement)"
+          >
+            I like films
+            <lord-icon
+              #filmIcon
+              src="https://cdn.lordicon.com/ugllxeyl.json"
+              trigger="hover"
+              style="width: 50px; height: 50px; padding-left: 10px"
+            />
+          </button>
+          <button
+            class="secondary-btn"
+            (mouseenter)="playAnimation(musicIconElement)"
+          >
+            I like music
+            <lord-icon
+              #musicIcon
+              src="https://cdn.lordicon.com/gcupmfyg.json"
+              trigger="hover"
+              style="width: 50px; height: 50px; padding-left: 10px"
+            />
+          </button>
+        </div>
+
+        <div class="trust-indicator">
+          <lord-icon
+            src="https://cdn.lordicon.com/hmzvkifi.json"
+            trigger="hover"
+            state="hover-pinch"
+            style="width: 40px; height: 40px"
+          >
+          </lord-icon>
+          <span class="effect-shine">Verified critic reviews only</span>
+        </div>
+      </div>
+
+      <div class="floating-elements right">
+        <lord-icon
+          src="https://cdn.lordicon.com/dedkryhs.json"
+          trigger="in"
+          delay="1500"
+          state="in-reveal"
+          style="width: 250px; height: 250px"
+        >
+        </lord-icon>
+      </div>
+    </div>
+  </main>
+</div>

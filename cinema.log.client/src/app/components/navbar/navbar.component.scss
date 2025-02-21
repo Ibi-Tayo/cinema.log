@@ -1,0 +1,111 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+a {
+  text-decoration: none;
+}
+
+.nav-wrapper {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: auto 1fr auto;
+}
+
+.logo {
+  font-family: "VT323", serif;
+  text-decoration: none;
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: get-color(neutral, 500);
+}
+
+.logo:hover {
+  cursor: pointer;
+}
+
+.navbar {
+  grid-area: 1 / 1 / 2 / 7;
+  padding: 1rem 2rem;
+  background-color: get-color(backgroundColor);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+
+  .nav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+
+    .active {
+      color: get-color(neutral, 100);
+    }
+
+    a {
+      color: get-color(neutral, 500);
+      font-weight: 500;
+
+      &:hover {
+        color: #ffffff;
+      }
+
+      &.sign-in {
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        transition: background-color 0.4s ease-in-out;
+      }
+      &.sign-in:hover {
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        background-color: get-color(primary, 500);
+      }
+    }
+  }
+}
+
+.nav-icons {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    display: none;
+  }
+  .nav-icons {
+    // if i change my mind and make nav sticky bottom
+    // position: fixed;
+    // bottom: 0;
+    // width: 100%;
+    // padding-bottom: 2em;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1em;
+
+    .icon {
+      display: block;
+      text-align: center;
+      padding-left: 1em;
+      padding-right: 1em;
+      :hover {
+        cursor: pointer;
+      }
+      .active {
+        border-radius: 20%;
+        border: 1.5px solid get-color(neutral, 800);
+      }
+    }
+    p {
+      text-align: center;
+      font-size: small;
+      margin: 0;
+      color: get-color(neutral, 700);
+    }
+  }
+}

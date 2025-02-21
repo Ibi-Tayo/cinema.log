@@ -1,0 +1,21 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.footer-wrapper {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: auto 1fr auto;
+  width: 100%;
+}
+
+.footer {
+  grid-area: 3 / 1 / 4 / 7;
+  background-color: get-color(backgroundColor);
+  padding: 1rem 2rem;
+  margin-bottom: 0;
+}
+
+.footer-content {
+  color: get-color(neutral, 800);
+  text-align: center;
+}
