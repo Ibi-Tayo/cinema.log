@@ -7,7 +7,8 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { ReviewComponent } from './components/review/review.component';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'home', component: HomeComponent },
   { path: 'about', component: AboutComponent },
   { path: 'search', component: SearchComponent },
   { path: 'review', component: ReviewComponent },
