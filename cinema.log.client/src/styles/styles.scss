@@ -3,6 +3,7 @@
 @use "mixins" as *;
 
 @import url("https://fonts.googleapis.com/css2?family=Teachers:ital,wght@0,400..800;1,400..800&family=VT323&display=swap");
+@import "primeicons/primeicons.css";
 
 :root {
   --lord-icon-primary: #{get-color(neutral, 500)};
