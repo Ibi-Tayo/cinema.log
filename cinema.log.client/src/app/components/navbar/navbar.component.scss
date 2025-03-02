@@ -1,5 +1,9 @@
 @use "variables" as *;
 @use "mixins" as *;
+.active {
+  --lord-icon-primary: #{get-color(primary, 400)};
+  --lord-icon-secondary: #{get-color(secondary, 400)};
+}
 
 a {
   text-decoration: none;
@@ -77,12 +81,6 @@ a {
     display: none;
   }
   .nav-icons {
-    // if i change my mind and make nav sticky bottom
-    // position: fixed;
-    // bottom: 0;
-    // width: 100%;
-    // padding-bottom: 2em;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -95,10 +93,6 @@ a {
       padding-right: 1em;
       :hover {
         cursor: pointer;
-      }
-      .active {
-        border-radius: 20%;
-        border: 1.5px solid get-color(neutral, 800);
       }
     }
     p {

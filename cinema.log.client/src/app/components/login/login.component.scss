@@ -1,0 +1,71 @@
+@use "variables" as *;
+@use "mixins" as *;
+@use "sass:map";
+
+.community-banner {
+  padding: 2rem 1rem;
+  margin-top: 4rem;
+
+  @media (min-width: 768px) {
+    padding: 2rem 1.5rem;
+  }
+
+  @media (min-width: 992px) {
+    padding: 2rem;
+  }
+
+  .banner-content {
+    text-align: center;
+    color: get-color(primary, 500);
+
+    .github-tag {
+      color: get-color(secondary, 500);
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+
+      i {
+        margin-right: 0.25rem;
+      }
+    }
+
+    .title {
+      color: get-color(neutral, 500);
+      font-weight: 500;
+      font-size: map.get($font-sizes, "5xl");
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+    }
+
+    .subtitle {
+      color: get-color(neutral, 700);
+      font-size: map.get($font-sizes, "xl");
+      line-height: 1.5;
+      margin-bottom: 3rem;
+    }
+
+    .join-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem 1.75rem;
+      font-size: map.get($font-sizes, "base");
+      font-weight: 500;
+      background-color: get-color(primary, 500);
+      color: white;
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      transition: transform 0.2s;
+
+      &:hover {
+        background-color: get-color(primary, 400);
+        transform: translateY(-2px);
+      }
+
+      i {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}

@@ -62,4 +62,22 @@ public class UserRepository(CinemaLogContext context, ILogger<UserRepository> lo
 
         return reviews;
     }
+
+    public async Task<User> GetOrCreateUserFromGithubId(long userId, string name, string username, string avatarUrl)
+    {
+        var foundUser = await _context.Users.FirstOrDefaultAsync(user => user.GithubId == userId);
+        if (foundUser != null) return foundUser;
+        // create new user
+        foundUser = new User
+        {
+            UserId = Guid.NewGuid(),
+            GithubId = userId,
+            Name = name,
+            Username = username,
+            ProfilePicUrl = avatarUrl
+        };
+        await _context.Users.AddAsync(foundUser);
+        await _context.SaveChangesAsync();
+        return foundUser;
+    }
 }

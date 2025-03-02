@@ -8,6 +8,8 @@ public class User
     [Required]
     public Guid UserId { get; set; }
     
+    public long GithubId { get; set; }
+    
     [Required]
     [MaxLength(40, ErrorMessage = "Name is too long")]
     public required string Name { get; set; }

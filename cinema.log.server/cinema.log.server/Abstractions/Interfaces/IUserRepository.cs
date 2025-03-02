@@ -9,4 +9,5 @@ public interface IUserRepository
     Task<User?> UpdateUser(User user);
     Task<User?> DeleteUserById(Guid id);
     Task<List<Review>> GetUserReviews(Guid id);
+    Task<User> GetOrCreateUserFromGithubId(long userId, string name, string username, string avatarUrl);
 }

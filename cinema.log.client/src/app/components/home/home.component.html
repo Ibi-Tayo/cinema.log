@@ -21,10 +21,7 @@
         </p>
 
         <div class="cta-buttons">
-          <button
-            class="primary-btn"
-            (mouseenter)="playAnimation(filmIconElement)"
-          >
+          <button class="primary-btn" (click)="playAnimation(filmIconElement)">
             I like films
             <lord-icon
               #filmIcon
@@ -35,7 +32,7 @@
           </button>
           <button
             class="secondary-btn"
-            (mouseenter)="playAnimation(musicIconElement)"
+            (click)="playAnimation(musicIconElement)"
           >
             I like music
             <lord-icon

@@ -27,6 +27,14 @@
           ariaCurrentWhenActive="page"
           >Search
         </a>
+        @if (auth.currentUser) {
+        <a
+          [routerLink]="['/profile', auth.currentUser.username]"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          >Profile
+        </a>
+        } @else {
         <a
           class="sign-in"
           routerLink="login"
@@ -34,6 +42,7 @@
           ariaCurrentWhenActive="page"
           >Sign in
         </a>
+        }
       </div>
     </div>
   </nav>
@@ -41,7 +50,11 @@
 
 <div class="nav-icons">
   <div class="icon">
-    <a routerLink="about" ariaCurrentWhenActive="page">
+    <a
+      routerLink="about"
+      routerLinkActive="active"
+      ariaCurrentWhenActive="page"
+    >
       <lord-icon
         routerLinkActive="active"
         src="https://cdn.lordicon.com/fjvfsqea.json"
@@ -93,8 +106,12 @@
       <p>Search</p>
     </a>
   </div>
+  @if(auth.currentUser) {
   <div class="icon">
-    <a routerLink="login" ariaCurrentWhenActive="page">
+    <a
+      [routerLink]="['/profile', auth.currentUser.username]"
+      ariaCurrentWhenActive="page"
+    >
       <lord-icon
         routerLinkActive="active"
         src="https://cdn.lordicon.com/kdduutaw.json"
@@ -106,4 +123,19 @@
       <p>Profile</p>
     </a>
   </div>
+  } @else {
+  <div class="icon">
+    <a routerLink="login" ariaCurrentWhenActive="page">
+      <lord-icon
+        routerLinkActive="active"
+        src="https://cdn.lordicon.com/kdduutaw.json"
+        trigger="click"
+        stroke="bold"
+        style="width: 30px; height: 30px"
+      >
+      </lord-icon>
+      <p>Login</p>
+    </a>
+  </div>
+  }
 </div>
