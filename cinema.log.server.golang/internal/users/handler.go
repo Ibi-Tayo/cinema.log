@@ -3,20 +3,24 @@ package users
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
-	"strconv"
 
 	"cinema.log.server.golang/internal/domain"
+	"cinema.log.server.golang/internal/utils"
+	"github.com/google/uuid"
 )
-
-type UserService interface {
-	GetByID(ctx context.Context, id int64) (*domain.User, error)
-	// add other methods like Create(ctx, user), Update(ctx, user), etc.
-}
 
 type Handler struct {
 	service UserService
+}
+
+type UserService interface {
+	GetAllUsers(ctx context.Context) ([]*domain.User, error)
+	GetUserById(ctx context.Context, id uuid.UUID) (*domain.User, error)
+	GetUserByGithubID(ctx context.Context, githubID uint64) (*domain.User, error)
+	CreateUser(ctx context.Context, user *domain.User) (*domain.User, error)
+	UpdateUser(ctx context.Context, user *domain.User) (*domain.User, error)
+	DeleteUser(ctx context.Context, id uuid.UUID) error
 }
 
 func NewHandler(s UserService) *Handler {
@@ -25,38 +29,108 @@ func NewHandler(s UserService) *Handler {
 	}
 }
 
-// EXAMPLE
-func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
-	// 1. **Decode and Validate the Request**
-	// We get the user ID from the URL path. In a real app, you'd use a router
-	// like chi or gin to extract this, but here we'll do it manually for clarity.
-	idStr := r.PathValue("id") // Available in Go 1.22+ with http.ServeMux
-	if idStr == "" {
-		http.Error(w, "User ID is required", http.StatusBadRequest)
+// GetUserById handles GET requests for a specific user by ID
+func (h *Handler) GetUserById(w http.ResponseWriter, r *http.Request) {
+	// Get the user ID from URL path parameter (you'll need to set this up in your router)
+	userIDStr := r.PathValue("id") // Assuming Go 1.22+ with new ServeMux
+	if userIDStr == "" {
+		http.Error(w, ErrNoId.Error(), http.StatusBadRequest)
 		return
 	}
 
-	id, err := strconv.ParseInt(idStr, 10, 64)
+	// Parse UUID
+	userID, err := utils.ParseUUID(userIDStr)
 	if err != nil {
-		http.Error(w, "Invalid User ID format", http.StatusBadRequest)
+		http.Error(w, ErrInvalidId.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// 2. **Call the Business Logic (Service Layer)**
-	// We pass the request context, which can handle timeouts and cancellations.
-	user, err := h.service.GetByID(r.Context(), id)
+	// Get user from service
+	user, err := h.service.GetUserById(r.Context(), userID)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
+		if err == ErrUserNotFound {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// 3. **Encode and Send the Response**
-	// Set the content type header and write the response.
+	// Return user as JSON
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK) // Set the status code to 200 OK
-
-	// Encode the user object into JSON and send it.
 	if err := json.NewEncoder(w).Encode(user); err != nil {
-		log.Printf("Error encoding response: %v", err)
+		http.Error(w, ErrEncoding.Error(), http.StatusInternalServerError)
+		return
 	}
+}
+
+// GetAllUsers handles GET requests for all users
+func (h *Handler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := h.service.GetAllUsers(r.Context())
+	if err != nil {
+		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(users); err != nil {
+		http.Error(w, ErrEncoding.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+// CreateUser handles POST requests to create a new user
+func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+	var user domain.User
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		http.Error(w, ErrInvalidJson.Error(), http.StatusBadRequest)
+		return
+	}
+
+	createdUser, err := h.service.CreateUser(r.Context(), &user)
+	if err != nil {
+		if err == ErrUserExists {
+			http.Error(w, ErrUserExists.Error(), http.StatusConflict)
+			return
+		}
+		if err == ErrUserNameInvalidLength {
+			http.Error(w, ErrUserNameInvalidLength.Error(), http.StatusBadRequest)
+			return
+		}
+		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(createdUser); err != nil {
+		http.Error(w, ErrEncoding.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+// DeleteUser handles DELETE requests for a specific user
+func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.PathValue("id")
+	if userIDStr == "" {
+		http.Error(w, ErrNoId.Error(), http.StatusBadRequest)
+		return
+	}
+
+	userID, err := utils.ParseUUID(userIDStr)
+	if err != nil {
+		http.Error(w, ErrInvalidId.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.service.DeleteUser(r.Context(), userID); err != nil {
+		if err == ErrUserNotFound {
+			http.Error(w, ErrUserNotFound.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

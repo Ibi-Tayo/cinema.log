@@ -22,6 +22,7 @@ type Service interface {
 	// Close terminates the database connection.
 	// It returns an error if the connection cannot be closed.
 	Close() error
+
 }
 
 type service struct {
@@ -38,20 +39,18 @@ var (
 	dbInstance *service
 )
 
-func New() Service {
+func New() *sql.DB {
 	// Reuse Connection
 	if dbInstance != nil {
-		return dbInstance
+		return dbInstance.db
 	}
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
 	db, err := sql.Open("pgx", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dbInstance = &service{
-		db: db,
-	}
-	return dbInstance
+	
+	return db
 }
 
 // Health checks the health of the database connection by pinging the database.
@@ -103,6 +102,11 @@ func (s *service) Health() map[string]string {
 	}
 
 	return stats
+}
+
+// Query executes a query that returns rows, typically a SELECT.
+func (s *service) Query(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+	return s.db.QueryContext(ctx, query, args...)
 }
 
 // Close closes the database connection.

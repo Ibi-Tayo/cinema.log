@@ -1,9 +1,17 @@
 package domain
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
 type User struct {
-	ID          int64  `json:"id"`
-	GithubID    string `json:"githubId"`
-	Name        string `json:"name"`
-	Username    string `json:"username"`
-	ProfilePicURL string `json:"profilePicUrl"`
+	ID            uuid.UUID `json:"id"`
+	GithubID      uint64    `json:"githubId"`
+	Name          string    `json:"name"`
+	Username      string    `json:"username"`
+	ProfilePicURL string    `json:"profilePicUrl"`
+	CreatedAt     time.Time `json:"createdAt"`
+	UpdatedAt     time.Time `json:"updatedAt"`
 }

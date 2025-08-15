@@ -10,10 +10,13 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// Register routes
 
 	// User routes - use the injected handler
-	mux.HandleFunc("/users/{id}", s.userHandler.GetUserByID)
+	mux.HandleFunc("GET /users/{id}", s.userHandler.GetUserById)
+	mux.HandleFunc("GET /users", s.userHandler.GetAllUsers)
+	mux.HandleFunc("POST /users", s.userHandler.CreateUser)
+	mux.HandleFunc("DELETE /users/{id}", s.userHandler.DeleteUser)
 
-	// Wrap the mux with CORS middleware
-	return s.corsMiddleware(mux)
+	// Wrap the mux with middleware
+	return s.corsMiddleware(s.authMiddleware(mux))
 }
 
 func (s *Server) corsMiddleware(next http.Handler) http.Handler {
@@ -29,6 +32,16 @@ func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
+
+		// Proceed with the next handler
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *Server) authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check for authentication token 
+		
 
 		// Proceed with the next handler
 		next.ServeHTTP(w, r)
