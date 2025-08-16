@@ -36,7 +36,7 @@ func (s *store) GetAllUsers(ctx context.Context) ([]*domain.User, error) {
 
 	for rows.Next() {
 		user := &domain.User{}
-		if err := rows.Scan(&user.ID, &user.GithubID, &user.Name, &user.Username, &user.ProfilePicURL, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		if err := rows.Scan(&user.ID, &user.GithubId, &user.Name, &user.Username, &user.ProfilePicURL, &user.CreatedAt, &user.UpdatedAt); err != nil {
 			return nil, err
 		}
 		users = append(users, user)
@@ -49,32 +49,14 @@ func (s *store) GetAllUsers(ctx context.Context) ([]*domain.User, error) {
 	return users, nil
 }
 
-func (s *store) GetUserByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
+func (s *store) GetUserById(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	query := `SELECT id, github_id, name, username, profile_pic_url, created_at, updated_at 
 	          FROM users WHERE id = $1`
 	
 	user := &domain.User{}
 	row := s.db.QueryRowContext(ctx, query, id)
 	
-	err := row.Scan(&user.ID, &user.GithubID, &user.Name, &user.Username, &user.ProfilePicURL, &user.CreatedAt, &user.UpdatedAt)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, ErrUserNotFound
-		}
-		return nil, err
-	}
-	
-	return user, nil
-}
-
-func (s *store) GetUserByGithubID(ctx context.Context, githubID uint64) (*domain.User, error) {
-	query := `SELECT id, github_id, name, username, profile_pic_url, created_at, updated_at 
-			  FROM users WHERE github_id = $1`
-	
-	user := &domain.User{}
-	row := s.db.QueryRowContext(ctx, query, githubID)
-	
-	err := row.Scan(&user.ID, &user.GithubID, &user.Name, &user.Username, &user.ProfilePicURL, &user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(&user.ID, &user.GithubId, &user.Name, &user.Username, &user.ProfilePicURL, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrUserNotFound
@@ -96,7 +78,7 @@ func (s *store) CreateUser(ctx context.Context, user *domain.User) (*domain.User
 		VALUES ($1, $2, $3, $4, $5, NOW(), NOW()) 
 		RETURNING created_at, updated_at`
 	
-	err := s.db.QueryRowContext(ctx, query, user.ID, user.GithubID, user.Name, user.Username, user.ProfilePicURL).
+	err := s.db.QueryRowContext(ctx, query, user.ID, user.GithubId, user.Name, user.Username, user.ProfilePicURL).
 	Scan(&user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
@@ -113,7 +95,7 @@ func (s *store) UpdateUser(ctx context.Context, user *domain.User) (*domain.User
 		WHERE id = $1
 		RETURNING updated_at`
 	
-	err := s.db.QueryRowContext(ctx, query, user.ID, user.GithubID, user.Name, user.Username, user.ProfilePicURL).Scan(&user.UpdatedAt)
+	err := s.db.QueryRowContext(ctx, query, user.ID, user.GithubId, user.Name, user.Username, user.ProfilePicURL).Scan(&user.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrUserNotFound
@@ -142,4 +124,30 @@ func (s *store) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	}
 	
 	return nil
+}
+
+func (s *store) GetOrCreateUserByGithubId(ctx context.Context, githubID uint64, 
+	name string, username string, avatarUrl string) (*domain.User, error) {
+	query := `SELECT id, github_id, name, username, profile_pic_url, created_at, updated_at 
+			  FROM users WHERE github_id = $1`
+
+	user := &domain.User{}
+	row := s.db.QueryRowContext(ctx, query, githubID)
+
+	err := row.Scan(&user.ID, &user.GithubId, &user.Name, &user.Username, &user.ProfilePicURL, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// If not found, create a new user
+			user = &domain.User{
+				GithubId: githubID,
+				Name:     name,
+				Username: username,
+				ProfilePicURL: avatarUrl,
+			}
+			return s.CreateUser(ctx, user)
+		}
+		return nil, err
+	}
+
+	return user, nil
 }

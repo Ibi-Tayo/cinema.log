@@ -25,8 +25,9 @@ type service struct {
 
 type Store interface {
 	GetAllUsers(ctx context.Context) ([]*domain.User, error)
-	GetUserByID(ctx context.Context, id uuid.UUID) (*domain.User, error)
-	GetUserByGithubID(ctx context.Context, githubID uint64) (*domain.User, error)
+	GetUserById(ctx context.Context, id uuid.UUID) (*domain.User, error)
+	GetOrCreateUserByGithubId(ctx context.Context, githubId uint64, name string, 
+								username string, avatarUrl string) (*domain.User, error)
 	CreateUser(ctx context.Context, user *domain.User) (*domain.User, error)
 	UpdateUser(ctx context.Context, user *domain.User) (*domain.User, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) error
@@ -43,11 +44,12 @@ func (s *service) GetAllUsers(ctx context.Context) ([]*domain.User, error) {
 }
 
 func (s *service) GetUserById(ctx context.Context, id uuid.UUID) (*domain.User, error) {
-	return s.store.GetUserByID(ctx, id)
+	return s.store.GetUserById(ctx, id)
 }
 
-func (s *service) GetUserByGithubID(ctx context.Context, githubID uint64) (*domain.User, error) {
-	return s.store.GetUserByGithubID(ctx, githubID)
+func (s *service) GetOrCreateUserByGithubId(ctx context.Context, githubId uint64, 
+	name string, username string, avatarUrl string) (*domain.User, error) {
+	return s.store.GetOrCreateUserByGithubId(ctx, githubId, name, username, avatarUrl)
 }
 
 func (s *service) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {

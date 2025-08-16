@@ -17,7 +17,8 @@ type Handler struct {
 type UserService interface {
 	GetAllUsers(ctx context.Context) ([]*domain.User, error)
 	GetUserById(ctx context.Context, id uuid.UUID) (*domain.User, error)
-	GetUserByGithubID(ctx context.Context, githubID uint64) (*domain.User, error)
+	GetOrCreateUserByGithubId(ctx context.Context, githubId uint64, name string,
+	   						username string, avatarUrl string) (*domain.User, error)
 	CreateUser(ctx context.Context, user *domain.User) (*domain.User, error)
 	UpdateUser(ctx context.Context, user *domain.User) (*domain.User, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) error

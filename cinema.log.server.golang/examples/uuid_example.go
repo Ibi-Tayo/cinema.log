@@ -11,7 +11,7 @@ import (
 func main() {
 	// Example of creating a user with UUID
 	user := &domain.User{
-		GithubID:      123456,
+		GithubId:      123456,
 		Name:          "John Doe",
 		Username:      "johndoe",
 		ProfilePicURL: "https://example.com/avatar.jpg",
@@ -22,7 +22,7 @@ func main() {
 	
 	fmt.Printf("Generated User:\n")
 	fmt.Printf("  ID: %s\n", user.ID.String())
-	fmt.Printf("  Github ID: %s\n", user.GithubID)
+	fmt.Printf("  Github ID: %s\n", user.GithubId)
 	fmt.Printf("  Name: %s\n", user.Name)
 	fmt.Printf("  Username: %s\n", user.Username)
 	

@@ -86,7 +86,7 @@ func TestUUIDParsing(t *testing.T) {
 func TestUserStructWithUUID(t *testing.T) {
 	user := &domain.User{
 		ID:            utils.GenerateUUID(),
-		GithubID:      789776,
+		GithubId:      789776,
 		Name:          "Test User",
 		Username:      "testuser",
 		ProfilePicURL: "https://example.com/pic.jpg",
@@ -96,7 +96,7 @@ func TestUserStructWithUUID(t *testing.T) {
 		t.Error("User ID should not be nil")
 	}
 	
-	if user.GithubID != 789776 {
+	if user.GithubId != 789776 {
 		t.Error("GithubID not set correctly")
 	}
 }
