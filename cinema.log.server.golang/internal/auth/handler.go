@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -19,7 +18,8 @@ var GithubClientSecret = os.Getenv("GITHUB_CLIENT_SECRET")
 var conf *oauth2.Config = &oauth2.Config{
         ClientID:     GithubClientID,
         ClientSecret: GithubClientSecret,
-        Scopes:       []string{},
+		RedirectURL: "http://localhost:8080/auth/github-callback",
+        Scopes:       []string{"user:email", "read:user"},
         Endpoint:     oauth2github.Endpoint,
 }
 
@@ -28,10 +28,6 @@ var cookieConf gologin.CookieConfig = gologin.DebugOnlyCookieConfig
 
 type Handler struct {
 	authService *AuthService
-}
-
-type AuthService struct {
-	LoginHandler  http.Handler
 }
 
 func NewHandler(authService *AuthService) *Handler {
@@ -45,7 +41,7 @@ func (h *Handler) Login() http.Handler {
 }
 
 func (h *Handler) Callback() http.Handler {
-	return github.StateHandler(cookieConf, github.CallbackHandler(conf, http.HandlerFunc(githubCallbackHandler), nil))
+	return github.StateHandler(cookieConf, github.CallbackHandler(conf, http.HandlerFunc(h.githubCallbackHandler), nil))
 }
 
 func (h *Handler) Logout() http.Handler {
@@ -58,7 +54,7 @@ func (h *Handler) RefreshToken() http.Handler {
 	return nil
 }
 
-func githubCallbackHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) githubCallbackHandler(w http.ResponseWriter, r *http.Request) {
   ctx := r.Context()
   githubUser, err := github.UserFromContext(ctx)
   if err != nil {
@@ -66,12 +62,34 @@ func githubCallbackHandler(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  // TODO: 1. Insert user into DB if doesn't exist
-  // TODO: 2. Generate JWT
-  // TODO: 3. Set JWT as cookie
-  // TODO: 4. Redirect to user profile: http://localhost:4200/profile/{newOrCurrentUser.Username}
+  createdOrReturnedUser, jwt, refreshToken, err := h.authService.HandleGithubCallback(ctx, githubUser)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    return
+  }
 
   w.Header().Set("Content-type", "application/json")
-  buf, _ := json.Marshal(githubUser)
-  fmt.Fprint(w, string(buf))
+  http.SetCookie(w, &http.Cookie{
+    Name:  "cinema-log-access-token",
+    Value: jwt,
+    Path:  "/",
+	HttpOnly: true,  
+	Secure:   false, // will set to true in production
+	SameSite: http.SameSiteStrictMode, 
+	MaxAge:  3600,  
+  })
+  http.SetCookie(w, &http.Cookie{
+	Name:  "cinema-log-refresh-token",
+	Value: refreshToken,
+	Path:  "/",
+	HttpOnly: true,  
+	Secure:   false,
+	SameSite: http.SameSiteStrictMode, 
+	MaxAge:  3600,  
+  })
+
+  // Redirect to user profile: http://localhost:4200/profile/{newOrCurrentUser.Username}
+  frontendURL := os.Getenv("FRONTEND_URL")
+  http.Redirect(w, r, fmt.Sprintf("%s/profile/%s", frontendURL, createdOrReturnedUser.Username), http.StatusTemporaryRedirect)
+
 }

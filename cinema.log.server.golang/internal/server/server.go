@@ -33,7 +33,8 @@ func NewServer() *http.Server {
 	userStore := users.NewStore(db)
 	userService := users.NewService(userStore)
 	userHandler := users.NewHandler(userService)
-	authService := &auth.AuthService{}
+
+	authService := auth.NewService(userService)
 	authHandler := auth.NewHandler(authService)
 
 	
