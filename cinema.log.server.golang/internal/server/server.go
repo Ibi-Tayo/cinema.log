@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
+	"cinema.log.server.golang/internal/auth"
 	"cinema.log.server.golang/internal/database"
 	"cinema.log.server.golang/internal/users"
 )
@@ -19,6 +20,7 @@ type Server struct {
 
 	db          *sql.DB
 	userHandler *users.Handler
+	authHandler *auth.Handler
 }
 
 func NewServer() *http.Server {
@@ -31,11 +33,15 @@ func NewServer() *http.Server {
 	userStore := users.NewStore(db)
 	userService := users.NewService(userStore)
 	userHandler := users.NewHandler(userService)
+	authService := &auth.AuthService{}
+	authHandler := auth.NewHandler(authService)
+
 	
 	NewServer := &Server{
 		port:        port,
 		db:          db,
 		userHandler: userHandler,
+		authHandler: authHandler,
 	}
 
 	// Declare Server config

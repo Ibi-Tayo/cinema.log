@@ -36,20 +36,22 @@ var (
 	port       = os.Getenv("BLUEPRINT_DB_PORT")
 	host       = os.Getenv("BLUEPRINT_DB_HOST")
 	schema     = os.Getenv("BLUEPRINT_DB_SCHEMA")
-	dbInstance *service
+	dbInstance *sql.DB
 )
 
 func New() *sql.DB {
 	// Reuse Connection
 	if dbInstance != nil {
-		return dbInstance.db
+		return dbInstance
 	}
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
 	db, err := sql.Open("pgx", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
+	dbInstance = db
+
 	return db
 }
 

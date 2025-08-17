@@ -30,10 +30,8 @@ func NewHandler(s UserService) *Handler {
 	}
 }
 
-// GetUserById handles GET requests for a specific user by ID
 func (h *Handler) GetUserById(w http.ResponseWriter, r *http.Request) {
-	// Get the user ID from URL path parameter (you'll need to set this up in your router)
-	userIDStr := r.PathValue("id") // Assuming Go 1.22+ with new ServeMux
+	userIDStr := r.PathValue("id")
 	if userIDStr == "" {
 		http.Error(w, ErrNoId.Error(), http.StatusBadRequest)
 		return
@@ -65,7 +63,6 @@ func (h *Handler) GetUserById(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetAllUsers handles GET requests for all users
 func (h *Handler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.service.GetAllUsers(r.Context())
 	if err != nil {
@@ -80,7 +77,6 @@ func (h *Handler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// CreateUser handles POST requests to create a new user
 func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user domain.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -110,7 +106,6 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DeleteUser handles DELETE requests for a specific user
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.PathValue("id")
 	if userIDStr == "" {

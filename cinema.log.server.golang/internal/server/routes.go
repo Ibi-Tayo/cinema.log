@@ -15,6 +15,12 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("POST /users", s.userHandler.CreateUser)
 	mux.HandleFunc("DELETE /users/{id}", s.userHandler.DeleteUser)
 
+	// Auth routes
+	mux.Handle("GET /auth/github-login", s.authHandler.Login())
+	mux.Handle("GET /auth/logout", s.authHandler.Logout())
+	mux.Handle("GET /auth/github-callback", s.authHandler.Callback())
+	mux.Handle("GET /auth/refresh-token", s.authHandler.RefreshToken())
+
 	// Wrap the mux with middleware
 	return s.corsMiddleware(s.authMiddleware(mux))
 }
@@ -40,10 +46,11 @@ func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 
 func (s *Server) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Check for authentication token 
+		// Check for authentication token in cookie
 		
 
 		// Proceed with the next handler
 		next.ServeHTTP(w, r)
 	})
 }
+
