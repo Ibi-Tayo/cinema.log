@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"cinema.log.server.golang/internal/migration"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -22,7 +23,6 @@ type Service interface {
 	// Close terminates the database connection.
 	// It returns an error if the connection cannot be closed.
 	Close() error
-
 }
 
 type service struct {
@@ -51,6 +51,20 @@ func New() *sql.DB {
 	}
 
 	dbInstance = db
+
+	return db
+}
+
+// NewWithMigrations creates a new database connection and runs migrations
+func NewWithMigrations() *sql.DB {
+	db := New()
+
+	// Run migrations
+	if err := migration.RunMigrations(db); err != nil {
+		log.Fatalf("failed to run migrations: %v", err)
+	}
+
+	log.Println("Database migrations completed successfully")
 
 	return db
 }

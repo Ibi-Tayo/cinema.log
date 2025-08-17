@@ -26,10 +26,10 @@ type Server struct {
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	
-	// Initialize database
-	db := database.New()
-	
+
+	// Initialize database with migrations // change to just database.New() if not needing auto migrations
+	db := database.NewWithMigrations()
+
 	// Wire up dependencies: Database -> Store -> Service -> Handler
 	userStore := users.NewStore(db)
 	userService := users.NewService(userStore)
@@ -38,12 +38,12 @@ func NewServer() *http.Server {
 	authService := auth.NewService(userService)
 	authHandler := auth.NewHandler(authService)
 
-	
 	NewServer := &Server{
 		port:        port,
 		db:          db,
 		userHandler: userHandler,
 		authHandler: authHandler,
+		authService: authService,
 	}
 
 	// Declare Server config

@@ -43,6 +43,38 @@ itest:
 	@echo "Running integration tests..."
 	@go test ./internal/database -v
 
+# Migration commands
+migrate-up:
+	@echo "Running database migrations..."
+	@go run cmd/migrate/main.go -command=up
+
+migrate-down:
+	@echo "Rolling back last migration..."
+	@go run cmd/migrate/main.go -command=down
+
+migrate-status:
+	@echo "Checking migration status..."
+	@go run cmd/migrate/main.go -command=status
+
+migrate-reset:
+	@echo "Resetting database..."
+	@go run cmd/migrate/main.go -command=reset
+
+# Create a new migration file
+migrate-create:
+	@if [ -z "$(name)" ]; then \
+		echo "Usage: make migrate-create name=migration_name"; \
+		exit 1; \
+	fi
+	@timestamp=$$(date +%Y%m%d%H%M%S); \
+	filename="internal/migration/goose/$${timestamp}_$(name).sql"; \
+	echo "-- +goose Up" > $$filename; \
+	echo "-- Add your migration SQL here" >> $$filename; \
+	echo "" >> $$filename; \
+	echo "-- +goose Down" >> $$filename; \
+	echo "-- Add your rollback SQL here" >> $$filename; \
+	echo "Created migration file: $$filename"
+
 # Clean the binary
 clean:
 	@echo "Cleaning..."
@@ -65,4 +97,4 @@ watch:
             fi; \
         fi
 
-.PHONY: all build run test clean watch docker-run docker-down itest
+.PHONY: all build run test clean watch docker-run docker-down itest migrate-up migrate-down migrate-status migrate-reset migrate-create

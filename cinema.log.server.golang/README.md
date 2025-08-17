@@ -44,6 +44,25 @@ DB Integrations Test:
 make itest
 ```
 
+Database Migrations (using Goose):
+
+```bash
+# Run all pending migrations
+make migrate-up
+
+# Rollback last migration
+make migrate-down
+
+# Check migration status
+make migrate-status
+
+# Reset database (rollback all migrations)
+make migrate-reset
+
+# Create new migration
+make migrate-create name=migration_name
+```
+
 Live reload the application:
 
 ```bash
