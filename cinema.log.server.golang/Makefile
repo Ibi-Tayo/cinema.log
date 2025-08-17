@@ -43,23 +43,6 @@ itest:
 	@echo "Running integration tests..."
 	@go test ./internal/database -v
 
-# Migration commands
-migrate-up:
-	@echo "Running database migrations..."
-	@go run cmd/migrate/main.go -command=up
-
-migrate-down:
-	@echo "Rolling back last migration..."
-	@go run cmd/migrate/main.go -command=down
-
-migrate-status:
-	@echo "Checking migration status..."
-	@go run cmd/migrate/main.go -command=status
-
-migrate-reset:
-	@echo "Resetting database..."
-	@go run cmd/migrate/main.go -command=reset
-
 # Create a new migration file
 migrate-create:
 	@if [ -z "$(name)" ]; then \
