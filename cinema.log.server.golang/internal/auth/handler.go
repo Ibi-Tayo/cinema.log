@@ -58,7 +58,7 @@ func (h *Handler) githubCallbackHandler(w http.ResponseWriter, r *http.Request) 
   ctx := r.Context()
   githubUser, err := github.UserFromContext(ctx)
   if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
+    http.Error(w, err.Error(), http.StatusUnauthorized)
     return
   }
 
