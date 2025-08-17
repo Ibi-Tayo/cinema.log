@@ -45,13 +45,27 @@ func (h *Handler) Callback() http.Handler {
 }
 
 func (h *Handler) Logout() http.Handler {
-	// TODO: Clear cookies
-	return nil
+	return http.HandlerFunc(h.logoutHandler)
 }
 
 func (h *Handler) RefreshToken() http.Handler {
-	// TODO: Implement token refresh logic
-	return nil
+	return http.HandlerFunc(h.refreshTokenHandler)
+}
+
+func (h *Handler) logoutHandler(w http.ResponseWriter, r *http.Request) {
+	// Clear cookies
+	http.SetCookie(w, &http.Cookie{
+		Name:   "cinema-log-access-token",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:   "cinema-log-refresh-token",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
 }
 
 func (h *Handler) githubCallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -62,34 +76,59 @@ func (h *Handler) githubCallbackHandler(w http.ResponseWriter, r *http.Request) 
     return
   }
 
-  createdOrReturnedUser, jwt, refreshToken, err := h.authService.HandleGithubCallback(ctx, githubUser)
+  jwtResponse, err := h.authService.HandleGithubCallback(ctx, githubUser)
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
     return
   }
 
   w.Header().Set("Content-type", "application/json")
-  http.SetCookie(w, &http.Cookie{
-    Name:  "cinema-log-access-token",
-    Value: jwt,
-    Path:  "/",
-	HttpOnly: true,  
-	Secure:   false, // will set to true in production
-	SameSite: http.SameSiteStrictMode, 
-	MaxAge:  3600,  
-  })
-  http.SetCookie(w, &http.Cookie{
-	Name:  "cinema-log-refresh-token",
-	Value: refreshToken,
-	Path:  "/",
-	HttpOnly: true,  
-	Secure:   false,
-	SameSite: http.SameSiteStrictMode, 
-	MaxAge:  3600,  
-  })
+  h.setCookies(w, jwtResponse.Jwt, jwtResponse.RefreshToken)
 
   // Redirect to user profile: http://localhost:4200/profile/{newOrCurrentUser.Username}
   frontendURL := os.Getenv("FRONTEND_URL")
-  http.Redirect(w, r, fmt.Sprintf("%s/profile/%s", frontendURL, createdOrReturnedUser.Username), http.StatusTemporaryRedirect)
+  http.Redirect(w, r, fmt.Sprintf("%s/profile/%s", frontendURL, jwtResponse.User.Username), http.StatusTemporaryRedirect)
+}
 
+func (h *Handler) refreshTokenHandler(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("cinema-log-refresh-token")
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	user, err := h.authService.ValidateRefreshToken(cookie.Value)
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	jwt, refreshToken, err := h.authService.GenerateJWT(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	h.setCookies(w, jwt, refreshToken)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (*Handler) setCookies(w http.ResponseWriter, jwt string, refreshToken string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "cinema-log-access-token",
+		Value:    jwt,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   600,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "cinema-log-refresh-token",
+		Value:    refreshToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   604800,
+	})
 }

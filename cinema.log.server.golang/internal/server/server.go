@@ -21,6 +21,7 @@ type Server struct {
 	db          *sql.DB
 	userHandler *users.Handler
 	authHandler *auth.Handler
+	authService *auth.AuthService
 }
 
 func NewServer() *http.Server {

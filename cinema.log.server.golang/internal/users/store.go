@@ -126,7 +126,7 @@ func (s *store) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (s *store) GetOrCreateUserByGithubId(ctx context.Context, githubID uint64, 
+func (s *store) GetOrCreateUserByGithubId(ctx context.Context, githubID int64, 
 	name string, username string, avatarUrl string) (*domain.User, error) {
 	query := `SELECT id, github_id, name, username, profile_pic_url, created_at, updated_at 
 			  FROM users WHERE github_id = $1`
