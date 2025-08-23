@@ -4,8 +4,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create users table with UUID primary key
 CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    github_id VARCHAR(255) UNIQUE NOT NULL,
+    user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    github_id BIGINT UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
     username VARCHAR(255) NOT NULL,
     profile_pic_url TEXT,
