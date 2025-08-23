@@ -84,6 +84,37 @@ func (s *AuthService) GenerateJWT(user *domain.User) (string, string, error) {
 	return jwtTokenString, refreshTokenString, nil
 }
 
+func (s *AuthService) ValidateJWT(tkn string) (*domain.User, error) {
+	ctx := context.Background()
+	token, err := jwt.Parse(tkn, func(token *jwt.Token) (any, error) {
+		return []byte(tokenSecret), nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse token: %w", err)
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID, ok := claims["id"].(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid token claims: missing user ID")
+		}
+
+		userUuid, err := utils.ParseUUID(userID)
+		if err != nil {
+			return nil, fmt.Errorf("invalid token claims: %w", err)
+		}
+
+		user, err := s.userService.GetUserById(ctx, userUuid)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get user by ID: %w", err)
+		}
+
+		return user, nil
+	}
+
+	return nil, fmt.Errorf("invalid token")
+}
+
 func (s *AuthService) ValidateRefreshToken(tkn string) (*domain.User, error) {
 	ctx := context.Background()
 	token, err := jwt.Parse(tkn, func(token *jwt.Token) (any, error) {

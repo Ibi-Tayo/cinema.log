@@ -1,7 +1,16 @@
 package server
 
 import (
+	"context"
 	"net/http"
+)
+
+type key int
+
+const (
+	keyPrincipalID key = iota
+	keyUser
+	// ...
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -46,11 +55,30 @@ func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 
 func (s *Server) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Allow github login path, otherwise validate auth token
+		if r.URL.Path == "/auth/github-login" ||
+			r.URL.Path == "/auth/github-callback" {
+			next.ServeHTTP(w, r)
+			return
+		}
 		// Check for authentication token in cookie
-		
+		authToken, err := r.Cookie("cinema-log-access-token")
+		if err != nil {
+			http.Error(w, http.ErrNoCookie.Error(), http.StatusUnauthorized)
+			return
+		}
 
-		// Proceed with the next handler
+		authTokenString := authToken.Value
+		user, err := s.authService.ValidateJWT(authTokenString)
+		if err != nil {
+			http.Error(w, "jwt invalid", http.StatusUnauthorized)
+			return
+		}
+		// so that downstream handlers can extract user from context
+		ctx := context.WithValue(r.Context(), keyUser, user)
+		r = r.WithContext(ctx)
+
 		next.ServeHTTP(w, r)
+
 	})
 }
-
