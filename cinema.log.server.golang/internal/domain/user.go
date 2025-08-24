@@ -8,7 +8,7 @@ import (
 
 type User struct {
 	ID            uuid.UUID `json:"id"`
-	GithubId      int64    `json:"githubId"`
+	GithubId      int64     `json:"githubId"`
 	Name          string    `json:"name"`
 	Username      string    `json:"username"`
 	ProfilePicURL string    `json:"profilePicUrl"`
