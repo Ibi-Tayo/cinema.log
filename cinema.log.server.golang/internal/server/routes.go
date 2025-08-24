@@ -18,10 +18,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	// Register routes
 
-	// User routes - use the injected handler
+	// User routes
 	mux.HandleFunc("GET /users/{id}", s.userHandler.GetUserById)
 	mux.HandleFunc("GET /users", s.userHandler.GetAllUsers)
 	mux.HandleFunc("POST /users", s.userHandler.CreateUser)
+	mux.HandleFunc("PUT /users", s.userHandler.UpdateUser)
 	mux.HandleFunc("DELETE /users/{id}", s.userHandler.DeleteUser)
 
 	// Auth routes
