@@ -12,6 +12,7 @@ import (
 
 	"cinema.log.server.golang/internal/auth"
 	"cinema.log.server.golang/internal/database"
+	"cinema.log.server.golang/internal/films"
 	"cinema.log.server.golang/internal/users"
 )
 
@@ -22,6 +23,7 @@ type Server struct {
 	userHandler *users.Handler
 	authHandler *auth.Handler
 	authService *auth.AuthService
+	filmHandler *films.Handler
 }
 
 func NewServer() *http.Server {

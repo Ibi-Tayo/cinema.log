@@ -31,6 +31,10 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.Handle("GET /auth/github-callback", s.authHandler.Callback())
 	mux.Handle("GET /auth/refresh-token", s.authHandler.RefreshToken())
 
+	// Film routes
+	mux.HandleFunc("GET /films/{id}", s.filmHandler.GetFilmById)
+	mux.HandleFunc("GET /films/search", s.filmHandler.GetFilmsFromExternal)
+
 	// Wrap the mux with middleware
 	return s.corsMiddleware(s.authMiddleware(mux))
 }
