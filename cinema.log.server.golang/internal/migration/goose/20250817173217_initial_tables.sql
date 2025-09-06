@@ -6,10 +6,8 @@ CREATE TABLE films (
     film_id UUID NOT NULL,
     title TEXT NOT NULL,
     description TEXT,
-    genre TEXT,
-    director TEXT,
     poster_url TEXT,
-    release_year INTEGER
+    release_year TEXT
 );
 
 -- Add primary key constraint

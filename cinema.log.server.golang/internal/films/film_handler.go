@@ -2,7 +2,6 @@ package films
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -14,7 +13,6 @@ import (
 var (
 	ErrFilmNotFound = errors.New("film not found")
 	ErrServer       = errors.New("internal server error")
-	ErrEncoding     = errors.New("error encoding response")
 )
 
 type Handler struct {
@@ -53,23 +51,20 @@ func (h *Handler) GetFilmById(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	sendJSON(w, film)
+	utils.SendJSON(w, film)
 }
 
 func (h *Handler) GetFilmsFromExternal(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	search := query.Get("f")
+	if search == "" {
+		http.Error(w, "Missing required query parameter 'f' for film search", http.StatusBadRequest)
+		return
+	}
 	films, err := h.FilmService.GetFilmsFromExternal(r.Context(), search)
 	if err != nil {
 		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
 		return
 	}
-	sendJSON(w, films)
-}
-
-func sendJSON(w http.ResponseWriter, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(v); err != nil {
-		http.Error(w, ErrEncoding.Error(), http.StatusInternalServerError)
-	}
+	utils.SendJSON(w, films)
 }

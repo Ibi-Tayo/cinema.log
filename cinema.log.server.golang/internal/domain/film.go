@@ -6,10 +6,9 @@ import (
 
 type Film struct {
 	ID          uuid.UUID `json:"id"`
+	ExternalID  int     `json:"externalId"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	Genre       string    `json:"genre"`
-	Director    string    `json:"director"`
 	PosterUrl   string    `json:"posterUrl"`
-	ReleaseYear int32     `json:"releaseYear"`
+	ReleaseYear string    `json:"releaseYear"`
 }

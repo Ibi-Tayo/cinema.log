@@ -13,6 +13,6 @@ type UserFilmRating struct {
 	EloRating           float64   `json:"eloRating"`
 	NumberOfComparisons string    `json:"numberOfComparisons"`
 	LastUpdated         time.Time `json:"lastUpdated"`
-	InitialRating       int32     `json:"initialRating"`
+	InitialRating       float32   `json:"initialRating"`
 	KConstantValue      float64   `json:"kConstantValue"`
 }

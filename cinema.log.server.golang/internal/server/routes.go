@@ -33,7 +33,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	// Film routes
 	mux.HandleFunc("GET /films/{id}", s.filmHandler.GetFilmById)
-	mux.HandleFunc("GET /films/search", s.filmHandler.GetFilmsFromExternal)
+	mux.HandleFunc("GET /films/search", s.filmHandler.GetFilmsFromExternal) // query param name = "f"
 
 	// Wrap the mux with middleware
 	return s.corsMiddleware(s.authMiddleware(mux))
