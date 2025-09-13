@@ -34,6 +34,17 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// Film routes
 	mux.HandleFunc("GET /films/{id}", s.filmHandler.GetFilmById)
 	mux.HandleFunc("GET /films/search", s.filmHandler.GetFilmsFromExternal) // query param name = "f"
+	mux.HandleFunc("GET /films/candidates-for-comparison", s.filmHandler.GetFilmsForRating) 
+	
+	// Review routes
+	mux.HandleFunc("GET /reviews/{userId}", s.reviewHandler.GetAllReviews)
+	mux.HandleFunc("POST /reviews", s.reviewHandler.CreateReview)
+	mux.HandleFunc("PUT /reviews/{id}", s.reviewHandler.UpdateReview)
+	mux.HandleFunc("DELETE /reviews", s.reviewHandler.DeleteReview)
+
+	// Rating routes
+	mux.HandleFunc("GET /ratings/{userId}/{filmId}", s.ratingHandler.GetRating) 
+	mux.HandleFunc("POST /ratings/compare-films", s.ratingHandler.CompareFilms) 
 
 	// Wrap the mux with middleware
 	return s.corsMiddleware(s.authMiddleware(mux))

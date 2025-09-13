@@ -23,9 +23,9 @@ type Service struct {
 }
 
 type FilmStore interface {
-	GetFilmById(ctx context.Context, id uuid.UUID) (domain.Film, error)
-	GetFilmByExternalId(ctx context.Context, id int) (domain.Film, error)
-	CreateFilm(ctx context.Context, film domain.Film) (domain.Film, error)
+	GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, error)
+	GetFilmByExternalId(ctx context.Context, id int) (*domain.Film, error)
+	CreateFilm(ctx context.Context, film domain.Film) (*domain.Film, error)
 }
 
 type TMDBSearchResponse struct {
@@ -46,14 +46,14 @@ func NewService(f FilmStore) *Service {
 	}
 }
 
-func (s Service) CreateFilm(ctx context.Context, film domain.Film) (domain.Film, error) {
+func (s Service) CreateFilm(ctx context.Context, film domain.Film) (*domain.Film, error) {
 	return s.FilmStore.CreateFilm(ctx, film)
 }
 
-func (s Service) GetFilmById(ctx context.Context, id uuid.UUID) (domain.Film, error) {
+func (s Service) GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, error) {
 	film, err := s.FilmStore.GetFilmById(ctx, id)
 	if err != nil {
-		return domain.Film{}, err
+		return nil, err
 	}
 	return film, nil
 }
@@ -108,7 +108,7 @@ func (s Service) GetFilmsFromExternal(ctx context.Context, query string) ([]doma
 			film = createdFilm
 		} 
 		// if film exists then add to list
-		films = append(films, film)
+		films = append(films, *film)
 	}
 
 	return films, nil

@@ -4,6 +4,7 @@
 -- Create Films table
 CREATE TABLE films (
     film_id UUID NOT NULL,
+    external_id INT NOT NULL,
     title TEXT NOT NULL,
     description TEXT,
     poster_url TEXT,

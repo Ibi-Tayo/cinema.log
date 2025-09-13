@@ -20,11 +20,13 @@ type Handler struct {
 }
 
 type FilmService interface {
-	GetFilmById(ctx context.Context, id uuid.UUID) (domain.Film, error)
+	GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, error)
 	GetFilmsFromExternal(ctx context.Context, query string) ([]domain.Film, error) // ? pagination?
+	GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error)
+}
 
-	// All the film handler needs are the above methods - the review handler would need an interface that defines the method below
-	// AddFilm(ctx context.Context, film domain.Film) (domain.Film, error)
+type RatingService interface {
+	GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error)
 }
 
 func NewHandler(filmService FilmService) *Handler {
@@ -67,4 +69,12 @@ func (h *Handler) GetFilmsFromExternal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	utils.SendJSON(w, films)
+}
+
+func (h *Handler) GetFilmsForRating(w http.ResponseWriter, r *http.Request) {
+	// TODO: use no of comparisons etc in user film rating to decide which films to send
+	// 1. Get all ratings using the rating service
+	// 2. Use rating service to priortise the top 5 or 10 based on no of comps and last updated
+	// 3. Use those film id's to get from db and send them as response
+
 }

@@ -13,17 +13,21 @@ import (
 	"cinema.log.server.golang/internal/auth"
 	"cinema.log.server.golang/internal/database"
 	"cinema.log.server.golang/internal/films"
+	"cinema.log.server.golang/internal/ratings"
+	"cinema.log.server.golang/internal/reviews"
 	"cinema.log.server.golang/internal/users"
 )
 
 type Server struct {
 	port int
 
-	db          *sql.DB
-	userHandler *users.Handler
-	authHandler *auth.Handler
-	authService *auth.AuthService
-	filmHandler *films.Handler
+	db            *sql.DB
+	userHandler   *users.Handler
+	authHandler   *auth.Handler
+	authService   *auth.AuthService
+	filmHandler   *films.Handler
+	reviewHandler *reviews.Handler
+	ratingHandler *ratings.Handler
 }
 
 func NewServer() *http.Server {
@@ -40,12 +44,27 @@ func NewServer() *http.Server {
 	authService := auth.NewService(userService)
 	authHandler := auth.NewHandler(authService)
 
+	filmStore := films.NewStore(db)
+	filmService := films.NewService(filmStore)
+	filmHandler := films.NewHandler(filmService)
+
+	reviewStore := reviews.NewStore(db)
+	reviewService := reviews.NewService(reviewStore)
+	reviewHandler := reviews.NewHandler(reviewService)
+
+	ratingStore := ratings.NewStore(db)
+	ratingService := ratings.NewService(ratingStore)
+	ratingHandler := ratings.NewHandler(ratingService)
+
 	NewServer := &Server{
-		port:        port,
-		db:          db,
-		userHandler: userHandler,
-		authHandler: authHandler,
-		authService: authService,
+		port:          port,
+		db:            db,
+		userHandler:   userHandler,
+		authHandler:   authHandler,
+		authService:   authService,
+		filmHandler:   filmHandler,
+		reviewHandler: reviewHandler,
+		ratingHandler: ratingHandler,
 	}
 
 	// Declare Server config

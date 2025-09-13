@@ -6,7 +6,7 @@ import (
 
 type Film struct {
 	ID          uuid.UUID `json:"id"`
-	ExternalID  int     `json:"externalId"`
+	ExternalID  int       `json:"externalId"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	PosterUrl   string    `json:"posterUrl"`
