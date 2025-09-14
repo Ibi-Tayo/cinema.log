@@ -51,7 +51,7 @@ func (s *store) GetAllUsers(ctx context.Context) ([]*domain.User, error) {
 
 func (s *store) GetUserById(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	query := `SELECT user_id, github_id, name, username, profile_pic_url, created_at, updated_at 
-	          FROM users WHERE id = $1`
+	          FROM users WHERE user_id = $1`
 	
 	user := &domain.User{}
 	row := s.db.QueryRowContext(ctx, query, id)
