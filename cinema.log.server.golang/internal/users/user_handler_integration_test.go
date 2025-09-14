@@ -16,7 +16,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// Test environment variables
 var (
 	testDB      *sql.DB
 	testHandler *Handler
@@ -50,7 +49,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateUserIntegration(t *testing.T) {
-	// Create test user
+	// Arrange
 	testUser := &domain.User{
 		Name:          "Test User",
 		Username:      "testuser",
@@ -58,35 +57,29 @@ func TestCreateUserIntegration(t *testing.T) {
 		ProfilePicURL: "https://example.com/avatar.jpg",
 	}
 
-	// Convert to JSON
 	userJSON, err := json.Marshal(testUser)
 	if err != nil {
 		t.Fatalf("failed to marshal user: %v", err)
 	}
 
-	// Create HTTP request
 	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(userJSON))
 	req.Header.Set("Content-Type", "application/json")
-
-	// Create response recorder
 	w := httptest.NewRecorder()
 
-	// Call handler
+	// Act
 	testHandler.CreateUser(w, req)
 
-	// Check response
+	// Assert
 	if w.Code != http.StatusCreated {
 		t.Errorf("expected status %d, got %d", http.StatusCreated, w.Code)
 		t.Errorf("response body: %s", w.Body.String())
 	}
 
-	// Parse response
 	var createdUser domain.User
 	if err := json.NewDecoder(w.Body).Decode(&createdUser); err != nil {
 		t.Fatalf("failed to decode response: %v", err)
 	}
 
-	// Verify user was created
 	if createdUser.Name != testUser.Name {
 		t.Errorf("expected name %s, got %s", testUser.Name, createdUser.Name)
 	}
@@ -99,7 +92,7 @@ func TestCreateUserIntegration(t *testing.T) {
 }
 
 func TestGetUserByIdIntegration(t *testing.T) {
-	// First create a user
+	// Arrange
 	testUser := &domain.User{
 		Name:          "Get Test User",
 		Username:      "gettestuser",
@@ -112,29 +105,24 @@ func TestGetUserByIdIntegration(t *testing.T) {
 		t.Fatalf("failed to create test user: %v", err)
 	}
 
-	// Create HTTP request
 	req := httptest.NewRequest(http.MethodGet, "/users/"+createdUser.ID.String(), nil)
 	req.SetPathValue("id", createdUser.ID.String())
-
-	// Create response recorder
 	w := httptest.NewRecorder()
 
-	// Call handler
+	// Act
 	testHandler.GetUserById(w, req)
 
-	// Check response
+	// Assert
 	if w.Code != http.StatusOK {
 		t.Errorf("expected status %d, got %d", http.StatusOK, w.Code)
 		t.Errorf("response body: %s", w.Body.String())
 	}
 
-	// Parse response
 	var retrievedUser domain.User
 	if err := json.NewDecoder(w.Body).Decode(&retrievedUser); err != nil {
 		t.Fatalf("failed to decode response: %v", err)
 	}
 
-	// Verify user data
 	if retrievedUser.ID != createdUser.ID {
 		t.Errorf("expected ID %s, got %s", createdUser.ID, retrievedUser.ID)
 	}
@@ -144,13 +132,12 @@ func TestGetUserByIdIntegration(t *testing.T) {
 }
 
 func TestGetAllUsersIntegration(t *testing.T) {
-	// Create multiple test users
+	// Arrange
 	users := []*domain.User{
 		{Name: "User One", Username: "userone", GithubId: 111},
 		{Name: "User Two", Username: "usertwo", GithubId: 222},
 	}
 
-	// Create users in database
 	for _, user := range users {
 		_, err := testService.CreateUser(context.Background(), user)
 		if err != nil {
@@ -158,32 +145,29 @@ func TestGetAllUsersIntegration(t *testing.T) {
 		}
 	}
 
-	// Create HTTP request
 	req := httptest.NewRequest(http.MethodGet, "/users", nil)
 	w := httptest.NewRecorder()
 
-	// Call handler
+	// Act
 	testHandler.GetAllUsers(w, req)
 
-	// Check response
+	// Assert
 	if w.Code != http.StatusOK {
 		t.Errorf("expected status %d, got %d", http.StatusOK, w.Code)
 	}
 
-	// Parse response
 	var retrievedUsers []*domain.User
 	if err := json.NewDecoder(w.Body).Decode(&retrievedUsers); err != nil {
 		t.Fatalf("failed to decode response: %v", err)
 	}
 
-	// Should have at least the users we created (may have more from other tests)
 	if len(retrievedUsers) < 2 {
 		t.Errorf("expected at least 2 users, got %d", len(retrievedUsers))
 	}
 }
 
 func TestUpdateUserIntegration(t *testing.T) {
-	// Create initial user
+	// Arrange
 	testUser := &domain.User{
 		Name:          "Original Name",
 		Username:      "originaluser",
@@ -196,33 +180,28 @@ func TestUpdateUserIntegration(t *testing.T) {
 		t.Fatalf("failed to create test user: %v", err)
 	}
 
-	// Update user data
 	updatedUser := *createdUser
 	updatedUser.Name = "Updated Name"
 	updatedUser.Username = "updateduser"
 
-	// Convert to JSON
 	userJSON, err := json.Marshal(updatedUser)
 	if err != nil {
 		t.Fatalf("failed to marshal user: %v", err)
 	}
 
-	// Create HTTP request
 	req := httptest.NewRequest(http.MethodPut, "/users", bytes.NewBuffer(userJSON))
 	req.Header.Set("Content-Type", "application/json")
-
 	w := httptest.NewRecorder()
 
-	// Call handler
+	// Act
 	testHandler.UpdateUser(w, req)
 
-	// Check response
+	// Assert
 	if w.Code != http.StatusOK {
 		t.Errorf("expected status %d, got %d", http.StatusOK, w.Code)
 		t.Errorf("response body: %s", w.Body.String())
 	}
 
-	// Verify update in database
 	retrievedUser, err := testService.GetUserById(context.Background(), createdUser.ID)
 	if err != nil {
 		t.Fatalf("failed to retrieve updated user: %v", err)
@@ -234,7 +213,7 @@ func TestUpdateUserIntegration(t *testing.T) {
 }
 
 func TestDeleteUserIntegration(t *testing.T) {
-	// Create user to delete
+	// Arrange
 	testUser := &domain.User{
 		Name:          "Delete Me",
 		Username:      "deleteme",
@@ -247,30 +226,26 @@ func TestDeleteUserIntegration(t *testing.T) {
 		t.Fatalf("failed to create test user: %v", err)
 	}
 
-	// Create delete request
 	req := httptest.NewRequest(http.MethodDelete, "/users/"+createdUser.ID.String(), nil)
 	req.SetPathValue("id", createdUser.ID.String())
-
 	w := httptest.NewRecorder()
 
-	// Call handler
+	// Act
 	testHandler.DeleteUser(w, req)
 
-	// Check response
+	// Assert
 	if w.Code != http.StatusNoContent {
 		t.Errorf("expected status %d, got %d", http.StatusNoContent, w.Code)
 	}
 
-	// Verify user was deleted
 	_, err = testService.GetUserById(context.Background(), createdUser.ID)
 	if err != ErrUserNotFound {
 		t.Errorf("expected user to be deleted, but got error: %v", err)
 	}
 }
 
-// Test validation errors
 func TestCreateUserValidationIntegration(t *testing.T) {
-	// Test with invalid name (too short)
+	// Arrange
 	testUser := &domain.User{
 		Name:          "Bad", // Too short
 		Username:      "baduser",
@@ -281,10 +256,12 @@ func TestCreateUserValidationIntegration(t *testing.T) {
 	userJSON, _ := json.Marshal(testUser)
 	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(userJSON))
 	req.Header.Set("Content-Type", "application/json")
-
 	w := httptest.NewRecorder()
+
+	// Act
 	testHandler.CreateUser(w, req)
 
+	// Assert
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("expected status %d for validation error, got %d", http.StatusBadRequest, w.Code)
 	}
