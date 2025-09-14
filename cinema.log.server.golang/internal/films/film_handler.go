@@ -3,6 +3,7 @@ package films
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 
 	"cinema.log.server.golang/internal/domain"
@@ -16,7 +17,8 @@ var (
 )
 
 type Handler struct {
-	FilmService FilmService
+	FilmService   FilmService
+	RatingService RatingService
 }
 
 type FilmService interface {
@@ -27,6 +29,7 @@ type FilmService interface {
 
 type RatingService interface {
 	GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error)
+	FilterRatingsForComparison([]domain.UserFilmRating) []domain.UserFilmRating
 }
 
 func NewHandler(filmService FilmService) *Handler {
@@ -72,9 +75,24 @@ func (h *Handler) GetFilmsFromExternal(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetFilmsForRating(w http.ResponseWriter, r *http.Request) {
-	// TODO: use no of comparisons etc in user film rating to decide which films to send
 	// 1. Get all ratings using the rating service
-	// 2. Use rating service to priortise the top 5 or 10 based on no of comps and last updated
-	// 3. Use those film id's to get from db and send them as response
+	allRatings, err := h.RatingService.GetAllRatings(r.Context())
+	if err != nil {
+		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
+		return
+	}
 
+	// 2. Use rating service to priortise the top 5 or 10 based on no of comps and last updated
+	filteredRatings := h.RatingService.FilterRatingsForComparison(allRatings)
+
+	// 3. Use those film id's to get from db and send them as response
+	var films []domain.Film
+	for _, rating := range filteredRatings {
+		if film, err := h.FilmService.GetFilmById(r.Context(), rating.FilmId); err != nil {
+			log.Printf("could not find film with id %s %v", rating.FilmId, err)
+		} else {
+			films = append(films, *film)
+		}
+	}
+	utils.SendJSON(w, films)
 }

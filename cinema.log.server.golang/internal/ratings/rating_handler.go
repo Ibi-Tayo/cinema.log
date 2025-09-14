@@ -14,6 +14,8 @@ type Handler struct {
 
 type RatingService interface {
 	GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
+	GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error)
+	UpdateRatings(ctx context.Context, ratings domain.ComparisonPair) (*domain.ComparisonPair, error)
 }
 
 func NewHandler(ratingService RatingService) *Handler {

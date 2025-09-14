@@ -16,3 +16,8 @@ type UserFilmRating struct {
 	InitialRating       float32   `json:"initialRating"`
 	KConstantValue      float64   `json:"kConstantValue"`
 }
+
+type ComparisonPair struct {
+    FilmA UserFilmRating
+    FilmB UserFilmRating
+}
