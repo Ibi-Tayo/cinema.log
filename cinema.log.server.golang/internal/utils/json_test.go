@@ -60,3 +60,30 @@ func TestDecodeJSON_InvalidJSON(t *testing.T) {
 		t.Errorf("expected ErrDecoding, got %v", err)
 	}
 }
+
+func TestSendJSON_UnencodableData(t *testing.T) {
+	w := httptest.NewRecorder()
+	// channels can't be JSON encoded
+	data := make(chan int)
+	
+	SendJSON(w, data)
+
+	// Should still return some response (error case is handled internally)
+	if w.Code != http.StatusOK {
+		// The function doesn't change the status code, so it stays 200
+		// but writes an error message
+		t.Logf("Status code: %d", w.Code)
+	}
+}
+
+func TestDecodeJSON_EmptyBody(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPost, "/test", bytes.NewBufferString(""))
+	req.Header.Set("Content-Type", "application/json")
+
+	var result map[string]interface{}
+	err := DecodeJSON(req, &result)
+
+	if err != ErrDecoding {
+		t.Errorf("expected ErrDecoding for empty body, got %v", err)
+	}
+}
