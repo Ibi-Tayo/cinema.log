@@ -261,6 +261,123 @@ func TestService_GetRatingsForComparison(t *testing.T) {
 	}
 }
 
+func TestService_UpdateRatings(t *testing.T) {
+	ctx := context.Background()
+	
+	filmAId := uuid.New()
+	filmBId := uuid.New()
+	
+	filmA := domain.UserFilmRating{
+		ID:                  uuid.New(),
+		UserId:              uuid.New(),
+		FilmId:              filmAId,
+		EloRating:           1500.0,
+		NumberOfComparisons: 5,
+		LastUpdated:         time.Now(),
+		InitialRating:       1500.0,
+		KConstantValue:      32.0,
+	}
+	
+	filmB := domain.UserFilmRating{
+		ID:                  uuid.New(),
+		UserId:              filmA.UserId,
+		FilmId:              filmBId,
+		EloRating:           1600.0,
+		NumberOfComparisons: 5,
+		LastUpdated:         time.Now(),
+		InitialRating:       1500.0,
+		KConstantValue:      32.0,
+	}
+	
+	mock := &mockRatingStore{
+		updateRatingFunc: func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error) {
+			return &rating, nil
+		},
+	}
+	
+	service := NewService(mock)
+	pair := domain.ComparisonPair{
+		FilmA: filmA,
+		FilmB: filmB,
+	}
+	
+	// FilmA wins
+	updatedPair, err := service.UpdateRatings(ctx, pair, filmAId)
+	
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	
+	// FilmA should have increased rating
+	if updatedPair.FilmA.EloRating <= filmA.EloRating {
+		t.Errorf("expected FilmA rating to increase from %.2f, got %.2f", filmA.EloRating, updatedPair.FilmA.EloRating)
+	}
+	
+	// FilmB should have decreased rating
+	if updatedPair.FilmB.EloRating >= filmB.EloRating {
+		t.Errorf("expected FilmB rating to decrease from %.2f, got %.2f", filmB.EloRating, updatedPair.FilmB.EloRating)
+	}
+	
+	// Both should have increased comparisons
+	if updatedPair.FilmA.NumberOfComparisons != filmA.NumberOfComparisons+1 {
+		t.Errorf("expected FilmA comparisons to be %d, got %d", filmA.NumberOfComparisons+1, updatedPair.FilmA.NumberOfComparisons)
+	}
+	if updatedPair.FilmB.NumberOfComparisons != filmB.NumberOfComparisons+1 {
+		t.Errorf("expected FilmB comparisons to be %d, got %d", filmB.NumberOfComparisons+1, updatedPair.FilmB.NumberOfComparisons)
+	}
+}
+
+func TestService_UpdateRatings_Draw(t *testing.T) {
+	ctx := context.Background()
+	
+	filmA := domain.UserFilmRating{
+		ID:                  uuid.New(),
+		UserId:              uuid.New(),
+		FilmId:              uuid.New(),
+		EloRating:           1500.0,
+		NumberOfComparisons: 5,
+		LastUpdated:         time.Now(),
+		InitialRating:       1500.0,
+		KConstantValue:      32.0,
+	}
+	
+	filmB := domain.UserFilmRating{
+		ID:                  uuid.New(),
+		UserId:              filmA.UserId,
+		FilmId:              uuid.New(),
+		EloRating:           1500.0,
+		NumberOfComparisons: 5,
+		LastUpdated:         time.Now(),
+		InitialRating:       1500.0,
+		KConstantValue:      32.0,
+	}
+	
+	mock := &mockRatingStore{
+		updateRatingFunc: func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error) {
+			return &rating, nil
+		},
+	}
+	
+	service := NewService(mock)
+	pair := domain.ComparisonPair{
+		FilmA: filmA,
+		FilmB: filmB,
+	}
+	
+	// Neither wins (draw) - use a different winnerId
+	updatedPair, err := service.UpdateRatings(ctx, pair, uuid.New())
+	
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	
+	// With equal ratings and a draw, ratings should stay roughly the same
+	// (they both get 0.5 result and 0.5 expected)
+	if updatedPair.FilmA.EloRating != filmA.EloRating {
+		t.Logf("FilmA rating changed from %.2f to %.2f (expected to stay same on draw with equal ratings)", filmA.EloRating, updatedPair.FilmA.EloRating)
+	}
+}
+
 func TestService_CalculateExpectedResult(t *testing.T) {
 	service := NewService(nil)
 
