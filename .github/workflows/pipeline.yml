@@ -1,0 +1,43 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache-dependency-path: cinema.log.server.golang/go.sum
+      
+      - name: Install dependencies
+        working-directory: ./cinema.log.server.golang
+        run: go mod download
+
+      - name: Install gotestsum
+        run: go install gotest.tools/gotestsum@latest
+      
+      - name: Run tests
+        working-directory: ./cinema.log.server.golang
+        run: gotestsum --format testname -- ./internal/... -v -cover
+      
+      - name: Run tests with coverage report
+        working-directory: ./cinema.log.server.golang
+        run: |
+          gotestsum --format standard-verbose -- ./internal/... -coverprofile=coverage.out
+          go tool cover -func=coverage.out
+          echo "## Test Summary" >> $GITHUB_STEP_SUMMARY
+          go tool cover -func=coverage.out | tail -1 >> $GITHUB_STEP_SUMMARY
