@@ -1,6 +1,7 @@
 package ratings
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -75,6 +76,188 @@ func TestService_FilterRatingsForComparison_Sorting(t *testing.T) {
 
 	if result[0].LastUpdated.After(result[1].LastUpdated) {
 		t.Error("expected ratings with same comparison count to be sorted by oldest first")
+	}
+}
+
+// Add mock store for service testing
+type mockRatingStore struct {
+	getRatingFunc          func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
+	getAllRatingsFunc      func(ctx context.Context) ([]domain.UserFilmRating, error)
+	getRatingsByUserIdFunc func(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error)
+	createRatingFunc       func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
+	updateRatingFunc       func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
+	updateRatingsFunc      func(ctx context.Context, ratings domain.ComparisonPair) (*domain.ComparisonPair, error)
+}
+
+func (m *mockRatingStore) GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error) {
+	if m.getRatingFunc != nil {
+		return m.getRatingFunc(ctx, userId, filmId)
+	}
+	return nil, ErrRatingNotFound
+}
+
+func (m *mockRatingStore) GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error) {
+	if m.getAllRatingsFunc != nil {
+		return m.getAllRatingsFunc(ctx)
+	}
+	return nil, nil
+}
+
+func (m *mockRatingStore) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error) {
+	if m.getRatingsByUserIdFunc != nil {
+		return m.getRatingsByUserIdFunc(ctx, userId)
+	}
+	return nil, nil
+}
+
+func (m *mockRatingStore) CreateRating(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error) {
+	if m.createRatingFunc != nil {
+		return m.createRatingFunc(ctx, rating)
+	}
+	return &rating, nil
+}
+
+func (m *mockRatingStore) UpdateRating(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error) {
+	if m.updateRatingFunc != nil {
+		return m.updateRatingFunc(ctx, rating)
+	}
+	return &rating, nil
+}
+
+func (m *mockRatingStore) UpdateRatings(ctx context.Context, ratings domain.ComparisonPair) (*domain.ComparisonPair, error) {
+	if m.updateRatingsFunc != nil {
+		return m.updateRatingsFunc(ctx, ratings)
+	}
+	return &ratings, nil
+}
+
+func TestService_GetRating(t *testing.T) {
+	ctx := context.Background()
+	userId := uuid.New()
+	filmId := uuid.New()
+	expectedRating := &domain.UserFilmRating{
+		ID:                  uuid.New(),
+		UserId:              userId,
+		FilmId:              filmId,
+		EloRating:           1500.0,
+		NumberOfComparisons: 5,
+	}
+
+	mock := &mockRatingStore{
+		getRatingFunc: func(ctx context.Context, uid uuid.UUID, fid uuid.UUID) (*domain.UserFilmRating, error) {
+			if uid != userId || fid != filmId {
+				return nil, ErrRatingNotFound
+			}
+			return expectedRating, nil
+		},
+	}
+
+	service := NewService(mock)
+	rating, err := service.GetRating(ctx, userId, filmId)
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if rating.ID != expectedRating.ID {
+		t.Errorf("expected rating ID %v, got %v", expectedRating.ID, rating.ID)
+	}
+}
+
+func TestService_GetAllRatings(t *testing.T) {
+	ctx := context.Background()
+	expectedRatings := []domain.UserFilmRating{
+		{ID: uuid.New(), EloRating: 1500.0},
+		{ID: uuid.New(), EloRating: 1600.0},
+	}
+
+	mock := &mockRatingStore{
+		getAllRatingsFunc: func(ctx context.Context) ([]domain.UserFilmRating, error) {
+			return expectedRatings, nil
+		},
+	}
+
+	service := NewService(mock)
+	ratings, err := service.GetAllRatings(ctx)
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(ratings) != 2 {
+		t.Errorf("expected 2 ratings, got %d", len(ratings))
+	}
+}
+
+func TestService_CreateRating(t *testing.T) {
+	ctx := context.Background()
+	userId := uuid.New()
+	filmId := uuid.New()
+	initialRating := float32(3.5)
+
+	mock := &mockRatingStore{
+		createRatingFunc: func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error) {
+			if rating.UserId != userId {
+				t.Errorf("expected user ID %v, got %v", userId, rating.UserId)
+			}
+			if rating.FilmId != filmId {
+				t.Errorf("expected film ID %v, got %v", filmId, rating.FilmId)
+			}
+			if rating.InitialRating != initialRating {
+				t.Errorf("expected initial rating %.1f, got %.1f", initialRating, rating.InitialRating)
+			}
+			if rating.NumberOfComparisons != 0 {
+				t.Errorf("expected 0 comparisons, got %d", rating.NumberOfComparisons)
+			}
+			if rating.KConstantValue != 40 {
+				t.Errorf("expected K constant 40, got %.1f", rating.KConstantValue)
+			}
+			return &rating, nil
+		},
+	}
+
+	service := NewService(mock)
+	rating, err := service.CreateRating(ctx, userId, filmId, initialRating)
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if rating.UserId != userId {
+		t.Errorf("expected user ID %v, got %v", userId, rating.UserId)
+	}
+}
+
+func TestService_GetRatingsForComparison(t *testing.T) {
+	ctx := context.Background()
+	userId := uuid.New()
+
+	now := time.Now()
+	allRatings := []domain.UserFilmRating{
+		{ID: uuid.New(), UserId: userId, NumberOfComparisons: 5, LastUpdated: now.Add(-1 * time.Hour)},
+		{ID: uuid.New(), UserId: userId, NumberOfComparisons: 0, LastUpdated: now.Add(-3 * time.Hour)},
+		{ID: uuid.New(), UserId: userId, NumberOfComparisons: 0, LastUpdated: now.Add(-2 * time.Hour)},
+		{ID: uuid.New(), UserId: userId, NumberOfComparisons: 3, LastUpdated: now},
+	}
+
+	mock := &mockRatingStore{
+		getRatingsByUserIdFunc: func(ctx context.Context, uid uuid.UUID) ([]domain.UserFilmRating, error) {
+			if uid != userId {
+				return nil, nil
+			}
+			return allRatings, nil
+		},
+	}
+
+	service := NewService(mock)
+	ratings, err := service.GetRatingsForComparison(ctx, userId)
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(ratings) != 4 {
+		t.Errorf("expected 4 ratings, got %d", len(ratings))
+	}
+	// Check that they're sorted correctly
+	if ratings[0].NumberOfComparisons != 0 {
+		t.Errorf("expected first rating to have 0 comparisons, got %d", ratings[0].NumberOfComparisons)
 	}
 }
 
