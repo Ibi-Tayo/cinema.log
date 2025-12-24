@@ -26,6 +26,7 @@ type FilmStore interface {
 	GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, error)
 	GetFilmByExternalId(ctx context.Context, id int) (*domain.Film, error)
 	CreateFilm(ctx context.Context, film domain.Film) (*domain.Film, error)
+	GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error)
 }
 
 type TMDBSearchResponse struct {
@@ -91,25 +92,29 @@ func (s Service) GetFilmsFromExternal(ctx context.Context, query string) ([]doma
 	for _, filmResult := range tmdbResponse.Results {
 		// check if film already exists in db
 		film, err := s.FilmStore.GetFilmByExternalId(ctx, filmResult.ID)
-		if (err != nil) {
+		if err != nil {
 			// create new film and put in database
 			createdFilm, err := s.FilmStore.CreateFilm(ctx, domain.Film{
-				ID: uuid.New(),
-				ExternalID: filmResult.ID,
-				Title: filmResult.Title,
+				ID:          uuid.New(),
+				ExternalID:  filmResult.ID,
+				Title:       filmResult.Title,
 				Description: filmResult.Overview,
-				PosterUrl: filmResult.PosterPath,
+				PosterUrl:   filmResult.PosterPath,
 				ReleaseYear: filmResult.ReleaseDate,
 			})
-			if (err != nil) {
+			if err != nil {
 				log.Printf("could not add film: %s to database:", filmResult.Title)
 				continue
 			}
 			film = createdFilm
-		} 
+		}
 		// if film exists then add to list
 		films = append(films, *film)
 	}
 
 	return films, nil
+}
+
+func (s Service) GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error) {
+	return s.FilmStore.GetFilmsForRating(ctx, userId, filmId)
 }

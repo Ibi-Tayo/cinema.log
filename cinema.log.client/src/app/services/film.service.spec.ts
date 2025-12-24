@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { FilmService, Film } from './film.service';
 import { environment } from '../../environments/environment';
 
@@ -11,7 +14,8 @@ describe('FilmService', () => {
     id: '123e4567-e89b-12d3-a456-426614174000',
     externalId: 550,
     title: 'Fight Club',
-    description: 'An insomniac office worker and a devil-may-care soap maker form an underground fight club.',
+    description:
+      'An insomniac office worker and a devil-may-care soap maker form an underground fight club.',
     posterUrl: 'https://example.com/poster.jpg',
     releaseYear: '1999',
   };
@@ -24,6 +28,7 @@ describe('FilmService', () => {
 
     service = TestBed.inject(FilmService);
     httpMock = TestBed.inject(HttpTestingController);
+    spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -35,11 +40,15 @@ describe('FilmService', () => {
   });
 
   it('should get film by id', () => {
-    service.getFilmById('123e4567-e89b-12d3-a456-426614174000').subscribe((film) => {
-      expect(film).toEqual(mockFilm);
-    });
+    service
+      .getFilmById('123e4567-e89b-12d3-a456-426614174000')
+      .subscribe((film) => {
+        expect(film).toEqual(mockFilm);
+      });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/films/123e4567-e89b-12d3-a456-426614174000`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/films/123e4567-e89b-12d3-a456-426614174000`
+    );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush(mockFilm);
@@ -66,7 +75,9 @@ describe('FilmService', () => {
       expect(films.length).toBe(1);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/films/search?f=${encodeURIComponent(query)}`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/films/search?f=${encodeURIComponent(query)}`
+    );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush(mockFilms);
@@ -92,7 +103,9 @@ describe('FilmService', () => {
       expect(films.length).toBe(1);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/films/candidates-for-comparison`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/films/candidates-for-comparison`
+    );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush(mockFilms);
@@ -106,7 +119,9 @@ describe('FilmService', () => {
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/films/candidates-for-comparison`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/films/candidates-for-comparison`
+    );
     req.error(new ProgressEvent('error'));
   });
 });

@@ -1,5 +1,297 @@
 @use "variables" as *;
 @use "mixins" as *;
+@use "sass:map";
+
+.about-container {
+  min-height: calc(100vh - 200px);
+  padding: 2rem;
+  background-color: get-color(backgroundColor);
+  color: get-color(neutral, 500);
+
+  .about-content {
+    max-width: 1000px;
+    margin: 0 auto;
+
+    // Hero Section
+    .hero-section {
+      text-align: center;
+      padding: 3rem 2rem;
+      margin-bottom: 3rem;
+
+      lord-icon {
+        margin-bottom: 1rem;
+      }
+
+      h1 {
+        font-size: 3.5rem;
+        font-weight: 500;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        color: get-color(neutral, 500);
+      }
+
+      .subtitle {
+        font-size: map.get($font-sizes, "xl");
+        color: get-color(neutral, 500);
+        max-width: 600px;
+        margin: 0 auto;
+      }
+    }
+
+    // Feature Sections
+    .feature-section {
+      margin-bottom: 4rem;
+      padding: 3rem 2rem;
+      background: linear-gradient(
+        135deg,
+        get-color(primary, 800) 0%,
+        get-color(secondary, 900) 100%
+      );
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+      .feature-content {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 2rem;
+        align-items: start;
+
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr;
+          text-align: center;
+          justify-items: center;
+        }
+
+        &.reverse {
+          grid-template-columns: 1fr auto;
+
+          @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+          }
+
+          .feature-text {
+            order: -1;
+
+            @media (max-width: 768px) {
+              order: 0;
+            }
+          }
+        }
+
+        .feature-icon {
+          @include flex-center;
+          background: get-color(neutral, 400);
+          border-radius: 1rem;
+          padding: 1.5rem;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-text {
+          h2 {
+            font-size: map.get($font-sizes, "3xl");
+            font-weight: 500;
+            color: get-color(neutral, 400);
+            margin-bottom: 1rem;
+          }
+
+          p {
+            font-size: map.get($font-sizes, "lg");
+            color: get-color(neutral, 500);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+          }
+
+          .feature-detail {
+            font-size: map.get($font-sizes, "base");
+            color: get-color(neutral, 600);
+          }
+
+          // Rating Display
+          .rating-display {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            font-size: map.get($font-sizes, "3xl");
+
+            @media (max-width: 768px) {
+              justify-content: center;
+            }
+
+            .star {
+              color: get-color(neutral, 700);
+
+              &.filled {
+                color: #fbbf24;
+                text-shadow: 0 2px 4px rgba(251, 191, 36, 0.5);
+              }
+            }
+          }
+
+          // ELO Section Specific
+          .elo-intro {
+            strong {
+              color: get-color(primary, 400);
+            }
+          }
+
+          .elo-explanation {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: get-color(backgroundColor);
+            border-radius: 0.75rem;
+            border-left: 4px solid get-color(primary, 500);
+
+            h3 {
+              font-size: map.get($font-sizes, "xl");
+              color: get-color(neutral, 400);
+              margin-bottom: 1.5rem;
+            }
+
+            .step {
+              display: flex;
+              gap: 1rem;
+              margin-bottom: 1.5rem;
+              align-items: start;
+
+              &:last-child {
+                margin-bottom: 0;
+              }
+
+              .step-number {
+                @include flex-center;
+                width: 40px;
+                height: 40px;
+                background: get-color(primary, 600);
+                color: white;
+                border-radius: 50%;
+                font-weight: 600;
+                font-size: map.get($font-sizes, "lg");
+                flex-shrink: 0;
+              }
+
+              p {
+                margin: 0;
+                font-size: map.get($font-sizes, "base");
+                color: get-color(neutral, 500);
+
+                strong {
+                  color: get-color(neutral, 400);
+                }
+              }
+            }
+          }
+
+          .elo-benefit {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: get-color(primary, 800);
+            border-radius: 0.75rem;
+
+            @media (max-width: 768px) {
+              flex-direction: column;
+              text-align: center;
+            }
+
+            lord-icon {
+              flex-shrink: 0;
+            }
+
+            p {
+              margin: 0;
+              font-size: map.get($font-sizes, "base");
+              color: get-color(neutral, 400);
+
+              strong {
+                color: get-color(primary, 300);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Call to Action
+    .cta-section {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: linear-gradient(
+        135deg,
+        get-color(primary, 800) 0%,
+        get-color(secondary, 800) 100%
+      );
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+      lord-icon {
+        margin-bottom: 1rem;
+      }
+
+      h2 {
+        font-size: map.get($font-sizes, "3xl");
+        font-weight: 500;
+        color: get-color(neutral, 300);
+        margin-bottom: 1rem;
+      }
+
+      p {
+        font-size: map.get($font-sizes, "lg");
+        color: get-color(neutral, 500);
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .cta-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        background: get-color(primary, 500);
+        color: white;
+        text-decoration: none;
+        font-size: map.get($font-sizes, "lg");
+        font-weight: 500;
+        border-radius: 2rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(129, 103, 151, 0.4);
+
+        &:hover {
+          background: get-color(primary, 400);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(129, 103, 151, 0.6);
+        }
+
+        lord-icon {
+          flex-shrink: 0;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .about-container {
+    padding: 1rem;
+
+    .about-content {
+      .hero-section {
+        padding: 2rem 1rem;
+
+        h1 {
+          font-size: map.get($font-sizes, "3xl");
+        }
+      }
+
+      .feature-section {
+        padding: 2rem 1.5rem;
+      }
+    }
+  }
+}
 
 .parent {
   display: grid;

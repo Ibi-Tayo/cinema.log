@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { UserService, User } from './user.service';
 import { environment } from '../../environments/environment';
 
@@ -25,6 +28,7 @@ describe('UserService', () => {
 
     service = TestBed.inject(UserService);
     httpMock = TestBed.inject(HttpTestingController);
+    spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -36,11 +40,15 @@ describe('UserService', () => {
   });
 
   it('should get user by id', () => {
-    service.getUserById('123e4567-e89b-12d3-a456-426614174000').subscribe((user) => {
-      expect(user).toEqual(mockUser);
-    });
+    service
+      .getUserById('123e4567-e89b-12d3-a456-426614174000')
+      .subscribe((user) => {
+        expect(user).toEqual(mockUser);
+      });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users/123e4567-e89b-12d3-a456-426614174000`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/users/123e4567-e89b-12d3-a456-426614174000`
+    );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush(mockUser);
@@ -137,7 +145,9 @@ describe('UserService', () => {
       expect(true).toBe(true);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users/123e4567-e89b-12d3-a456-426614174000`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/users/123e4567-e89b-12d3-a456-426614174000`
+    );
     expect(req.request.method).toBe('DELETE');
     expect(req.request.withCredentials).toBe(true);
     req.flush(null);

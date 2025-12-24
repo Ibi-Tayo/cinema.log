@@ -1,6 +1,14 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { RatingService, UserFilmRating, ComparisonPair, ComparisonRequest } from './rating.service';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
+import {
+  RatingService,
+  UserFilmRating,
+  ComparisonPair,
+  ComparisonRequest,
+} from './rating.service';
 import { environment } from '../../environments/environment';
 
 describe('RatingService', () => {
@@ -31,6 +39,7 @@ describe('RatingService', () => {
 
     service = TestBed.inject(RatingService);
     httpMock = TestBed.inject(HttpTestingController);
+    spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -49,7 +58,9 @@ describe('RatingService', () => {
       expect(rating).toEqual(mockRating);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/ratings?userId=${userId}&filmId=${filmId}`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/ratings?userId=${userId}&filmId=${filmId}`
+    );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush(mockRating);
@@ -66,7 +77,9 @@ describe('RatingService', () => {
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/ratings?userId=${userId}&filmId=${filmId}`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/ratings?userId=${userId}&filmId=${filmId}`
+    );
     req.error(new ProgressEvent('error'));
   });
 
@@ -79,7 +92,9 @@ describe('RatingService', () => {
       expect(ratings.length).toBe(1);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/ratings/for-comparison?userId=${userId}`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/ratings/for-comparison?userId=${userId}`
+    );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush(mockRatings);
@@ -91,11 +106,15 @@ describe('RatingService', () => {
     service.getRatingsForComparison(userId).subscribe({
       next: () => fail('should have failed'),
       error: (error) => {
-        expect(error.message).toContain('Failed to fetch ratings for comparison');
+        expect(error.message).toContain(
+          'Failed to fetch ratings for comparison'
+        );
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/ratings/for-comparison?userId=${userId}`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/ratings/for-comparison?userId=${userId}`
+    );
     req.error(new ProgressEvent('error'));
   });
 
@@ -112,7 +131,9 @@ describe('RatingService', () => {
       expect(pair).toEqual(mockComparisonPair);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/ratings/compare-films`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/ratings/compare-films`
+    );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(comparisonRequest);
     expect(req.request.withCredentials).toBe(true);
@@ -131,7 +152,9 @@ describe('RatingService', () => {
       expect(pair).toEqual(mockComparisonPair);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/ratings/compare-films`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/ratings/compare-films`
+    );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(comparisonRequest);
     expect(req.request.withCredentials).toBe(true);
@@ -154,7 +177,9 @@ describe('RatingService', () => {
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/ratings/compare-films`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/ratings/compare-films`
+    );
     req.error(new ProgressEvent('error'));
   });
 });

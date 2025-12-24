@@ -1,6 +1,14 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { ReviewService, Review, CreateReviewRequest, UpdateReviewRequest } from './review.service';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
+import {
+  ReviewService,
+  Review,
+  CreateReviewRequest,
+  UpdateReviewRequest,
+} from './review.service';
 import { environment } from '../../environments/environment';
 
 describe('ReviewService', () => {
@@ -24,6 +32,7 @@ describe('ReviewService', () => {
 
     service = TestBed.inject(ReviewService);
     httpMock = TestBed.inject(HttpTestingController);
+    spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -106,7 +115,11 @@ describe('ReviewService', () => {
       rating: 8.5,
     };
 
-    const updatedReview: Review = { ...mockReview, title: 'Updated content', rating: 8.5 };
+    const updatedReview: Review = {
+      ...mockReview,
+      title: 'Updated content',
+      rating: 8.5,
+    };
 
     service.updateReview(reviewId, updateRequest).subscribe((review) => {
       expect(review).toEqual(updatedReview);
@@ -144,7 +157,9 @@ describe('ReviewService', () => {
       expect(true).toBe(true);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/reviews?id=${reviewId}`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/reviews?id=${reviewId}`
+    );
     expect(req.request.method).toBe('DELETE');
     expect(req.request.withCredentials).toBe(true);
     req.flush(null);
@@ -160,7 +175,9 @@ describe('ReviewService', () => {
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/reviews?id=${reviewId}`);
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/reviews?id=${reviewId}`
+    );
     req.error(new ProgressEvent('error'));
   });
 });

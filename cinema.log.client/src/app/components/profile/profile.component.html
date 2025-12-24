@@ -1,1 +1,156 @@
-<p>profile works!</p>
+<div class="profile-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <lord-icon
+      src="https://cdn.lordicon.com/xjovhxra.json"
+      trigger="loop"
+      style="width: 100px; height: 100px"
+    >
+    </lord-icon>
+    <p>Loading profile...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !isLoading" class="error-state">
+    <lord-icon
+      src="https://cdn.lordicon.com/tdrtiskw.json"
+      trigger="loop"
+      style="width: 80px; height: 80px"
+    >
+    </lord-icon>
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <!-- Profile Content -->
+  <div *ngIf="user && !isLoading" class="profile-content">
+    <!-- User Header -->
+    <div class="profile-header">
+      <div class="profile-avatar">
+        <img [src]="user.profilePicUrl" [alt]="user.name" />
+      </div>
+      <div class="profile-info">
+        <h1>{{ user.name }}</h1>
+        <p class="username">{{ "@" + user.username }}</p>
+        <div class="profile-meta">
+          <div class="meta-item">
+            <lord-icon
+              src="https://cdn.lordicon.com/hmzvkifi.json"
+              trigger="hover"
+              style="width: 24px; height: 24px"
+            >
+            </lord-icon>
+            <span>Member since {{ user.createdAt | date : "MMMM yyyy" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Reviews Section -->
+    <div class="recent-reviews-section">
+      <h2>
+        <lord-icon
+          src="https://cdn.lordicon.com/ugllxeyl.json"
+          trigger="hover"
+          style="width: 32px; height: 32px; margin-right: 8px"
+        >
+        </lord-icon>
+        Recently Reviewed Films
+      </h2>
+
+      <!-- No Reviews Placeholder -->
+      <div *ngIf="recentReviews.length === 0" class="no-reviews-placeholder">
+        <lord-icon
+          src="https://cdn.lordicon.com/fpmskzsv.json"
+          trigger="loop"
+          style="width: 120px; height: 120px"
+        >
+        </lord-icon>
+        <p class="placeholder-title">No Reviews Yet</p>
+        <p class="placeholder-subtitle">
+          Start reviewing films to see them appear here
+        </p>
+      </div>
+
+      <!-- Reviews Carousel -->
+      <div *ngIf="recentReviews.length > 0" class="carousel-container">
+        <button
+          class="carousel-button prev"
+          (click)="previousCarouselSlide()"
+          [disabled]="recentReviews.length <= 1"
+        >
+          <lord-icon
+            src="https://cdn.lordicon.com/zmkotitn.json"
+            trigger="hover"
+            style="width: 40px; height: 40px"
+          >
+          </lord-icon>
+        </button>
+
+        <div class="carousel-track">
+          <div
+            *ngFor="let review of recentReviews; let i = index"
+            class="carousel-slide"
+            [class.active]="i === currentCarouselIndex"
+          >
+            <div class="review-card">
+              <div class="film-poster">
+                <img
+                  *ngIf="review.film?.posterUrl"
+                  [src]="review.film?.posterUrl"
+                  [alt]="review.film?.title || 'Film poster'"
+                />
+                <div *ngIf="!review.film?.posterUrl" class="poster-placeholder">
+                  <lord-icon
+                    src="https://cdn.lordicon.com/ugllxeyl.json"
+                    trigger="hover"
+                    style="width: 80px; height: 80px"
+                  >
+                  </lord-icon>
+                </div>
+              </div>
+              <div class="review-details">
+                <h3>{{ review.film?.title || "Unknown Film" }}</h3>
+                <p class="review-date">
+                  {{ review.date | date : "MMM d, yyyy" }}
+                </p>
+                <div class="rating">
+                  <span
+                    *ngFor="let star of getStars(review.rating)"
+                    class="star"
+                    [class.filled]="star === 'full'"
+                  >
+                    ★
+                  </span>
+                </div>
+                <p class="review-content">{{ review.title }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          class="carousel-button next"
+          (click)="nextCarouselSlide()"
+          [disabled]="recentReviews.length <= 1"
+        >
+          <lord-icon
+            src="https://cdn.lordicon.com/zmkotitn.json"
+            trigger="hover"
+            style="width: 40px; height: 40px; transform: rotate(180deg)"
+          >
+          </lord-icon>
+        </button>
+
+        <!-- Carousel Indicators -->
+        <div class="carousel-indicators">
+          <button
+            *ngFor="let review of recentReviews; let i = index"
+            class="indicator"
+            [class.active]="i === currentCarouselIndex"
+            (click)="goToSlide(i)"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
