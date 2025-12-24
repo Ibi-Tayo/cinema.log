@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"net/http"
+	"os"
 )
 
 type key int
@@ -12,6 +13,21 @@ const (
 	keyUser
 	// ...
 )
+
+// isAuthExempt checks if a path should bypass authentication
+func isAuthExempt(path string) bool {
+	exemptPaths := []string{
+		"/auth/github-login",
+		"/auth/github-callback",
+		"/auth/refresh-token",
+	}
+	for _, exemptPath := range exemptPaths {
+		if path == exemptPath {
+			return true
+		}
+	}
+	return false
+}
 
 func (s *Server) RegisterRoutes() http.Handler {
 	mux := http.NewServeMux()
@@ -34,8 +50,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// Film routes
 	mux.HandleFunc("GET /films/{id}", s.filmHandler.GetFilmById)
 	mux.HandleFunc("GET /films/search", s.filmHandler.GetFilmsFromExternal) // query param name = "f"
-	mux.HandleFunc("GET /films/candidates-for-comparison", s.filmHandler.GetFilmsForRating) 
-	
+	mux.HandleFunc("GET /films/candidates-for-comparison", s.filmHandler.GetFilmsForRating)
+
 	// Review routes
 	mux.HandleFunc("GET /reviews/{userId}", s.reviewHandler.GetAllReviews)
 	mux.HandleFunc("POST /reviews", s.reviewHandler.CreateReview)
@@ -43,8 +59,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("DELETE /reviews", s.reviewHandler.DeleteReview)
 
 	// Rating routes
-	mux.HandleFunc("GET /ratings/{userId}/{filmId}", s.ratingHandler.GetRating) 
-	mux.HandleFunc("POST /ratings/compare-films", s.ratingHandler.CompareFilms) 
+	mux.HandleFunc("GET /ratings", s.ratingHandler.GetRating)                              // query params: userId, filmId
+	mux.HandleFunc("GET /ratings/for-comparison", s.ratingHandler.GetRatingsForComparison) // query param: userId
+	mux.HandleFunc("POST /ratings/compare-films", s.ratingHandler.CompareFilms)
 
 	// Wrap the mux with middleware
 	return s.corsMiddleware(s.authMiddleware(mux))
@@ -52,11 +69,17 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Set CORS headers
-		w.Header().Set("Access-Control-Allow-Origin", "*") // Replace "*" with specific origins if needed
+		// Get frontend URL from environment, fallback to localhost for development
+		frontendURL := os.Getenv("FRONTEND_URL")
+		if frontendURL == "" {
+			frontendURL = "http://localhost:4200"
+		}
+
+		// Set CORS headers - must use specific origin with credentials
+		w.Header().Set("Access-Control-Allow-Origin", frontendURL)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
 		w.Header().Set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, X-CSRF-Token")
-		w.Header().Set("Access-Control-Allow-Credentials", "false") // Set to "true" if credentials are required
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		// Handle preflight OPTIONS requests
 		if r.Method == http.MethodOptions {
@@ -71,9 +94,8 @@ func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 
 func (s *Server) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Allow github login path, otherwise validate auth token
-		if r.URL.Path == "/auth/github-login" ||
-			r.URL.Path == "/auth/github-callback" {
+		// Allow certain auth paths to bypass token validation
+		if isAuthExempt(r.URL.Path) {
 			next.ServeHTTP(w, r)
 			return
 		}

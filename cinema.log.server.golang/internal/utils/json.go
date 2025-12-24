@@ -8,6 +8,7 @@ import (
 
 var (
 	ErrEncoding = errors.New("error encoding response")
+	ErrDecoding = errors.New("error decoding request body")
 )
 
 func SendJSON(w http.ResponseWriter, v any) {
@@ -15,4 +16,11 @@ func SendJSON(w http.ResponseWriter, v any) {
 	if err := json.NewEncoder(w).Encode(v); err != nil {
 		http.Error(w, ErrEncoding.Error(), http.StatusInternalServerError)
 	}
+}
+
+func DecodeJSON(r *http.Request, v any) error {
+	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
+		return ErrDecoding
+	}
+	return nil
 }
