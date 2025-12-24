@@ -1,71 +1,134 @@
-<div class="parent">
-  <main class="main-content">
+<div class="about-container">
+  <div class="about-content">
+    <!-- Hero Section -->
     <div class="hero-section">
-      <div class="floating-elements left">
-        <lord-icon
-          src="https://cdn.lordicon.com/ripqtsik.json"
-          trigger="in"
-          delay="1500"
-          state="in-reveal"
-          style="width: 250px; height: 250px"
-        >
-        </lord-icon>
-      </div>
+      <lord-icon
+        src="https://cdn.lordicon.com/ugllxeyl.json"
+        trigger="loop"
+        delay="2000"
+        style="width: 100px; height: 100px"
+      >
+      </lord-icon>
+      <h1>Your personal hub for film review</h1>
+      <p class="subtitle">A smarter way to track and rate the films you love</p>
+    </div>
 
-      <div class="content-wrapper">
-        <h1>Your personal hub<br />for film review</h1>
-        <p class="subtitle">
-          Join our private community of film enthusiasts. Share your thoughts on
-          the latest releases. Review films with like-minded
-          individuals.
-        </p>
-
-        <div class="cta-buttons">
-          <button class="primary-btn" (click)="playAnimation(filmIconElement)">
-            I like films
-            <lord-icon
-              #filmIcon
-              src="https://cdn.lordicon.com/ugllxeyl.json"
-              trigger="hover"
-              style="width: 50px; height: 50px; padding-left: 10px"
-            />
-          </button>
-          <button
-            class="secondary-btn"
-            (click)="playAnimation(musicIconElement)"
-          >
-            I like music
-            <lord-icon
-              #musicIcon
-              src="https://cdn.lordicon.com/gcupmfyg.json"
-              trigger="hover"
-              style="width: 50px; height: 50px; padding-left: 10px"
-            />
-          </button>
-        </div>
-
-        <div class="trust-indicator">
+    <!-- Rating System Section -->
+    <div class="feature-section">
+      <div class="feature-content">
+        <div class="feature-icon">
           <lord-icon
-            src="https://cdn.lordicon.com/hmzvkifi.json"
+            src="https://cdn.lordicon.com/fpmskzsv.json"
             trigger="hover"
-            state="hover-pinch"
-            style="width: 40px; height: 40px"
+            style="width: 80px; height: 80px"
           >
           </lord-icon>
-          <span class="effect-shine">Verified critic reviews only</span>
+        </div>
+        <div class="feature-text">
+          <h2>Review & Rate Films</h2>
+          <p>
+            Share your thoughts on films with our simple 5-star rating system.
+            Whether it's a masterpiece or a letdown, your opinion matters.
+          </p>
+          <div class="rating-display">
+            <span class="star filled">★</span>
+            <span class="star filled">★</span>
+            <span class="star filled">★</span>
+            <span class="star filled">★</span>
+            <span class="star filled">★</span>
+          </div>
+          <p class="feature-detail">
+            Rate films from 1 to 5 stars based on your experience. Write reviews
+            to capture your thoughts and help others discover great cinema.
+          </p>
         </div>
       </div>
+    </div>
 
-      <div class="floating-elements right">
-        <lord-icon
-          src="https://cdn.lordicon.com/dedkryhs.json"
-          trigger="in"
-          delay="1500"
-          state="in-reveal"
-          style="width: 250px; height: 250px"
-        >
-        </lord-icon>
+    <!-- ELO Rating System Section -->
+    <div class="feature-section elo-section">
+      <div class="feature-content reverse">
+        <div class="feature-icon">
+          <lord-icon
+            src="https://cdn.lordicon.com/mqgegihh.json"
+            trigger="hover"
+            style="width: 80px; height: 80px"
+          >
+          </lord-icon>
+        </div>
+        <div class="feature-text">
+          <h2>ELO Rating System</h2>
+          <p class="elo-intro">
+            Inspired by the <strong>ELO rating system</strong> used in chess,
+            Cinema.Log helps you build a more accurate picture of your film
+            preferences over time.
+          </p>
+          <div class="elo-explanation">
+            <h3>How It Works</h3>
+            <div class="step">
+              <span class="step-number">1</span>
+              <p>
+                <strong>Compare Films:</strong> Review films against others
+                you've already rated. This head-to-head comparison updates their
+                ELO ratings.
+              </p>
+            </div>
+            <div class="step">
+              <span class="step-number">2</span>
+              <p>
+                <strong>Dynamic Ratings:</strong> Each comparison adjusts the
+                relative rankings of films in your collection based on your
+                preferences.
+              </p>
+            </div>
+            <div class="step">
+              <span class="step-number">3</span>
+              <p>
+                <strong>Refined Over Time:</strong> The more films you rate and
+                compare, the more accurate your personal film rankings become.
+              </p>
+            </div>
+          </div>
+          <div class="elo-benefit">
+            <lord-icon
+              src="https://cdn.lordicon.com/lomfljuq.json"
+              trigger="hover"
+              style="width: 32px; height: 32px"
+            >
+            </lord-icon>
+            <p>
+              Unlike simple star ratings, ELO gives you a
+              <strong>living, evolving</strong>
+              ranking that truly reflects your taste in cinema.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
-  </main>
+
+    <!-- Call to Action -->
+    <div class="cta-section">
+      <lord-icon
+        src="https://cdn.lordicon.com/jvucoldz.json"
+        trigger="loop"
+        delay="2000"
+        style="width: 60px; height: 60px"
+      >
+      </lord-icon>
+      <h2>Ready to Start?</h2>
+      <p>
+        Join our community and begin building your personalized film rankings
+        today.
+      </p>
+      <a href="/login" class="cta-button">
+        Get Started
+        <lord-icon
+          src="https://cdn.lordicon.com/zmkotitn.json"
+          trigger="hover"
+          style="width: 24px; height: 24px; transform: rotate(180deg)"
+        >
+        </lord-icon>
+      </a>
+    </div>
+  </div>
 </div>

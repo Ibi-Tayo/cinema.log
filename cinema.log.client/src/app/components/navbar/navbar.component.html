@@ -10,12 +10,6 @@
       </a>
       <div class="nav-links">
         <a
-          routerLink="about"
-          routerLinkActive="active"
-          ariaCurrentWhenActive="page"
-          >About
-        </a>
-        <a
           routerLink="review"
           routerLinkActive="active"
           ariaCurrentWhenActive="page"
@@ -50,24 +44,6 @@
 
 <div class="nav-icons">
   <div class="icon">
-    <a
-      routerLink="about"
-      routerLinkActive="active"
-      ariaCurrentWhenActive="page"
-    >
-      <lord-icon
-        routerLinkActive="active"
-        src="https://cdn.lordicon.com/fjvfsqea.json"
-        trigger="click"
-        stroke="bold"
-        state="hover-unfold"
-        style="width: 30px; height: 30px"
-      >
-      </lord-icon>
-      <p>About</p>
-    </a>
-  </div>
-  <div class="icon">
     <a routerLink="review" ariaCurrentWhenActive="page">
       <lord-icon
         routerLinkActive="active"
@@ -81,17 +57,19 @@
       <p>Reviews</p>
     </a>
   </div>
-  <div>
-    <div class="icon">
-      <a
-        class="logo"
-        routerLink="/home"
+  <div class="icon">
+    <a routerLink="home" ariaCurrentWhenActive="page">
+      <lord-icon
         routerLinkActive="active"
-        ariaCurrentWhenActive="page"
+        src="https://cdn.lordicon.com/jeuxydnh.json"
+        trigger="click"
+        stroke="bold"
+        state="hover-wink"
+        style="width: 30px; height: 30px"
       >
-        C.L
-      </a>
-    </div>
+      </lord-icon>
+      <p>About</p>
+    </a>
   </div>
   <div class="icon">
     <a routerLink="search" ariaCurrentWhenActive="page">
