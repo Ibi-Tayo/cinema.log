@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
@@ -14,15 +17,13 @@ describe('AuthService', () => {
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [
-        AuthService,
-        { provide: Router, useValue: routerSpyObj }
-      ]
+      providers: [AuthService, { provide: Router, useValue: routerSpyObj }],
     });
 
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
     routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -46,7 +47,7 @@ describe('AuthService', () => {
     service.logout().subscribe({
       next: () => {
         expect(true).toBe(true);
-      }
+      },
     });
 
     const req = httpMock.expectOne(`${environment.apiUrl}/auth/logout`);
@@ -60,7 +61,7 @@ describe('AuthService', () => {
       next: () => fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Logout failed');
-      }
+      },
     });
 
     const req = httpMock.expectOne(`${environment.apiUrl}/auth/logout`);
@@ -71,7 +72,7 @@ describe('AuthService', () => {
     service.requestRefreshToken().subscribe({
       next: () => {
         expect(true).toBe(true);
-      }
+      },
     });
 
     const req = httpMock.expectOne(`${environment.apiUrl}/auth/refresh-token`);
@@ -85,7 +86,7 @@ describe('AuthService', () => {
       next: () => fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Authentication session expired');
-      }
+      },
     });
 
     const req = httpMock.expectOne(`${environment.apiUrl}/auth/refresh-token`);
