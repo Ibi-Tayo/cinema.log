@@ -12,29 +12,51 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  getCurrentUser(): Observable<User> {
+    return this.http
+      .get<User>(`${environment.apiUrl}/auth/me`, { withCredentials: true })
+      .pipe(
+        catchError((error) => {
+          console.error('Failed to get current user:', error);
+          return throwError(
+            () => new Error('Failed to authenticate. Please log in.')
+          );
+        })
+      );
+  }
+
   login(): void {
     // Redirect directly to the GitHub login endpoint
     window.location.href = `${environment.apiUrl}/auth/github-login`;
   }
 
   logout(): Observable<void> {
-    return this.http.get<void>(`${environment.apiUrl}/auth/logout`, { withCredentials: true }).pipe(
-      catchError((error) => {
-        console.error('Logout failed:', error);
-        return throwError(() => new Error('Logout failed. Please try again.'));
-      })
-    );
+    return this.http
+      .get<void>(`${environment.apiUrl}/auth/logout`, { withCredentials: true })
+      .pipe(
+        catchError((error) => {
+          console.error('Logout failed:', error);
+          return throwError(
+            () => new Error('Logout failed. Please try again.')
+          );
+        })
+      );
   }
 
   requestRefreshToken(): Observable<void> {
-    return this.http.get<void>(`${environment.apiUrl}/auth/refresh-token`, { withCredentials: true }).pipe(
-      catchError((error) => {
-        console.error('Token refresh failed:', error);
-        return throwError(
-          () => new Error('Authentication session expired. Please log in again.')
-        );
+    return this.http
+      .get<void>(`${environment.apiUrl}/auth/refresh-token`, {
+        withCredentials: true,
       })
-    );
+      .pipe(
+        catchError((error) => {
+          console.error('Token refresh failed:', error);
+          return throwError(
+            () =>
+              new Error('Authentication session expired. Please log in again.')
+          );
+        })
+      );
   }
 
   getCookie(name: string): string {

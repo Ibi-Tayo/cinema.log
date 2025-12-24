@@ -29,7 +29,7 @@
         </a>
         @if (auth.currentUser) {
         <a
-          [routerLink]="['/profile', auth.currentUser.username]"
+          [routerLink]="['/profile', auth.currentUser.id]"
           routerLinkActive="active"
           ariaCurrentWhenActive="page"
           >Profile
@@ -109,7 +109,7 @@
   @if(auth.currentUser) {
   <div class="icon">
     <a
-      [routerLink]="['/profile', auth.currentUser.username]"
+      [routerLink]="['/profile', auth.currentUser.id]"
       ariaCurrentWhenActive="page"
     >
       <lord-icon

@@ -46,6 +46,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.Handle("GET /auth/logout", s.authHandler.Logout())
 	mux.Handle("GET /auth/github-callback", s.authHandler.Callback())
 	mux.Handle("GET /auth/refresh-token", s.authHandler.RefreshToken())
+	mux.Handle("GET /auth/me", s.authHandler.Me())
 
 	// Film routes
 	mux.HandleFunc("GET /films/{id}", s.filmHandler.GetFilmById)

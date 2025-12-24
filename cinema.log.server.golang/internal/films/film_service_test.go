@@ -11,9 +11,10 @@ import (
 
 // Mock FilmStore for testing
 type mockFilmStore struct {
-	getFilmByIdFunc        func(ctx context.Context, id uuid.UUID) (*domain.Film, error)
+	getFilmByIdFunc         func(ctx context.Context, id uuid.UUID) (*domain.Film, error)
 	getFilmByExternalIdFunc func(ctx context.Context, id int) (*domain.Film, error)
 	createFilmFunc          func(ctx context.Context, film domain.Film) (*domain.Film, error)
+	getFilmsForRatingFunc   func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error)
 }
 
 func (m *mockFilmStore) GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, error) {
@@ -33,6 +34,13 @@ func (m *mockFilmStore) GetFilmByExternalId(ctx context.Context, id int) (*domai
 func (m *mockFilmStore) CreateFilm(ctx context.Context, film domain.Film) (*domain.Film, error) {
 	if m.createFilmFunc != nil {
 		return m.createFilmFunc(ctx, film)
+	}
+	return nil, errors.New("not implemented")
+}
+
+func (m *mockFilmStore) GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error) {
+	if m.getFilmsForRatingFunc != nil {
+		return m.getFilmsForRatingFunc(ctx, userId, filmId)
 	}
 	return nil, errors.New("not implemented")
 }
