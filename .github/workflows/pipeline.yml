@@ -26,13 +26,18 @@ jobs:
       - name: Install dependencies
         working-directory: ./cinema.log.server.golang
         run: go mod download
+
+      - name: Install gotestsum
+        run: go install gotest.tools/gotestsum@latest
       
       - name: Run tests
         working-directory: ./cinema.log.server.golang
-        run: go test ./internal/... -v -cover
+        run: gotestsum --format testname -- ./internal/... -v -cover
       
       - name: Run tests with coverage report
         working-directory: ./cinema.log.server.golang
         run: |
-          go test ./internal/... -coverprofile=coverage.out
+          gotestsum --format standard-verbose -- ./internal/... -coverprofile=coverage.out
           go tool cover -func=coverage.out
+          echo "## Test Summary" >> $GITHUB_STEP_SUMMARY
+          go tool cover -func=coverage.out | tail -1 >> $GITHUB_STEP_SUMMARY
