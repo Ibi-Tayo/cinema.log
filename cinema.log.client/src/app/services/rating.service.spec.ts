@@ -119,6 +119,25 @@ describe('RatingService', () => {
     req.flush(mockComparisonPair);
   });
 
+  it('should compare films when equal (no winner)', () => {
+    const comparisonRequest: ComparisonRequest = {
+      userId: '456e7890-e89b-12d3-a456-426614174001',
+      filmAId: '789e0123-e89b-12d3-a456-426614174002',
+      filmBId: '789e0123-e89b-12d3-a456-426614174003',
+      wasEqual: true,
+    };
+
+    service.compareFilms(comparisonRequest).subscribe((pair) => {
+      expect(pair).toEqual(mockComparisonPair);
+    });
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/ratings/compare-films`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(comparisonRequest);
+    expect(req.request.withCredentials).toBe(true);
+    req.flush(mockComparisonPair);
+  });
+
   it('should handle error when comparing films', () => {
     const comparisonRequest: ComparisonRequest = {
       userId: 'invalid-user-id',

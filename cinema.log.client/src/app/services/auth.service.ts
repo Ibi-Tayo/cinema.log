@@ -17,8 +17,8 @@ export class AuthService {
     window.location.href = `${environment.apiUrl}/auth/github-login`;
   }
 
-  logout(): Observable<any> {
-    return this.http.get(`${environment.apiUrl}/auth/logout`, { withCredentials: true }).pipe(
+  logout(): Observable<void> {
+    return this.http.get<void>(`${environment.apiUrl}/auth/logout`, { withCredentials: true }).pipe(
       catchError((error) => {
         console.error('Logout failed:', error);
         return throwError(() => new Error('Logout failed. Please try again.'));
@@ -26,8 +26,8 @@ export class AuthService {
     );
   }
 
-  requestRefreshToken(): Observable<any> {
-    return this.http.get(`${environment.apiUrl}/auth/refresh-token`, { withCredentials: true }).pipe(
+  requestRefreshToken(): Observable<void> {
+    return this.http.get<void>(`${environment.apiUrl}/auth/refresh-token`, { withCredentials: true }).pipe(
       catchError((error) => {
         console.error('Token refresh failed:', error);
         return throwError(

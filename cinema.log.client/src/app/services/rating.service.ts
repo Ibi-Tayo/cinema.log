@@ -20,12 +20,10 @@ export interface ComparisonPair {
 }
 
 export interface ComparisonRequest {
-  id?: string;
   userId: string;
   filmAId: string;
   filmBId: string;
-  winningFilmId: string;
-  comparisonDate?: string;
+  winningFilmId?: string;
   wasEqual: boolean;
 }
 
