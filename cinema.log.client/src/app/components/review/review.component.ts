@@ -88,8 +88,12 @@ export class ReviewComponent implements OnInit {
         this.reviewText = '';
         // Redirect to profile after a short delay
         setTimeout(() => {
-          if (this.authService.currentUser) {
-            this.router.navigate(['/profile', this.authService.currentUser.id]);
+          const userId = this.authService.currentUser?.id;
+          if (userId) {
+            this.router.navigate(['/profile', userId]);
+          } else {
+            // Fallback to home if user is somehow not available
+            this.router.navigate(['/home']);
           }
         }, 2000);
       },
