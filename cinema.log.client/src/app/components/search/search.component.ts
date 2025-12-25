@@ -13,7 +13,7 @@ import { debounceTime, Subject } from 'rxjs';
   styleUrl: './search.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class SearchComponent implements OnDestroy {
+export class SearchComponent implements OnInit, OnDestroy {
   searchQuery = '';
   searchResults: Film[] = [];
   isLoading = false;
@@ -24,7 +24,9 @@ export class SearchComponent implements OnDestroy {
   constructor(
     private filmService: FilmService,
     private router: Router
-  ) {
+  ) {}
+
+  ngOnInit(): void {
     // Debounce search input to avoid excessive API calls
     this.searchSubject.pipe(debounceTime(500)).subscribe((query) => {
       this.performSearch(query);

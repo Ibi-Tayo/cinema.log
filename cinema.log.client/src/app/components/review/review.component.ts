@@ -17,6 +17,8 @@ import { ComparisonService, ComparisonRequest } from '../../services/comparison.
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ReviewComponent implements OnInit {
+  private static readonly REDIRECT_DELAY_MS = 1500;
+
   film: Film | null = null;
   isLoading = true;
   errorMessage = '';
@@ -238,7 +240,7 @@ export class ReviewComponent implements OnInit {
     if (userId) {
       setTimeout(() => {
         this.router.navigate(['/profile', userId]);
-      }, 1500);
+      }, ReviewComponent.REDIRECT_DELAY_MS);
     }
   }
 
