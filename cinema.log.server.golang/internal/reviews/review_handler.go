@@ -2,6 +2,7 @@ package reviews
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -18,6 +19,7 @@ const (
 
 type Handler struct {
 	ReviewService ReviewService
+	RatingService RatingService
 }
 
 type ReviewService interface {
@@ -27,9 +29,15 @@ type ReviewService interface {
 	DeleteReview(ctx context.Context, reviewId uuid.UUID) error
 }
 
-func NewHandler(reviewService ReviewService) *Handler {
+type RatingService interface {
+	GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
+	CreateRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID, initialRating float32) (*domain.UserFilmRating, error)
+}
+
+func NewHandler(reviewService ReviewService, ratingService RatingService) *Handler {
 	return &Handler{
 		ReviewService: reviewService,
+		RatingService: ratingService,
 	}
 }
 
@@ -82,6 +90,18 @@ func (h *Handler) CreateReview(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	// Create initial ELO rating for the film if it doesn't exist
+	_, err = h.RatingService.GetRating(r.Context(), user.ID, req.FilmId)
+	if err != nil {
+		// Rating doesn't exist, create it
+		_, err = h.RatingService.CreateRating(r.Context(), user.ID, req.FilmId, req.Rating)
+		if err != nil {
+			// Log the error but don't fail the review creation
+			// The rating can be created later
+			fmt.Printf("Failed to create initial rating: %v\n", err)
+		}
 	}
 
 	w.WriteHeader(http.StatusCreated)
