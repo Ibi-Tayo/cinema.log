@@ -1,1 +1,177 @@
-<p>review works!</p>
+<div class="review-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <lord-icon
+      src="https://cdn.lordicon.com/xjovhxra.json"
+      trigger="loop"
+      style="width: 100px; height: 100px"
+    >
+    </lord-icon>
+    <p>Loading film details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !isLoading" class="error-state">
+    <lord-icon
+      src="https://cdn.lordicon.com/tdrtiskw.json"
+      trigger="loop"
+      style="width: 80px; height: 80px"
+    >
+    </lord-icon>
+    <p>{{ errorMessage }}</p>
+    <button class="back-button" (click)="goBackToSearch()">
+      <lord-icon
+        src="https://cdn.lordicon.com/zmkotitn.json"
+        trigger="hover"
+        style="width: 24px; height: 24px"
+      >
+      </lord-icon>
+      Back to Search
+    </button>
+  </div>
+
+  <!-- Film Details & Review Form -->
+  <div *ngIf="film && !isLoading" class="review-content">
+    <!-- Header -->
+    <div class="review-header">
+      <button class="back-button" (click)="goBackToSearch()">
+        <lord-icon
+          src="https://cdn.lordicon.com/zmkotitn.json"
+          trigger="hover"
+          style="width: 24px; height: 24px"
+        >
+        </lord-icon>
+        Back to Search
+      </button>
+      <h1>Review Film</h1>
+    </div>
+
+    <!-- Film Display Section -->
+    <div class="film-section">
+      <div class="film-poster">
+        <img
+          *ngIf="film.posterUrl"
+          [src]="film.posterUrl"
+          [alt]="film.title"
+        />
+        <div *ngIf="!film.posterUrl" class="poster-placeholder">
+          <lord-icon
+            src="https://cdn.lordicon.com/ugllxeyl.json"
+            trigger="hover"
+            style="width: 100px; height: 100px"
+          >
+          </lord-icon>
+        </div>
+      </div>
+
+      <div class="film-details">
+        <h2>{{ film.title }}</h2>
+        <p class="film-year">{{ film.releaseYear }}</p>
+        <div class="film-description-section">
+          <h3>
+            <lord-icon
+              src="https://cdn.lordicon.com/fpmskzsv.json"
+              trigger="hover"
+              style="width: 24px; height: 24px"
+            >
+            </lord-icon>
+            Description
+          </h3>
+          <p class="film-description">{{ film.description }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Review Form Section -->
+    <div class="review-form-section">
+      <h3>
+        <lord-icon
+          src="https://cdn.lordicon.com/cvwrvyjv.json"
+          trigger="hover"
+          style="width: 28px; height: 28px"
+        >
+        </lord-icon>
+        Your Review
+      </h3>
+
+      <!-- Success Message -->
+      <div *ngIf="submitSuccess" class="success-message">
+        <lord-icon
+          src="https://cdn.lordicon.com/lomfljuq.json"
+          trigger="loop"
+          style="width: 60px; height: 60px"
+        >
+        </lord-icon>
+        <p>Review submitted successfully! Redirecting to your profile...</p>
+      </div>
+
+      <!-- Review Form -->
+      <div *ngIf="!submitSuccess" class="review-form">
+        <!-- Rating Section -->
+        <div class="rating-section">
+          <label>Rating (out of 5)</label>
+          <div class="star-rating">
+            <span
+              *ngFor="let star of getStars()"
+              class="star"
+              [class.selected]="star <= selectedRating"
+              [class.hover]="star <= selectedRating"
+              (click)="selectRating(star)"
+            >
+              ★
+            </span>
+          </div>
+          <p class="rating-hint">Click to rate ({{ selectedRating || 'Not rated' }})</p>
+        </div>
+
+        <!-- Review Text Section -->
+        <div class="review-text-section">
+          <label for="reviewText">Your Thoughts</label>
+          <textarea
+            id="reviewText"
+            [(ngModel)]="reviewText"
+            placeholder="Share your thoughts about this film..."
+            rows="8"
+            [disabled]="isSubmitting"
+          ></textarea>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="submitError" class="error-message">
+          <lord-icon
+            src="https://cdn.lordicon.com/tdrtiskw.json"
+            trigger="loop"
+            style="width: 24px; height: 24px"
+          >
+          </lord-icon>
+          <p>{{ submitError }}</p>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="submit-section">
+          <button
+            class="submit-button"
+            (click)="submitReview()"
+            [disabled]="isSubmitting || selectedRating === 0 || !reviewText.trim()"
+          >
+            <lord-icon
+              *ngIf="!isSubmitting"
+              src="https://cdn.lordicon.com/jvucoldz.json"
+              trigger="hover"
+              style="width: 24px; height: 24px"
+            >
+            </lord-icon>
+            <lord-icon
+              *ngIf="isSubmitting"
+              src="https://cdn.lordicon.com/xjovhxra.json"
+              trigger="loop"
+              style="width: 24px; height: 24px"
+            >
+            </lord-icon>
+            {{ isSubmitting ? 'Submitting...' : 'Submit Review' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

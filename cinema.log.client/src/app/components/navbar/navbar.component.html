@@ -10,12 +10,6 @@
       </a>
       <div class="nav-links">
         <a
-          routerLink="review"
-          routerLinkActive="active"
-          ariaCurrentWhenActive="page"
-          >Review
-        </a>
-        <a
           routerLink="search"
           routerLinkActive="active"
           ariaCurrentWhenActive="page"
@@ -44,17 +38,16 @@
 
 <div class="nav-icons">
   <div class="icon">
-    <a routerLink="review" ariaCurrentWhenActive="page">
+    <a routerLink="search" ariaCurrentWhenActive="page">
       <lord-icon
         routerLinkActive="active"
-        src="https://cdn.lordicon.com/cvwrvyjv.json"
+        src="https://cdn.lordicon.com/wjyqkiew.json"
         trigger="click"
         stroke="bold"
-        state="hover-wink"
         style="width: 30px; height: 30px"
       >
       </lord-icon>
-      <p>Reviews</p>
+      <p>Search</p>
     </a>
   </div>
   <div class="icon">
@@ -69,19 +62,6 @@
       >
       </lord-icon>
       <p>About</p>
-    </a>
-  </div>
-  <div class="icon">
-    <a routerLink="search" ariaCurrentWhenActive="page">
-      <lord-icon
-        routerLinkActive="active"
-        src="https://cdn.lordicon.com/wjyqkiew.json"
-        trigger="click"
-        stroke="bold"
-        style="width: 30px; height: 30px"
-      >
-      </lord-icon>
-      <p>Search</p>
     </a>
   </div>
   @if(auth.currentUser) {

@@ -10,7 +10,7 @@ export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: HomeComponent },
   { path: 'search', component: SearchComponent, canActivate: [AuthGuard] },
-  { path: 'review', component: ReviewComponent, canActivate: [AuthGuard] },
+  { path: 'review/:filmId', component: ReviewComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
   {
     path: 'profile/:id',
