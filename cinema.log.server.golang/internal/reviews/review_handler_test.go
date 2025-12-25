@@ -49,21 +49,42 @@ func (m *mockReviewService) DeleteReview(ctx context.Context, reviewId uuid.UUID
 	return nil
 }
 
+type mockRatingService struct {
+	getRatingFunc    func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
+	createRatingFunc func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID, initialRating float32) (*domain.UserFilmRating, error)
+}
+
+func (m *mockRatingService) GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error) {
+	if m.getRatingFunc != nil {
+		return m.getRatingFunc(ctx, userId, filmId)
+	}
+	return &domain.UserFilmRating{ID: uuid.New(), UserId: userId, FilmId: filmId}, nil
+}
+
+func (m *mockRatingService) CreateRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID, initialRating float32) (*domain.UserFilmRating, error) {
+	if m.createRatingFunc != nil {
+		return m.createRatingFunc(ctx, userId, filmId, initialRating)
+	}
+	return &domain.UserFilmRating{ID: uuid.New(), UserId: userId, FilmId: filmId, InitialRating: initialRating}, nil
+}
+
 func TestNewHandler(t *testing.T) {
-	mockSvc := &mockReviewService{}
-	handler := NewHandler(mockSvc)
+	mockReviewSvc := &mockReviewService{}
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc)
 
 	if handler == nil {
 		t.Fatal("expected non-nil handler")
 	}
-	if handler.ReviewService != mockSvc {
+	if handler.ReviewService != mockReviewSvc {
 		t.Error("expected handler to contain the provided service")
 	}
 }
 
 func TestHandler_GetAllReviews_Success(t *testing.T) {
-	mockSvc := &mockReviewService{}
-	handler := NewHandler(mockSvc)
+	mockReviewSvc := &mockReviewService{}
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc)
 
 	userId := uuid.New()
 	req := httptest.NewRequest(http.MethodGet, "/reviews/"+userId.String(), nil)
@@ -78,8 +99,9 @@ func TestHandler_GetAllReviews_Success(t *testing.T) {
 }
 
 func TestHandler_GetAllReviews_InvalidUserId(t *testing.T) {
-	mockSvc := &mockReviewService{}
-	handler := NewHandler(mockSvc)
+	mockReviewSvc := &mockReviewService{}
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc)
 
 	req := httptest.NewRequest(http.MethodGet, "/reviews/invalid", nil)
 	req.SetPathValue("userId", "invalid")
@@ -93,12 +115,13 @@ func TestHandler_GetAllReviews_InvalidUserId(t *testing.T) {
 }
 
 func TestHandler_GetAllReviews_ServiceError(t *testing.T) {
-	mockSvc := &mockReviewService{
+	mockReviewSvc := &mockReviewService{
 		getAllReviewsByUserIdFunc: func(ctx context.Context, userId uuid.UUID) ([]domain.Review, error) {
 			return nil, errors.New("database error")
 		},
 	}
-	handler := NewHandler(mockSvc)
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc)
 
 	userId := uuid.New()
 	req := httptest.NewRequest(http.MethodGet, "/reviews/"+userId.String(), nil)
@@ -113,8 +136,9 @@ func TestHandler_GetAllReviews_ServiceError(t *testing.T) {
 }
 
 func TestHandler_CreateReview_Success(t *testing.T) {
-	mockSvc := &mockReviewService{}
-	handler := NewHandler(mockSvc)
+	mockReviewSvc := &mockReviewService{}
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc)
 
 	userId := uuid.New()
 	filmId := uuid.New()
@@ -141,8 +165,9 @@ func TestHandler_CreateReview_Success(t *testing.T) {
 }
 
 func TestHandler_CreateReview_Unauthorized(t *testing.T) {
-	mockSvc := &mockReviewService{}
-	handler := NewHandler(mockSvc)
+	mockReviewSvc := &mockReviewService{}
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc)
 
 	reviewReq := map[string]interface{}{
 		"content": "Great movie!",
@@ -163,8 +188,9 @@ func TestHandler_CreateReview_Unauthorized(t *testing.T) {
 }
 
 func TestHandler_CreateReview_InvalidJSON(t *testing.T) {
-	mockSvc := &mockReviewService{}
-	handler := NewHandler(mockSvc)
+	mockReviewSvc := &mockReviewService{}
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc)
 
 	userId := uuid.New()
 	user := &domain.User{ID: userId, Name: "Test User", Username: "testuser"}
@@ -183,8 +209,9 @@ func TestHandler_CreateReview_InvalidJSON(t *testing.T) {
 }
 
 func TestHandler_UpdateReview_Success(t *testing.T) {
-	mockSvc := &mockReviewService{}
-	handler := NewHandler(mockSvc)
+	mockReviewSvc := &mockReviewService{}
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc)
 
 	userId := uuid.New()
 	reviewId := uuid.New()
@@ -213,8 +240,9 @@ func TestHandler_UpdateReview_Success(t *testing.T) {
 }
 
 func TestHandler_DeleteReview_Success(t *testing.T) {
-	mockSvc := &mockReviewService{}
-	handler := NewHandler(mockSvc)
+	mockReviewSvc := &mockReviewService{}
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc)
 
 	reviewId := uuid.New()
 	req := httptest.NewRequest(http.MethodDelete, "/reviews?id="+reviewId.String(), nil)
@@ -228,8 +256,9 @@ func TestHandler_DeleteReview_Success(t *testing.T) {
 }
 
 func TestHandler_DeleteReview_MissingReviewId(t *testing.T) {
-	mockSvc := &mockReviewService{}
-	handler := NewHandler(mockSvc)
+	mockReviewSvc := &mockReviewService{}
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc)
 
 	req := httptest.NewRequest(http.MethodDelete, "/reviews", nil)
 	w := httptest.NewRecorder()
@@ -242,8 +271,9 @@ func TestHandler_DeleteReview_MissingReviewId(t *testing.T) {
 }
 
 func TestHandler_DeleteReview_InvalidReviewId(t *testing.T) {
-	mockSvc := &mockReviewService{}
-	handler := NewHandler(mockSvc)
+	mockReviewSvc := &mockReviewService{}
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc)
 
 	req := httptest.NewRequest(http.MethodDelete, "/reviews?id=invalid", nil)
 	w := httptest.NewRecorder()
