@@ -56,4 +56,20 @@ export class FilmService {
         })
       );
   }
+
+  getFilmsForComparison(userId: string, filmId: string): Observable<Film[]> {
+    return this.http
+      .get<Film[]>(
+        `${environment.apiUrl}/films/for-comparison?userId=${userId}&filmId=${filmId}`,
+        { withCredentials: true }
+      )
+      .pipe(
+        catchError((error) => {
+          console.error('Error fetching films for comparison:', error);
+          return throwError(
+            () => new Error('Failed to fetch films for comparison. Please try again later.')
+          );
+        })
+      );
+  }
 }

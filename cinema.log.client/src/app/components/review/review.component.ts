@@ -5,6 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FilmService, Film } from '../../services/film.service';
 import { ReviewService, CreateReviewRequest } from '../../services/review.service';
 import { AuthService } from '../../services/auth.service';
+import { RatingService, UserFilmRating } from '../../services/rating.service';
+import { ComparisonService, ComparisonRequest } from '../../services/comparison.service';
 
 @Component({
   selector: 'app-review',
@@ -26,12 +28,26 @@ export class ReviewComponent implements OnInit {
   submitSuccess = false;
   submitError = '';
 
+  // ELO rating data
+  filmRating: UserFilmRating | null = null;
+  hasRating = false;
+
+  // Comparison data
+  filmsForComparison: Film[] = [];
+  isLoadingComparisons = false;
+  comparisonError = '';
+  currentComparisonIndex = 0;
+  isSubmittingComparison = false;
+  showComparisons = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private filmService: FilmService,
     private reviewService: ReviewService,
-    private authService: AuthService
+    private authService: AuthService,
+    private ratingService: RatingService,
+    private comparisonService: ComparisonService
   ) {}
 
   ngOnInit(): void {
@@ -50,11 +66,29 @@ export class ReviewComponent implements OnInit {
       next: (film) => {
         this.film = film;
         this.isLoading = false;
+        // Check if the user has already rated this film
+        this.checkForExistingRating(filmId);
       },
       error: (error) => {
         console.error('Error loading film:', error);
         this.errorMessage = 'Failed to load film details. Please try again.';
         this.isLoading = false;
+      },
+    });
+  }
+
+  checkForExistingRating(filmId: string): void {
+    const userId = this.authService.currentUser?.id;
+    if (!userId) return;
+
+    this.ratingService.getRating(userId, filmId).subscribe({
+      next: (rating) => {
+        this.filmRating = rating;
+        this.hasRating = true;
+      },
+      error: () => {
+        // Rating doesn't exist yet, which is fine
+        this.hasRating = false;
       },
     });
   }
@@ -86,16 +120,11 @@ export class ReviewComponent implements OnInit {
         // Reset form
         this.selectedRating = 0;
         this.reviewText = '';
-        // Redirect to profile after a short delay
-        setTimeout(() => {
-          const userId = this.authService.currentUser?.id;
-          if (userId) {
-            this.router.navigate(['/profile', userId]);
-          } else {
-            // Fallback to home if user is somehow not available
-            this.router.navigate(['/home']);
-          }
-        }, 2000);
+        // Load the rating and comparisons
+        if (this.film) {
+          this.checkForExistingRating(this.film.id);
+          this.loadFilmsForComparison();
+        }
       },
       error: (error) => {
         console.error('Error submitting review:', error);
@@ -111,5 +140,109 @@ export class ReviewComponent implements OnInit {
 
   goBackToSearch(): void {
     this.router.navigate(['/search']);
+  }
+
+  loadFilmsForComparison(): void {
+    const userId = this.authService.currentUser?.id;
+    if (!userId || !this.film) return;
+
+    this.isLoadingComparisons = true;
+    this.comparisonError = '';
+    this.showComparisons = true;
+
+    this.filmService.getFilmsForComparison(userId, this.film.id).subscribe({
+      next: (films) => {
+        this.filmsForComparison = films;
+        this.isLoadingComparisons = false;
+        this.currentComparisonIndex = 0;
+      },
+      error: (error) => {
+        console.error('Error loading films for comparison:', error);
+        this.comparisonError = 'Failed to load films for comparison.';
+        this.isLoadingComparisons = false;
+      },
+    });
+  }
+
+  getCurrentComparisonFilm(): Film | null {
+    if (this.currentComparisonIndex < this.filmsForComparison.length) {
+      return this.filmsForComparison[this.currentComparisonIndex];
+    }
+    return null;
+  }
+
+  submitComparison(result: 'better' | 'worse' | 'same'): void {
+    const userId = this.authService.currentUser?.id;
+    if (!userId || !this.film) return;
+
+    const comparisonFilm = this.getCurrentComparisonFilm();
+    if (!comparisonFilm) return;
+
+    this.isSubmittingComparison = true;
+    this.comparisonError = '';
+
+    let winningFilmId: string;
+    let wasEqual = false;
+
+    if (result === 'better') {
+      winningFilmId = this.film.id;
+    } else if (result === 'worse') {
+      winningFilmId = comparisonFilm.id;
+    } else {
+      // same
+      winningFilmId = this.film.id; // For equal, we'll use the current film's ID
+      wasEqual = true;
+    }
+
+    const comparisonRequest: ComparisonRequest = {
+      userId: userId,
+      filmAId: this.film.id,
+      filmBId: comparisonFilm.id,
+      winningFilmId: winningFilmId,
+      wasEqual: wasEqual,
+    };
+
+    this.comparisonService.compareFilms(comparisonRequest).subscribe({
+      next: () => {
+        this.isSubmittingComparison = false;
+        // Refresh the rating
+        if (this.film) {
+          this.checkForExistingRating(this.film.id);
+        }
+        // Move to next comparison or finish
+        if (this.currentComparisonIndex < this.filmsForComparison.length - 1) {
+          this.currentComparisonIndex++;
+        } else {
+          // All comparisons done, redirect to profile
+          this.finishComparisons();
+        }
+      },
+      error: (error) => {
+        console.error('Error submitting comparison:', error);
+        this.comparisonError = 'Failed to submit comparison. Please try again.';
+        this.isSubmittingComparison = false;
+      },
+    });
+  }
+
+  skipComparison(): void {
+    if (this.currentComparisonIndex < this.filmsForComparison.length - 1) {
+      this.currentComparisonIndex++;
+    } else {
+      this.finishComparisons();
+    }
+  }
+
+  finishComparisons(): void {
+    const userId = this.authService.currentUser?.id;
+    if (userId) {
+      setTimeout(() => {
+        this.router.navigate(['/profile', userId]);
+      }, 1500);
+    }
+  }
+
+  getComparisonProgress(): string {
+    return `${this.currentComparisonIndex + 1} / ${this.filmsForComparison.length}`;
   }
 }
