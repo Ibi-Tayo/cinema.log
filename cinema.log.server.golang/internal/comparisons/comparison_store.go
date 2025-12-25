@@ -1,12 +1,12 @@
 package comparisons
 
 import (
-"context"
-"database/sql"
-"errors"
+	"context"
+	"database/sql"
+	"errors"
 
-"cinema.log.server.golang/internal/domain"
-"github.com/google/uuid"
+	"cinema.log.server.golang/internal/domain"
+	"github.com/google/uuid"
 )
 
 var (
