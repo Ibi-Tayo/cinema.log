@@ -17,8 +17,9 @@ var (
 )
 
 type Handler struct {
-	FilmService   FilmService
-	RatingService RatingService
+	FilmService       FilmService
+	RatingService     RatingService
+	ComparisonService ComparisonService
 }
 
 type FilmService interface {
@@ -32,9 +33,15 @@ type RatingService interface {
 	FilterRatingsForComparison([]domain.UserFilmRating) []domain.UserFilmRating
 }
 
-func NewHandler(filmService FilmService) *Handler {
+type ComparisonService interface {
+	HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error)
+}
+
+func NewHandler(filmService FilmService, ratingService RatingService, comparisonService ComparisonService) *Handler {
 	return &Handler{
-		FilmService: filmService,
+		FilmService:       filmService,
+		RatingService:     ratingService,
+		ComparisonService: comparisonService,
 	}
 }
 
@@ -95,4 +102,57 @@ func (h *Handler) GetFilmsForRating(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	utils.SendJSON(w, films)
+}
+
+func (h *Handler) GetFilmsForComparison(w http.ResponseWriter, r *http.Request) {
+	// Get userId and filmId from query parameters
+	userIDStr := r.URL.Query().Get("userId")
+	if userIDStr == "" {
+		http.Error(w, "userId is required", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := utils.ParseUUID(userIDStr)
+	if err != nil {
+		http.Error(w, "invalid userId", http.StatusBadRequest)
+		return
+	}
+
+	filmIDStr := r.URL.Query().Get("filmId")
+	if filmIDStr == "" {
+		http.Error(w, "filmId is required", http.StatusBadRequest)
+		return
+	}
+
+	filmID, err := utils.ParseUUID(filmIDStr)
+	if err != nil {
+		http.Error(w, "invalid filmId", http.StatusBadRequest)
+		return
+	}
+
+	// Get films for rating that the user has already rated (excluding the current film)
+	candidateFilms, err := h.FilmService.GetFilmsForRating(r.Context(), userID, filmID)
+	if err != nil {
+		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Filter out films that have already been compared
+	var filmsForComparison []domain.Film
+	for _, film := range candidateFilms {
+		hasBeenCompared, err := h.ComparisonService.HasBeenCompared(r.Context(), userID, filmID, film.ID)
+		if err != nil {
+			log.Printf("error checking comparison history: %v", err)
+			continue
+		}
+		if !hasBeenCompared {
+			filmsForComparison = append(filmsForComparison, film)
+		}
+		// Limit to 5 films
+		if len(filmsForComparison) >= 5 {
+			break
+		}
+	}
+
+	utils.SendJSON(w, filmsForComparison)
 }
