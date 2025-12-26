@@ -157,7 +157,7 @@ func (*Handler) setCookies(w http.ResponseWriter, jwt string, refreshToken strin
 		HttpOnly: true,
 		Secure:   false, // Set to true in production with HTTPS
 		SameSite: http.SameSiteLaxMode,
-		MaxAge:   600,
+		MaxAge:   86400, // 24 hours to match JWT expiration
 	})
 	http.SetCookie(w, &http.Cookie{
 		Name:     "cinema-log-refresh-token",
