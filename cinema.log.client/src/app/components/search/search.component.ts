@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FilmService, Film } from '../../services/film.service';
@@ -8,7 +8,7 @@ import { debounceTime, Subject } from 'rxjs';
 @Component({
   selector: 'app-search',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

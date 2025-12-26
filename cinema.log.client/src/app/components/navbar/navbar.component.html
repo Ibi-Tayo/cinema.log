@@ -15,9 +15,9 @@
           ariaCurrentWhenActive="page"
           >Search
         </a>
-        @if (auth.currentUser) {
+        @if (currentUser) {
         <a
-          [routerLink]="['/profile', auth.currentUser.id]"
+          [routerLink]="['/profile', currentUser.id]"
           routerLinkActive="active"
           ariaCurrentWhenActive="page"
           >Profile
@@ -64,10 +64,10 @@
       <p>About</p>
     </a>
   </div>
-  @if(auth.currentUser) {
+  @if(currentUser) {
   <div class="icon">
     <a
-      [routerLink]="['/profile', auth.currentUser.id]"
+      [routerLink]="['/profile', currentUser.id]"
       ariaCurrentWhenActive="page"
     >
       <lord-icon

@@ -7,7 +7,7 @@
         trigger="loop"
         delay="2000"
         style="width: 80px; height: 80px"
-      >
+        >
       </lord-icon>
       <h1>Search for Films</h1>
       <p class="subtitle">Find films to review and rate</p>
@@ -20,7 +20,7 @@
           src="https://cdn.lordicon.com/wjyqkiew.json"
           trigger="hover"
           style="width: 24px; height: 24px"
-        >
+          >
         </lord-icon>
         <input
           type="text"
@@ -28,76 +28,88 @@
           (input)="onSearchInput()"
           placeholder="Search for a film by title..."
           class="search-input"
-        />
+          />
       </div>
     </div>
 
     <!-- Loading State -->
-    <div *ngIf="isLoading" class="loading-state">
-      <lord-icon
-        src="https://cdn.lordicon.com/xjovhxra.json"
-        trigger="loop"
-        style="width: 80px; height: 80px"
-      >
-      </lord-icon>
-      <p>Searching for films...</p>
-    </div>
+    @if (isLoading) {
+      <div class="loading-state">
+        <lord-icon
+          src="https://cdn.lordicon.com/xjovhxra.json"
+          trigger="loop"
+          style="width: 80px; height: 80px"
+          >
+        </lord-icon>
+        <p>Searching for films...</p>
+      </div>
+    }
 
     <!-- Error State -->
-    <div *ngIf="errorMessage && !isLoading" class="error-state">
-      <lord-icon
-        src="https://cdn.lordicon.com/tdrtiskw.json"
-        trigger="loop"
-        style="width: 60px; height: 60px"
-      >
-      </lord-icon>
-      <p>{{ errorMessage }}</p>
-    </div>
+    @if (errorMessage && !isLoading) {
+      <div class="error-state">
+        <lord-icon
+          src="https://cdn.lordicon.com/tdrtiskw.json"
+          trigger="loop"
+          style="width: 60px; height: 60px"
+          >
+        </lord-icon>
+        <p>{{ errorMessage }}</p>
+      </div>
+    }
 
     <!-- Search Results -->
-    <div *ngIf="searchResults.length > 0 && !isLoading" class="search-results">
-      <h2>Search Results ({{ searchResults.length }})</h2>
-      <div class="film-grid">
-        <div
-          *ngFor="let film of searchResults"
-          class="film-card"
-          (click)="selectFilm(film)"
-        >
-          <div class="film-poster">
-            <img
-              *ngIf="film.posterUrl"
-              [src]="film.posterUrl"
-              [alt]="film.title"
-            />
-            <div *ngIf="!film.posterUrl" class="poster-placeholder">
-              <lord-icon
-                src="https://cdn.lordicon.com/ugllxeyl.json"
-                trigger="hover"
-                style="width: 60px; height: 60px"
+    @if (searchResults.length > 0 && !isLoading) {
+      <div class="search-results">
+        <h2>Search Results ({{ searchResults.length }})</h2>
+        <div class="film-grid">
+          @for (film of searchResults; track film) {
+            <div
+              class="film-card"
+              (click)="selectFilm(film)"
               >
-              </lord-icon>
+              <div class="film-poster">
+                @if (film.posterUrl) {
+                  <img
+                    [src]="film.posterUrl"
+                    [alt]="film.title"
+                    />
+                }
+                @if (!film.posterUrl) {
+                  <div class="poster-placeholder">
+                    <lord-icon
+                      src="https://cdn.lordicon.com/ugllxeyl.json"
+                      trigger="hover"
+                      style="width: 60px; height: 60px"
+                      >
+                    </lord-icon>
+                  </div>
+                }
+              </div>
+              <div class="film-info">
+                <h3>{{ film.title }}</h3>
+                <p class="film-year">{{ film.releaseYear }}</p>
+                <p class="film-description">{{ film.description }}</p>
+              </div>
             </div>
-          </div>
-          <div class="film-info">
-            <h3>{{ film.title }}</h3>
-            <p class="film-year">{{ film.releaseYear }}</p>
-            <p class="film-description">{{ film.description }}</p>
-          </div>
+          }
         </div>
       </div>
-    </div>
+    }
 
     <!-- No Search Yet State -->
-    <div *ngIf="!hasSearched && !isLoading && searchResults.length === 0" class="empty-state">
-      <lord-icon
-        src="https://cdn.lordicon.com/fpmskzsv.json"
-        trigger="loop"
-        delay="2000"
-        style="width: 100px; height: 100px"
-      >
-      </lord-icon>
-      <p class="empty-title">Start Your Search</p>
-      <p class="empty-subtitle">Type in the search box above to find films</p>
-    </div>
+    @if (!hasSearched && !isLoading && searchResults.length === 0) {
+      <div class="empty-state">
+        <lord-icon
+          src="https://cdn.lordicon.com/fpmskzsv.json"
+          trigger="loop"
+          delay="2000"
+          style="width: 100px; height: 100px"
+          >
+        </lord-icon>
+        <p class="empty-title">Start Your Search</p>
+        <p class="empty-subtitle">Type in the search box above to find films</p>
+      </div>
+    }
   </div>
 </div>
