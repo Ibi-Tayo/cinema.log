@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"cinema.log.server.golang/internal/domain"
+	"cinema.log.server.golang/internal/middleware"
 	"github.com/google/uuid"
 )
 
@@ -153,7 +154,7 @@ func TestHandler_CreateReview_Success(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/reviews", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	ctx := context.WithValue(req.Context(), keyUser, user)
+	ctx := context.WithValue(req.Context(), middleware.KeyUser, user)
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
@@ -197,7 +198,7 @@ func TestHandler_CreateReview_InvalidJSON(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/reviews", strings.NewReader("invalid json"))
 	req.Header.Set("Content-Type", "application/json")
-	ctx := context.WithValue(req.Context(), keyUser, user)
+	ctx := context.WithValue(req.Context(), middleware.KeyUser, user)
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
@@ -225,10 +226,10 @@ func TestHandler_UpdateReview_Success(t *testing.T) {
 	}
 	body, _ := json.Marshal(updateReq)
 
-	req := httptest.NewRequest(http.MethodPut, "/reviews/"+reviewId.String(), bytes.NewReader(body))
+	req := httptest.NewRequest(http.MethodPut, "/reviews/"+ reviewId.String(), bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.SetPathValue("id", reviewId.String())
-	ctx := context.WithValue(req.Context(), keyUser, user)
+	ctx := context.WithValue(req.Context(), middleware.KeyUser, user)
 	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 

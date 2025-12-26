@@ -7,14 +7,9 @@ import (
 	"time"
 
 	"cinema.log.server.golang/internal/domain"
+	"cinema.log.server.golang/internal/middleware"
 	"cinema.log.server.golang/internal/utils"
 	"github.com/google/uuid"
-)
-
-type key int
-
-const (
-	keyUser key = iota
 )
 
 type Handler struct {
@@ -60,7 +55,7 @@ func (h *Handler) GetAllReviews(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) CreateReview(w http.ResponseWriter, r *http.Request) {
 	// Get authenticated user from context
-	user, ok := r.Context().Value(keyUser).(*domain.User)
+	user, ok := r.Context().Value(middleware.KeyUser).(*domain.User)
 	if !ok || user == nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -110,7 +105,7 @@ func (h *Handler) CreateReview(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) UpdateReview(w http.ResponseWriter, r *http.Request) {
 	// Get authenticated user from context
-	user, ok := r.Context().Value(keyUser).(*domain.User)
+	user, ok := r.Context().Value(middleware.KeyUser).(*domain.User)
 	if !ok || user == nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
