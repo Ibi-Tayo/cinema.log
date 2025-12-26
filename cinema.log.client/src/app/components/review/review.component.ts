@@ -106,6 +106,7 @@ export class ReviewComponent implements OnInit {
     this.selectedRating = rating;
   }
 
+  // TODO: Implement edit/update review functionality
   submitReview(): void {
     if (!this.film || this.selectedRating === 0 || !this.reviewText.trim()) {
       this.submitError = 'Please provide both a rating and a review.';
