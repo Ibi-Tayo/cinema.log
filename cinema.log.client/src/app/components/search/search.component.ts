@@ -1,9 +1,15 @@
-import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  CUSTOM_ELEMENTS_SCHEMA,
+} from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FilmService, Film } from '../../services/film.service';
 import { debounceTime, Subject } from 'rxjs';
+import { getTMDBPosterUrl, TMDBPosterSize } from '../../utils/tmdb-image.util';
 
 @Component({
   selector: 'app-search',
@@ -21,10 +27,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   hasSearched = false;
   private searchSubject = new Subject<string>();
 
-  constructor(
-    private filmService: FilmService,
-    private router: Router
-  ) {}
+  constructor(private filmService: FilmService, private router: Router) {}
 
   ngOnInit(): void {
     // Debounce search input to avoid excessive API calls
@@ -76,5 +79,17 @@ export class SearchComponent implements OnInit, OnDestroy {
   selectFilm(film: Film): void {
     // Navigate to review page with film ID
     this.router.navigate(['/review', film.id]);
+  }
+
+  /**
+   * Gets the TMDB poster URL for a film with specified size
+   * @param posterPath
+   * @param size - note that it should be a bit smaller than detail view
+   */
+  getPosterUrl(
+    posterPath: string | null | undefined,
+    size: TMDBPosterSize = 'w780'
+  ): string {
+    return getTMDBPosterUrl(posterPath, size);
   }
 }

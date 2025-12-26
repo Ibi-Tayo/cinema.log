@@ -7,6 +7,7 @@ import { FilmService, Film } from '../../services/film.service';
 import { AuthService } from '../../services/auth.service';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { getTMDBPosterUrl, TMDBPosterSize } from '../../utils/tmdb-image.util';
 
 interface ReviewWithFilm extends Review {
   film?: Film;
@@ -107,5 +108,17 @@ export class ProfileComponent implements OnInit {
     return Array(5)
       .fill('star')
       .map((_, i) => (i < rating ? 'full' : 'empty'));
+  }
+
+  /**
+   * Gets the TMDB poster URL for a film with specified size
+   * @param posterPath - The poster path from the film
+   * @param size - The desired image size (default: 'w342' for carousel display)
+   */
+  getPosterUrl(
+    posterPath: string | null | undefined,
+    size: TMDBPosterSize = 'w342'
+  ): string {
+    return getTMDBPosterUrl(posterPath, size);
   }
 }

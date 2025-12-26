@@ -3,10 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FilmService, Film } from '../../services/film.service';
-import { ReviewService, CreateReviewRequest } from '../../services/review.service';
+import {
+  ReviewService,
+  CreateReviewRequest,
+} from '../../services/review.service';
 import { AuthService } from '../../services/auth.service';
 import { RatingService, UserFilmRating } from '../../services/rating.service';
-import { ComparisonService, ComparisonRequest } from '../../services/comparison.service';
+import {
+  ComparisonService,
+  ComparisonRequest,
+} from '../../services/comparison.service';
+import { getTMDBPosterUrl, TMDBPosterSize } from '../../utils/tmdb-image.util';
 
 @Component({
   selector: 'app-review',
@@ -22,7 +29,7 @@ export class ReviewComponent implements OnInit {
   film: Film | null = null;
   isLoading = true;
   errorMessage = '';
-  
+
   // Review form data
   selectedRating = 0;
   reviewText = '';
@@ -245,6 +252,20 @@ export class ReviewComponent implements OnInit {
   }
 
   getComparisonProgress(): string {
-    return `${this.currentComparisonIndex + 1} / ${this.filmsForComparison.length}`;
+    return `${this.currentComparisonIndex + 1} / ${
+      this.filmsForComparison.length
+    }`;
+  }
+
+  /**
+   * Gets the TMDB poster URL for a film with specified size
+   * @param posterPath
+   * @param size
+   */
+  getPosterUrl(
+    posterPath: string | null | undefined,
+    size: TMDBPosterSize = 'original'
+  ): string {
+    return getTMDBPosterUrl(posterPath, size);
   }
 }
