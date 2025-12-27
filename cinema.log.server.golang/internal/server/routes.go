@@ -4,14 +4,8 @@ import (
 	"context"
 	"net/http"
 	"os"
-)
 
-type key int
-
-const (
-	keyPrincipalID key = iota
-	keyUser
-	// ...
+	"cinema.log.server.golang/internal/middleware"
 )
 
 // isAuthExempt checks if a path should bypass authentication
@@ -52,6 +46,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("GET /films/{id}", s.filmHandler.GetFilmById)
 	mux.HandleFunc("GET /films/search", s.filmHandler.GetFilmsFromExternal) // query param name = "f"
 	mux.HandleFunc("GET /films/candidates-for-comparison", s.filmHandler.GetFilmsForRating)
+	mux.HandleFunc("GET /films/for-comparison", s.filmHandler.GetFilmsForComparison) // query params: userId, filmId
 
 	// Review routes
 	mux.HandleFunc("GET /reviews/{userId}", s.reviewHandler.GetAllReviews)
@@ -114,7 +109,7 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		// so that downstream handlers can extract user from context
-		ctx := context.WithValue(r.Context(), keyUser, user)
+		ctx := context.WithValue(r.Context(), middleware.KeyUser, user)
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)

@@ -1,6 +1,7 @@
 <div class="profile-container">
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-state">
+  @if (isLoading) {
+  <div class="loading-state">
     <lord-icon
       src="https://cdn.lordicon.com/xjovhxra.json"
       trigger="loop"
@@ -9,9 +10,11 @@
     </lord-icon>
     <p>Loading profile...</p>
   </div>
+  }
 
   <!-- Error State -->
-  <div *ngIf="errorMessage && !isLoading" class="error-state">
+  @if (errorMessage && !isLoading) {
+  <div class="error-state">
     <lord-icon
       src="https://cdn.lordicon.com/tdrtiskw.json"
       trigger="loop"
@@ -20,9 +23,11 @@
     </lord-icon>
     <p>{{ errorMessage }}</p>
   </div>
+  }
 
   <!-- Profile Content -->
-  <div *ngIf="user && !isLoading" class="profile-content">
+  @if (user && !isLoading) {
+  <div class="profile-content">
     <!-- User Header -->
     <div class="profile-header">
       <div class="profile-avatar">
@@ -44,7 +49,6 @@
         </div>
       </div>
     </div>
-
     <!-- Recent Reviews Section -->
     <div class="recent-reviews-section">
       <h2>
@@ -56,9 +60,9 @@
         </lord-icon>
         Recently Reviewed Films
       </h2>
-
       <!-- No Reviews Placeholder -->
-      <div *ngIf="recentReviews.length === 0" class="no-reviews-placeholder">
+      @if (recentReviews.length === 0) {
+      <div class="no-reviews-placeholder">
         <lord-icon
           src="https://cdn.lordicon.com/fpmskzsv.json"
           trigger="loop"
@@ -70,67 +74,13 @@
           Start reviewing films to see them appear here
         </p>
       </div>
-
+      }
       <!-- Reviews Carousel -->
-      <div *ngIf="recentReviews.length > 0" class="carousel-container">
+      @if (recentReviews.length > 0) {
+      <div class="carousel-container">
         <button
           class="carousel-button prev"
           (click)="previousCarouselSlide()"
-          [disabled]="recentReviews.length <= 1"
-        >
-          <lord-icon
-            src="https://cdn.lordicon.com/zmkotitn.json"
-            trigger="hover"
-            style="width: 40px; height: 40px"
-          >
-          </lord-icon>
-        </button>
-
-        <div class="carousel-track">
-          <div
-            *ngFor="let review of recentReviews; let i = index"
-            class="carousel-slide"
-            [class.active]="i === currentCarouselIndex"
-          >
-            <div class="review-card">
-              <div class="film-poster">
-                <img
-                  *ngIf="review.film?.posterUrl"
-                  [src]="review.film?.posterUrl"
-                  [alt]="review.film?.title || 'Film poster'"
-                />
-                <div *ngIf="!review.film?.posterUrl" class="poster-placeholder">
-                  <lord-icon
-                    src="https://cdn.lordicon.com/ugllxeyl.json"
-                    trigger="hover"
-                    style="width: 80px; height: 80px"
-                  >
-                  </lord-icon>
-                </div>
-              </div>
-              <div class="review-details">
-                <h3>{{ review.film?.title || "Unknown Film" }}</h3>
-                <p class="review-date">
-                  {{ review.date | date : "MMM d, yyyy" }}
-                </p>
-                <div class="rating">
-                  <span
-                    *ngFor="let star of getStars(review.rating)"
-                    class="star"
-                    [class.filled]="star === 'full'"
-                  >
-                    ★
-                  </span>
-                </div>
-                <p class="review-content">{{ review.title }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <button
-          class="carousel-button next"
-          (click)="nextCarouselSlide()"
           [disabled]="recentReviews.length <= 1"
         >
           <lord-icon
@@ -140,17 +90,71 @@
           >
           </lord-icon>
         </button>
-
+        <div class="carousel-track">
+          @for (review of recentReviews; track review; let i = $index) {
+          <div
+            class="carousel-slide"
+            [class.active]="i === currentCarouselIndex"
+          >
+            <div class="review-card">
+              <div class="film-poster" (click)="selectFilm(review.film!.id)">
+                @if (review.film?.posterUrl) {
+                <img
+                  [src]="getPosterUrl(review.film?.posterUrl)"
+                  [alt]="review.film?.title || 'Film poster'"
+                />
+                } @if (!review.film?.posterUrl) {
+                <div class="poster-placeholder">
+                  <lord-icon
+                    src="https://cdn.lordicon.com/ugllxeyl.json"
+                    trigger="hover"
+                    style="width: 80px; height: 80px"
+                  >
+                  </lord-icon>
+                </div>
+                }
+              </div>
+              <div class="review-details">
+                <h3>{{ review.film?.title || "Unknown Film" }}</h3>
+                <p class="review-date">
+                  {{ review.date | date : "MMM d, yyyy" }}
+                </p>
+                <div class="rating">
+                  @for (star of getStars(review.rating); track star) {
+                  <span class="star" [class.filled]="star === 'full'"> ★ </span>
+                  }
+                </div>
+                <p class="review-content">{{ review.title }}</p>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+        <button
+          class="carousel-button next"
+          (click)="nextCarouselSlide()"
+          [disabled]="recentReviews.length <= 1"
+        >
+          <lord-icon
+            src="https://cdn.lordicon.com/zmkotitn.json"
+            trigger="hover"
+            style="width: 40px; height: 40px;"
+          >
+          </lord-icon>
+        </button>
         <!-- Carousel Indicators -->
         <div class="carousel-indicators">
+          @for (review of recentReviews; track review; let i = $index) {
           <button
-            *ngFor="let review of recentReviews; let i = index"
             class="indicator"
             [class.active]="i === currentCarouselIndex"
             (click)="goToSlide(i)"
           ></button>
+          }
         </div>
       </div>
+      }
     </div>
   </div>
+  }
 </div>

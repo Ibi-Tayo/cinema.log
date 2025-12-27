@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"cinema.log.server.golang/internal/domain"
+	"cinema.log.server.golang/internal/middleware"
 	"github.com/google/uuid"
 )
 
@@ -26,8 +27,20 @@ func (m *mockRatingService) GetRatingsForComparison(ctx context.Context, userId 
 	return []domain.UserFilmRating{{ID: uuid.New()}}, nil
 }
 
-func (m *mockRatingService) UpdateRatings(ctx context.Context, ratings domain.ComparisonPair, winnerId uuid.UUID) (*domain.ComparisonPair, error) {
+func (m *mockRatingService) UpdateRatings(ctx context.Context, ratings domain.ComparisonPair, comparison domain.ComparisonHistory) (*domain.ComparisonPair, error) {
 	return &ratings, nil
+}
+
+func (m *mockRatingService) CreateComparison(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error) {
+	return &comparison, nil
+}
+
+func (m *mockRatingService) HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error) {
+	return false, nil
+}
+
+func (m *mockRatingService) GetComparisonHistory(ctx context.Context, userId uuid.UUID) ([]domain.ComparisonHistory, error) {
+	return nil, errors.New("not implemented")
 }
 
 func TestHandler_GetRating_MissingUserId(t *testing.T) {
@@ -147,6 +160,7 @@ func TestHandler_CompareFilms_Success(t *testing.T) {
 	userId := uuid.New()
 	filmAId := uuid.New()
 	filmBId := uuid.New()
+	user := &domain.User{ID: userId, Name: "Test User", Username: "testuser"}
 
 	comparison := `{
 		"userId": "` + userId.String() + `",
@@ -157,6 +171,8 @@ func TestHandler_CompareFilms_Success(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/ratings/compare-films", strings.NewReader(comparison))
 	req.Header.Set("Content-Type", "application/json")
+	ctx := context.WithValue(req.Context(), middleware.KeyUser, user)
+	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
 	handler.CompareFilms(w, req)
@@ -168,9 +184,13 @@ func TestHandler_CompareFilms_Success(t *testing.T) {
 
 func TestHandler_CompareFilms_InvalidJSON(t *testing.T) {
 	handler := NewHandler(&mockRatingService{})
+	userId := uuid.New()
+	user := &domain.User{ID: userId, Name: "Test User", Username: "testuser"}
 
 	req := httptest.NewRequest(http.MethodPost, "/ratings/compare-films", strings.NewReader("invalid json"))
 	req.Header.Set("Content-Type", "application/json")
+	ctx := context.WithValue(req.Context(), middleware.KeyUser, user)
+	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
 	handler.CompareFilms(w, req)

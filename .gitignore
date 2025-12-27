@@ -14,3 +14,5 @@ cinema.log.server/cinema.log.test/bin
 cinema.log.client/node_modules
 cinema.log.client/.angular
 cinema.log.client/.vscode
+*.zsh
+.vscode/launch.json

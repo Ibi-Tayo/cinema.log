@@ -1,6 +1,6 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, User } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -9,6 +9,14 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './navbar.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
+  currentUser: User | null = null;
+
   constructor(public auth: AuthService) {}
+
+  ngOnInit(): void {
+    this.auth.getCurrentUser().subscribe((user) => {
+      this.currentUser = user;
+    });
+  }
 }

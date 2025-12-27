@@ -37,6 +37,7 @@ func (m *mockFilmService) GetFilmsForRating(ctx context.Context, userId uuid.UUI
 type mockRatingService struct {
 	getAllRatingsFunc              func(ctx context.Context) ([]domain.UserFilmRating, error)
 	filterRatingsForComparisonFunc func([]domain.UserFilmRating) []domain.UserFilmRating
+	hasBeenComparedFunc            func(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error)
 }
 
 func (m *mockRatingService) GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error) {
@@ -54,9 +55,17 @@ func (m *mockRatingService) FilterRatingsForComparison(ratings []domain.UserFilm
 	return ratings
 }
 
+func (m *mockRatingService) HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error) {
+	if m.hasBeenComparedFunc != nil {
+		return m.hasBeenComparedFunc(ctx, userId, filmAId, filmBId)
+	}
+	return false, nil
+}
+
 func TestNewHandler_Films(t *testing.T) {
 	mockFilmSvc := &mockFilmService{}
-	handler := NewHandler(mockFilmSvc)
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockFilmSvc, mockRatingSvc)
 
 	if handler == nil {
 		t.Fatal("expected non-nil handler")
@@ -68,7 +77,8 @@ func TestNewHandler_Films(t *testing.T) {
 
 func TestHandler_GetFilmById_Success(t *testing.T) {
 	mockFilmSvc := &mockFilmService{}
-	handler := NewHandler(mockFilmSvc)
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockFilmSvc, mockRatingSvc)
 
 	filmId := uuid.New()
 	req := httptest.NewRequest(http.MethodGet, "/films/"+filmId.String(), nil)
@@ -84,7 +94,8 @@ func TestHandler_GetFilmById_Success(t *testing.T) {
 
 func TestHandler_GetFilmById_InvalidUUID(t *testing.T) {
 	mockFilmSvc := &mockFilmService{}
-	handler := NewHandler(mockFilmSvc)
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockFilmSvc, mockRatingSvc)
 
 	req := httptest.NewRequest(http.MethodGet, "/films/invalid", nil)
 	req.SetPathValue("id", "invalid")
@@ -103,7 +114,8 @@ func TestHandler_GetFilmById_NotFound(t *testing.T) {
 			return nil, ErrFilmNotFound
 		},
 	}
-	handler := NewHandler(mockFilmSvc)
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockFilmSvc, mockRatingSvc)
 
 	filmId := uuid.New()
 	req := httptest.NewRequest(http.MethodGet, "/films/"+filmId.String(), nil)
@@ -123,7 +135,8 @@ func TestHandler_GetFilmById_ServiceError(t *testing.T) {
 			return nil, errors.New("database error")
 		},
 	}
-	handler := NewHandler(mockFilmSvc)
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockFilmSvc, mockRatingSvc)
 
 	filmId := uuid.New()
 	req := httptest.NewRequest(http.MethodGet, "/films/"+filmId.String(), nil)
@@ -139,7 +152,8 @@ func TestHandler_GetFilmById_ServiceError(t *testing.T) {
 
 func TestHandler_GetFilmsFromExternal_Success(t *testing.T) {
 	mockFilmSvc := &mockFilmService{}
-	handler := NewHandler(mockFilmSvc)
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockFilmSvc, mockRatingSvc)
 
 	req := httptest.NewRequest(http.MethodGet, "/films/search?f=inception", nil)
 	w := httptest.NewRecorder()
@@ -153,7 +167,8 @@ func TestHandler_GetFilmsFromExternal_Success(t *testing.T) {
 
 func TestHandler_GetFilmsFromExternal_MissingQuery(t *testing.T) {
 	mockFilmSvc := &mockFilmService{}
-	handler := NewHandler(mockFilmSvc)
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockFilmSvc, mockRatingSvc)
 
 	req := httptest.NewRequest(http.MethodGet, "/films/search", nil)
 	w := httptest.NewRecorder()
@@ -171,7 +186,8 @@ func TestHandler_GetFilmsFromExternal_ServiceError(t *testing.T) {
 			return nil, errors.New("external API error")
 		},
 	}
-	handler := NewHandler(mockFilmSvc)
+	mockRatingSvc := &mockRatingService{}
+	handler := NewHandler(mockFilmSvc, mockRatingSvc)
 
 	req := httptest.NewRequest(http.MethodGet, "/films/search?f=test", nil)
 	w := httptest.NewRecorder()

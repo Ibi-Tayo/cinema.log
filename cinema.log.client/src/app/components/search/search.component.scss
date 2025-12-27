@@ -1,0 +1,245 @@
+@use "variables" as *;
+@use "mixins" as *;
+@use "sass:map";
+
+.search-container {
+  min-height: calc(100vh - 200px);
+  padding: 2rem;
+  background-color: get-color(backgroundColor);
+  color: get-color(neutral, 500);
+
+  .search-content {
+    max-width: 1200px;
+    margin: 0 auto;
+
+    // Header Section
+    .search-header {
+      text-align: center;
+      padding: 2rem 0 3rem;
+
+      lord-icon {
+        margin-bottom: 1rem;
+      }
+
+      h1 {
+        font-size: map.get($font-sizes, "4xl");
+        font-weight: 500;
+        color: get-color(neutral, 400);
+        margin-bottom: 0.5rem;
+      }
+
+      .subtitle {
+        font-size: map.get($font-sizes, "lg");
+        color: get-color(neutral, 600);
+      }
+    }
+
+    // Search Input
+    .search-input-wrapper {
+      margin-bottom: 3rem;
+
+      .search-input-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(
+          135deg,
+          get-color(primary, 800) 0%,
+          get-color(secondary, 800) 100%
+        );
+        border-radius: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+
+        &:focus-within {
+          box-shadow: 0 6px 16px rgba(129, 103, 151, 0.4);
+          transform: translateY(-2px);
+        }
+
+        lord-icon {
+          flex-shrink: 0;
+        }
+
+        .search-input {
+          flex: 1;
+          background: transparent;
+          border: none;
+          outline: none;
+          font-size: map.get($font-sizes, "lg");
+          color: get-color(neutral, 300);
+          font-family: $font-family-primary;
+
+          &::placeholder {
+            color: get-color(neutral, 600);
+          }
+        }
+      }
+    }
+
+    // Loading State
+    .loading-state {
+      @include flex-center;
+      flex-direction: column;
+      padding: 4rem 2rem;
+      gap: 1rem;
+
+      p {
+        font-size: map.get($font-sizes, "xl");
+        color: get-color(neutral, 500);
+      }
+    }
+
+    // Error State
+    .error-state {
+      @include flex-center;
+      flex-direction: column;
+      padding: 3rem 2rem;
+      gap: 1rem;
+      background: linear-gradient(
+        135deg,
+        get-color(primary, 800) 0%,
+        get-color(secondary, 900) 100%
+      );
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+      p {
+        font-size: map.get($font-sizes, "lg");
+        color: get-color(neutral, 500);
+      }
+    }
+
+    // Empty State
+    .empty-state {
+      @include flex-center;
+      flex-direction: column;
+      padding: 4rem 2rem;
+      gap: 1rem;
+      background: linear-gradient(
+        135deg,
+        get-color(primary, 800) 0%,
+        get-color(secondary, 800) 100%
+      );
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+      .empty-title {
+        font-size: map.get($font-sizes, "2xl");
+        font-weight: 500;
+        color: get-color(neutral, 400);
+        margin: 0;
+      }
+
+      .empty-subtitle {
+        font-size: map.get($font-sizes, "lg");
+        color: get-color(neutral, 600);
+        margin: 0;
+      }
+    }
+
+    // Search Results
+    .search-results {
+      h2 {
+        font-size: map.get($font-sizes, "2xl");
+        font-weight: 500;
+        color: get-color(neutral, 400);
+        margin-bottom: 2rem;
+      }
+
+      .film-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr;
+        }
+
+        .film-card {
+          background: linear-gradient(
+            135deg,
+            get-color(primary, 800) 0%,
+            get-color(secondary, 800) 100%
+          );
+          border-radius: 1rem;
+          overflow: hidden;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(129, 103, 151, 0.4);
+          }
+
+          .film-poster {
+            width: 100%;
+            height: 400px;
+            background: get-color(backgroundColor);
+            @include flex-center;
+            overflow: hidden;
+
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
+            }
+
+            .poster-placeholder {
+              @include flex-center;
+              width: 100%;
+              height: 100%;
+              color: get-color(neutral, 700);
+            }
+          }
+
+          .film-info {
+            padding: 1.5rem;
+
+            h3 {
+              font-size: map.get($font-sizes, "xl");
+              font-weight: 600;
+              color: get-color(neutral, 300);
+              margin: 0 0 0.5rem 0;
+            }
+
+            .film-year {
+              font-size: map.get($font-sizes, "sm");
+              color: get-color(neutral, 600);
+              margin: 0 0 1rem 0;
+            }
+
+            .film-description {
+              font-size: map.get($font-sizes, "base");
+              color: get-color(neutral, 500);
+              line-height: 1.6;
+              margin: 0;
+              display: -webkit-box;
+              -webkit-line-clamp: 3;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .search-container {
+    padding: 1rem;
+
+    .search-content {
+      .search-header {
+        padding: 1rem 0 2rem;
+
+        h1 {
+          font-size: map.get($font-sizes, "3xl");
+        }
+      }
+    }
+  }
+}

@@ -44,17 +44,18 @@ func NewServer() *http.Server {
 	authService := auth.NewService(userService)
 	authHandler := auth.NewHandler(authService)
 
-	filmStore := films.NewStore(db)
-	filmService := films.NewService(filmStore)
-	filmHandler := films.NewHandler(filmService)
-
-	reviewStore := reviews.NewStore(db)
-	reviewService := reviews.NewService(reviewStore)
-	reviewHandler := reviews.NewHandler(reviewService)
-
 	ratingStore := ratings.NewStore(db)
 	ratingService := ratings.NewService(ratingStore)
 	ratingHandler := ratings.NewHandler(ratingService)
+
+	filmStore := films.NewStore(db)
+	filmService := films.NewService(filmStore)
+	filmHandler := films.NewHandler(filmService, ratingService)
+
+	reviewStore := reviews.NewStore(db)
+	reviewService := reviews.NewService(reviewStore)
+
+	reviewHandler := reviews.NewHandler(reviewService, ratingService)
 
 	NewServer := &Server{
 		port:          port,
