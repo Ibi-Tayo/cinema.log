@@ -8,11 +8,11 @@ import {
   CreateReviewRequest,
 } from '../../services/review.service';
 import { AuthService } from '../../services/auth.service';
-import { RatingService, UserFilmRating } from '../../services/rating.service';
 import {
-  ComparisonService,
+  RatingService,
+  UserFilmRating,
   ComparisonRequest,
-} from '../../services/comparison.service';
+} from '../../services/rating.service';
 import { getTMDBPosterUrl, TMDBPosterSize } from '../../utils/tmdb-image.util';
 
 @Component({
@@ -55,8 +55,7 @@ export class ReviewComponent implements OnInit {
     private filmService: FilmService,
     private reviewService: ReviewService,
     private authService: AuthService,
-    private ratingService: RatingService,
-    private comparisonService: ComparisonService
+    private ratingService: RatingService
   ) {}
 
   ngOnInit(): void {
@@ -86,6 +85,7 @@ export class ReviewComponent implements OnInit {
     });
   }
 
+  // TODO: Not sure that I like having a 400 error show up in the console for normal flow
   checkForExistingRating(filmId: string): void {
     const userId = this.authService.currentUser?.id;
     if (!userId) return;
@@ -94,6 +94,8 @@ export class ReviewComponent implements OnInit {
       next: (rating) => {
         this.filmRating = rating;
         this.hasRating = true;
+        // Load comparisons if user already has a rating for this film
+        this.loadFilmsForComparison();
       },
       error: () => {
         // Rating doesn't exist yet, which is fine
@@ -162,7 +164,7 @@ export class ReviewComponent implements OnInit {
 
     this.filmService.getFilmsForComparison(userId, this.film.id).subscribe({
       next: (films) => {
-        this.filmsForComparison = films;
+        this.filmsForComparison = films ?? []; // This is because the server might return null
         this.isLoadingComparisons = false;
         this.currentComparisonIndex = 0;
       },
@@ -212,7 +214,7 @@ export class ReviewComponent implements OnInit {
       wasEqual: wasEqual,
     };
 
-    this.comparisonService.compareFilms(comparisonRequest).subscribe({
+    this.ratingService.compareFilms(comparisonRequest).subscribe({
       next: () => {
         this.isSubmittingComparison = false;
         // Refresh the rating

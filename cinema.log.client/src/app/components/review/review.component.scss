@@ -680,11 +680,11 @@
             }
 
             &.same {
-              background: get-color(neutral, 600);
+              background: get-color(neutral, 900);
               color: white;
 
               &:hover:not(:disabled) {
-                background: get-color(neutral, 500);
+                background: get-color(neutral, 800);
               }
             }
 

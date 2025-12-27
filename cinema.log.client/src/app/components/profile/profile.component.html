@@ -86,7 +86,7 @@
           <lord-icon
             src="https://cdn.lordicon.com/zmkotitn.json"
             trigger="hover"
-            style="width: 40px; height: 40px"
+            style="width: 40px; height: 40px; transform: rotate(180deg)"
           >
           </lord-icon>
         </button>
@@ -97,7 +97,7 @@
             [class.active]="i === currentCarouselIndex"
           >
             <div class="review-card">
-              <div class="film-poster">
+              <div class="film-poster" (click)="selectFilm(review.film!.id)">
                 @if (review.film?.posterUrl) {
                 <img
                   [src]="getPosterUrl(review.film?.posterUrl)"
@@ -138,7 +138,7 @@
           <lord-icon
             src="https://cdn.lordicon.com/zmkotitn.json"
             trigger="hover"
-            style="width: 40px; height: 40px; transform: rotate(180deg)"
+            style="width: 40px; height: 40px;"
           >
           </lord-icon>
         </button>

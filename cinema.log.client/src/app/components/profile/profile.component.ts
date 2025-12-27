@@ -110,6 +110,11 @@ export class ProfileComponent implements OnInit {
       .map((_, i) => (i < rating ? 'full' : 'empty'));
   }
 
+  selectFilm(filmId: string): void {
+    // Navigate to review page with film ID
+    this.router.navigate(['/review', filmId]);
+  }
+
   /**
    * Gets the TMDB poster URL for a film with specified size
    * @param posterPath - The poster path from the film

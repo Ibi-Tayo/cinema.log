@@ -17,9 +17,8 @@ var (
 )
 
 type Handler struct {
-	FilmService       FilmService
-	RatingService     RatingService
-	ComparisonService ComparisonService
+	FilmService   FilmService
+	RatingService RatingService
 }
 
 type FilmService interface {
@@ -31,17 +30,13 @@ type FilmService interface {
 type RatingService interface {
 	GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error)
 	FilterRatingsForComparison([]domain.UserFilmRating) []domain.UserFilmRating
-}
-
-type ComparisonService interface {
 	HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error)
 }
 
-func NewHandler(filmService FilmService, ratingService RatingService, comparisonService ComparisonService) *Handler {
+func NewHandler(filmService FilmService, ratingService RatingService) *Handler {
 	return &Handler{
-		FilmService:       filmService,
-		RatingService:     ratingService,
-		ComparisonService: comparisonService,
+		FilmService:   filmService,
+		RatingService: ratingService,
 	}
 }
 
@@ -140,7 +135,7 @@ func (h *Handler) GetFilmsForComparison(w http.ResponseWriter, r *http.Request) 
 	// Filter out films that have already been compared
 	var filmsForComparison []domain.Film
 	for _, film := range candidateFilms {
-		hasBeenCompared, err := h.ComparisonService.HasBeenCompared(r.Context(), userID, filmID, film.ID)
+		hasBeenCompared, err := h.RatingService.HasBeenCompared(r.Context(), userID, filmID, film.ID)
 		if err != nil {
 			log.Printf("error checking comparison history: %v", err)
 			continue

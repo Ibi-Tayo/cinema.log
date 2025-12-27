@@ -11,7 +11,6 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 
 	"cinema.log.server.golang/internal/auth"
-	"cinema.log.server.golang/internal/comparisons"
 	"cinema.log.server.golang/internal/database"
 	"cinema.log.server.golang/internal/films"
 	"cinema.log.server.golang/internal/ratings"
@@ -22,14 +21,13 @@ import (
 type Server struct {
 	port int
 
-	db                *sql.DB
-	userHandler       *users.Handler
-	authHandler       *auth.Handler
-	authService       *auth.AuthService
-	filmHandler       *films.Handler
-	reviewHandler     *reviews.Handler
-	ratingHandler     *ratings.Handler
-	comparisonHandler *comparisons.Handler
+	db            *sql.DB
+	userHandler   *users.Handler
+	authHandler   *auth.Handler
+	authService   *auth.AuthService
+	filmHandler   *films.Handler
+	reviewHandler *reviews.Handler
+	ratingHandler *ratings.Handler
 }
 
 func NewServer() *http.Server {
@@ -50,29 +48,24 @@ func NewServer() *http.Server {
 	ratingService := ratings.NewService(ratingStore)
 	ratingHandler := ratings.NewHandler(ratingService)
 
-	comparisonStore := comparisons.NewStore(db)
-	comparisonService := comparisons.NewService(comparisonStore)
-	comparisonHandler := comparisons.NewHandler(comparisonService, ratingService)
-
 	filmStore := films.NewStore(db)
 	filmService := films.NewService(filmStore)
-	filmHandler := films.NewHandler(filmService, ratingService, comparisonService)
+	filmHandler := films.NewHandler(filmService, ratingService)
 
 	reviewStore := reviews.NewStore(db)
 	reviewService := reviews.NewService(reviewStore)
-	
+
 	reviewHandler := reviews.NewHandler(reviewService, ratingService)
 
 	NewServer := &Server{
-		port:              port,
-		db:                db,
-		userHandler:       userHandler,
-		authHandler:       authHandler,
-		authService:       authService,
-		filmHandler:       filmHandler,
-		reviewHandler:     reviewHandler,
-		ratingHandler:     ratingHandler,
-		comparisonHandler: comparisonHandler,
+		port:          port,
+		db:            db,
+		userHandler:   userHandler,
+		authHandler:   authHandler,
+		authService:   authService,
+		filmHandler:   filmHandler,
+		reviewHandler: reviewHandler,
+		ratingHandler: ratingHandler,
 	}
 
 	// Declare Server config

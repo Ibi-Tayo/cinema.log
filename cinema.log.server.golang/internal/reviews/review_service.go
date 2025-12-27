@@ -3,6 +3,7 @@ package reviews
 import (
 	"context"
 	"errors"
+	"sort"
 
 	"cinema.log.server.golang/internal/domain"
 	"github.com/google/uuid"
@@ -35,6 +36,10 @@ func (s *Service) GetAllReviewsByUserId(ctx context.Context, userId uuid.UUID) (
 	if err != nil {
 		return nil, err
 	}
+	// sort reviews by most recent first
+	sort.SliceStable(reviews, func(i, j int) bool {
+		return reviews[i].Date.After(reviews[j].Date)
+	})
 	return reviews, nil
 }
 

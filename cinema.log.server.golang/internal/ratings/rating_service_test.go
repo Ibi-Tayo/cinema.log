@@ -81,12 +81,15 @@ func TestService_FilterRatingsForComparison_Sorting(t *testing.T) {
 
 // Add mock store for service testing
 type mockRatingStore struct {
-	getRatingFunc          func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
-	getAllRatingsFunc      func(ctx context.Context) ([]domain.UserFilmRating, error)
-	getRatingsByUserIdFunc func(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error)
-	createRatingFunc       func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
-	updateRatingFunc       func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
-	updateRatingsFunc      func(ctx context.Context, ratings domain.ComparisonPair) (*domain.ComparisonPair, error)
+	getRatingFunc            func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
+	getAllRatingsFunc        func(ctx context.Context) ([]domain.UserFilmRating, error)
+	getRatingsByUserIdFunc   func(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error)
+	createRatingFunc         func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
+	updateRatingFunc         func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
+	updateRatingsFunc        func(ctx context.Context, ratings domain.ComparisonPair) (*domain.ComparisonPair, error)
+	createComparisonFunc     func(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error)
+	hasBeenComparedFunc      func(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error)
+	getComparisonHistoryFunc func(ctx context.Context, userId uuid.UUID) ([]domain.ComparisonHistory, error)
 }
 
 func (m *mockRatingStore) GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error) {
@@ -129,6 +132,27 @@ func (m *mockRatingStore) UpdateRatings(ctx context.Context, ratings domain.Comp
 		return m.updateRatingsFunc(ctx, ratings)
 	}
 	return &ratings, nil
+}
+
+func (m *mockRatingStore) CreateComparison(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error) {
+	if m.createComparisonFunc != nil {
+		return m.createComparisonFunc(ctx, comparison)
+	}
+	return &comparison, nil
+}
+
+func (m *mockRatingStore) HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error) {
+	if m.hasBeenComparedFunc != nil {
+		return m.hasBeenComparedFunc(ctx, userId, filmAId, filmBId)
+	}
+	return false, nil
+}
+
+func (m *mockRatingStore) GetComparisonHistory(ctx context.Context, userId uuid.UUID) ([]domain.ComparisonHistory, error) {
+	if m.getComparisonHistoryFunc != nil {
+		return m.getComparisonHistoryFunc(ctx, userId)
+	}
+	return nil, nil
 }
 
 func TestService_GetRating(t *testing.T) {
@@ -263,10 +287,10 @@ func TestService_GetRatingsForComparison(t *testing.T) {
 
 func TestService_UpdateRatings(t *testing.T) {
 	ctx := context.Background()
-	
+
 	filmAId := uuid.New()
 	filmBId := uuid.New()
-	
+
 	filmA := domain.UserFilmRating{
 		ID:                  uuid.New(),
 		UserId:              uuid.New(),
@@ -277,7 +301,7 @@ func TestService_UpdateRatings(t *testing.T) {
 		InitialRating:       1500.0,
 		KConstantValue:      32.0,
 	}
-	
+
 	filmB := domain.UserFilmRating{
 		ID:                  uuid.New(),
 		UserId:              filmA.UserId,
@@ -288,36 +312,44 @@ func TestService_UpdateRatings(t *testing.T) {
 		InitialRating:       1500.0,
 		KConstantValue:      32.0,
 	}
-	
+
 	mock := &mockRatingStore{
 		updateRatingFunc: func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error) {
 			return &rating, nil
 		},
 	}
-	
+
 	service := NewService(mock)
 	pair := domain.ComparisonPair{
 		FilmA: filmA,
 		FilmB: filmB,
 	}
-	
+
 	// FilmA wins
-	updatedPair, err := service.UpdateRatings(ctx, pair, filmAId)
-	
+	comparison := domain.ComparisonHistory{
+		ID:            uuid.New(),
+		UserId:        filmA.UserId,
+		FilmAId:       filmA.FilmId,
+		FilmBId:       filmB.FilmId,
+		WinningFilmId: filmA.FilmId,
+		WasEqual:      false,
+	}
+	updatedPair, err := service.UpdateRatings(ctx, pair, comparison)
+
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
-	
+
 	// FilmA should have increased rating
 	if updatedPair.FilmA.EloRating <= filmA.EloRating {
 		t.Errorf("expected FilmA rating to increase from %.2f, got %.2f", filmA.EloRating, updatedPair.FilmA.EloRating)
 	}
-	
+
 	// FilmB should have decreased rating
 	if updatedPair.FilmB.EloRating >= filmB.EloRating {
 		t.Errorf("expected FilmB rating to decrease from %.2f, got %.2f", filmB.EloRating, updatedPair.FilmB.EloRating)
 	}
-	
+
 	// Both should have increased comparisons
 	if updatedPair.FilmA.NumberOfComparisons != filmA.NumberOfComparisons+1 {
 		t.Errorf("expected FilmA comparisons to be %d, got %d", filmA.NumberOfComparisons+1, updatedPair.FilmA.NumberOfComparisons)
@@ -329,7 +361,7 @@ func TestService_UpdateRatings(t *testing.T) {
 
 func TestService_UpdateRatings_Draw(t *testing.T) {
 	ctx := context.Background()
-	
+
 	filmA := domain.UserFilmRating{
 		ID:                  uuid.New(),
 		UserId:              uuid.New(),
@@ -340,7 +372,7 @@ func TestService_UpdateRatings_Draw(t *testing.T) {
 		InitialRating:       1500.0,
 		KConstantValue:      32.0,
 	}
-	
+
 	filmB := domain.UserFilmRating{
 		ID:                  uuid.New(),
 		UserId:              filmA.UserId,
@@ -351,26 +383,34 @@ func TestService_UpdateRatings_Draw(t *testing.T) {
 		InitialRating:       1500.0,
 		KConstantValue:      32.0,
 	}
-	
+
 	mock := &mockRatingStore{
 		updateRatingFunc: func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error) {
 			return &rating, nil
 		},
 	}
-	
+
 	service := NewService(mock)
 	pair := domain.ComparisonPair{
 		FilmA: filmA,
 		FilmB: filmB,
 	}
-	
+
 	// Neither wins (draw) - use a different winnerId
-	updatedPair, err := service.UpdateRatings(ctx, pair, uuid.New())
-	
+	comparison := domain.ComparisonHistory{
+		ID:            uuid.New(),
+		UserId:        filmA.UserId,
+		FilmAId:       filmA.FilmId,
+		FilmBId:       filmB.FilmId,
+		WinningFilmId: filmA.FilmId,
+		WasEqual:      true,
+	}
+	updatedPair, err := service.UpdateRatings(ctx, pair, comparison)
+
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
-	
+
 	// With equal ratings and a draw, ratings should stay roughly the same
 	// (they both get 0.5 result and 0.5 expected)
 	if updatedPair.FilmA.EloRating != filmA.EloRating {
@@ -471,26 +511,35 @@ func TestService_DefineFilmContestResult(t *testing.T) {
 	filmB := uuid.New()
 
 	tests := []struct {
-		name      string
-		winnerId  uuid.UUID
-		expectedA float64
-		expectedB float64
+		name       string
+		comparison domain.ComparisonHistory
+		expectedA  float64
+		expectedB  float64
 	}{
 		{
-			name:      "film A wins",
-			winnerId:  filmA,
+			name: "film A wins",
+			comparison: domain.ComparisonHistory{
+				WinningFilmId: filmA,
+				WasEqual:      false,
+			},
 			expectedA: 1.0,
 			expectedB: 0.0,
 		},
 		{
-			name:      "film B wins",
-			winnerId:  filmB,
+			name: "film B wins",
+			comparison: domain.ComparisonHistory{
+				WinningFilmId: filmB,
+				WasEqual:      false,
+			},
 			expectedA: 0.0,
 			expectedB: 1.0,
 		},
 		{
-			name:      "draw",
-			winnerId:  uuid.New(), // Different ID
+			name: "draw",
+			comparison: domain.ComparisonHistory{
+				WinningFilmId: uuid.New(), // Different ID doesn't matter when WasEqual is true
+				WasEqual:      true,
+			},
 			expectedA: 0.5,
 			expectedB: 0.5,
 		},
@@ -498,7 +547,7 @@ func TestService_DefineFilmContestResult(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			resultA, resultB := service.defineFilmContestResult(filmA, filmB, tt.winnerId)
+			resultA, resultB := service.defineFilmContestResult(filmA, filmB, tt.comparison)
 			if resultA != tt.expectedA {
 				t.Errorf("expected film A result %v, got %v", tt.expectedA, resultA)
 			}

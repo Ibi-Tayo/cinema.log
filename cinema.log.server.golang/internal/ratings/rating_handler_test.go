@@ -26,8 +26,20 @@ func (m *mockRatingService) GetRatingsForComparison(ctx context.Context, userId 
 	return []domain.UserFilmRating{{ID: uuid.New()}}, nil
 }
 
-func (m *mockRatingService) UpdateRatings(ctx context.Context, ratings domain.ComparisonPair, winnerId uuid.UUID) (*domain.ComparisonPair, error) {
+func (m *mockRatingService) UpdateRatings(ctx context.Context, ratings domain.ComparisonPair, comparison domain.ComparisonHistory) (*domain.ComparisonPair, error) {
 	return &ratings, nil
+}
+
+func (m *mockRatingService) CreateComparison(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error) {
+	return &comparison, nil
+}
+
+func (m *mockRatingService) HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error) {
+	return false, nil
+}
+
+func (m *mockRatingService) GetComparisonHistory(ctx context.Context, userId uuid.UUID) ([]domain.ComparisonHistory, error) {
+	return nil, errors.New("not implemented")
 }
 
 func TestHandler_GetRating_MissingUserId(t *testing.T) {

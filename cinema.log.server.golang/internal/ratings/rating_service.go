@@ -21,6 +21,9 @@ type RatingStore interface {
 	CreateRating(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
 	UpdateRating(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
 	UpdateRatings(ctx context.Context, ratings domain.ComparisonPair) (*domain.ComparisonPair, error)
+	CreateComparison(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error)
+	HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error)
+	GetComparisonHistory(ctx context.Context, userId uuid.UUID) ([]domain.ComparisonHistory, error)
 }
 
 func NewService(r RatingStore) *Service {
@@ -35,6 +38,18 @@ func (s Service) GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UU
 
 func (s Service) GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error) {
 	return s.RatingStore.GetAllRatings(ctx)
+}
+
+func (s Service) CreateComparison(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error) {
+	return s.RatingStore.CreateComparison(ctx, comparison)
+}
+
+func (s Service) HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error) {
+	return s.RatingStore.HasBeenCompared(ctx, userId, filmAId, filmBId)
+}
+
+func (s Service) GetComparisonHistory(ctx context.Context, userId uuid.UUID) ([]domain.ComparisonHistory, error) {
+	return s.RatingStore.GetComparisonHistory(ctx, userId)
 }
 
 func (s Service) CreateRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID, initialRating float32) (*domain.UserFilmRating, error) {
@@ -58,6 +73,9 @@ func (s Service) GetRatingsForComparison(ctx context.Context, userId uuid.UUID) 
 	ratings, err := s.RatingStore.GetRatingsByUserId(ctx, userId)
 	if err != nil {
 		return nil, err
+	}
+	if (len(ratings) == 0) {
+		return []domain.UserFilmRating{}, nil
 	}
 
 	// Filter and sort them for comparison
@@ -83,12 +101,11 @@ func (s Service) FilterRatingsForComparison(ratings []domain.UserFilmRating) []d
 	return ratings[:maxFilms]
 }
 
-func (s Service) UpdateRatings(ctx context.Context, ratings domain.ComparisonPair, winnerId uuid.UUID) (*domain.ComparisonPair, error) {
+func (s Service) UpdateRatings(ctx context.Context, ratings domain.ComparisonPair, comparison domain.ComparisonHistory) (*domain.ComparisonPair, error) {
 	filmA := ratings.FilmA
 	filmB := ratings.FilmB
 	// Set the results from the film head to head
-	filmAResult, filmBResult := s.defineFilmContestResult(filmA.FilmId, filmB.FilmId, winnerId)
-
+	filmAResult, filmBResult := s.defineFilmContestResult(filmA.FilmId, filmB.FilmId, comparison)
 	// Calculate expected results for film A and film B
 	filmAExpectedResult := s.calculateExpectedResult(filmA.EloRating, filmB.EloRating)
 	filmBExpectedResult := s.calculateExpectedResult(filmB.EloRating, filmA.EloRating)
@@ -168,17 +185,20 @@ func (s Service) recalculateFilmRating(expectedResult float64, actualResult floa
 	return math.Round(rawCalc)
 }
 
-func (s Service) defineFilmContestResult(filmA uuid.UUID, filmB uuid.UUID, winnerId uuid.UUID) (float64, float64) {
+func (s Service) defineFilmContestResult(filmA uuid.UUID, filmB uuid.UUID, comparison domain.ComparisonHistory) (float64, float64) {
 	var filmAResult, filmBResult float64
-	if filmA == winnerId {
-		filmAResult = 1
-		filmBResult = 0
-	} else if filmB == winnerId {
-		filmAResult = 0
-		filmBResult = 1
-	} else {
+	if comparison.WasEqual {
 		filmAResult = 0.5
 		filmBResult = 0.5
+		return filmAResult, filmBResult
+	}
+
+	if filmA == comparison.WinningFilmId {
+		filmAResult = 1
+		filmBResult = 0
+	} else if filmB == comparison.WinningFilmId {
+		filmAResult = 0
+		filmBResult = 1
 	}
 	return filmAResult, filmBResult
 }

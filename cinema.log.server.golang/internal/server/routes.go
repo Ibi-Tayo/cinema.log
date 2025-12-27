@@ -59,9 +59,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("GET /ratings/for-comparison", s.ratingHandler.GetRatingsForComparison) // query param: userId
 	mux.HandleFunc("POST /ratings/compare-films", s.ratingHandler.CompareFilms)
 
-	// Comparison routes
-	mux.HandleFunc("POST /comparisons/compare", s.comparisonHandler.CompareFilms)
-
 	// Wrap the mux with middleware
 	return s.corsMiddleware(s.authMiddleware(mux))
 }

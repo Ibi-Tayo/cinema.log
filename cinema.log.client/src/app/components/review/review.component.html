@@ -26,7 +26,7 @@
       <lord-icon
         src="https://cdn.lordicon.com/zmkotitn.json"
         trigger="hover"
-        style="width: 24px; height: 24px"
+        style="width: 24px; height: 24px; transform: rotate(180deg)"
       >
       </lord-icon>
       Back to Search
@@ -43,7 +43,7 @@
         <lord-icon
           src="https://cdn.lordicon.com/zmkotitn.json"
           trigger="hover"
-          style="width: 24px; height: 24px"
+          style="width: 24px; height: 24px; transform: rotate(180deg)"
         >
         </lord-icon>
         Back to Search
@@ -125,7 +125,7 @@
           style="width: 60px; height: 60px"
         >
         </lord-icon>
-        <p>Review submitted successfully! Redirecting to your profile...</p>
+        <p>Review submitted successfully</p>
       </div>
       }
       <!-- Review Form -->
@@ -204,11 +204,11 @@
       }
     </div>
     <!-- Film Comparison Section -->
-    @if (showComparisons && !submitSuccess) {
+    @if (showComparisons) {
     <div class="comparison-section">
       <h3>
         <lord-icon
-          src="https://cdn.lordicon.com/xjovhxra.json"
+          src="https://cdn.lordicon.com/jzeyjfkz.json"
           trigger="loop"
           style="width: 28px; height: 28px"
         >
@@ -280,7 +280,7 @@
             <div class="card-poster">
               @if (film.posterUrl) {
               <img
-                [src]="getPosterUrl(film.posterUrl, 'w342')"
+                [src]="getPosterUrl(film.posterUrl, 'w780')"
                 [alt]="film.title"
               />
               } @if (!film.posterUrl) {
@@ -306,7 +306,7 @@
           <div class="comparison-card challenger-film">
             <div class="card-header">
               <lord-icon
-                src="https://cdn.lordicon.com/ymrrmgjp.json"
+                src="https://cdn.lordicon.com/weqkkuwt.json"
                 trigger="hover"
                 style="width: 24px; height: 24px"
               >
@@ -317,7 +317,7 @@
               @if (getCurrentComparisonFilm()?.posterUrl) {
               <img
                 [src]="
-                  getPosterUrl(getCurrentComparisonFilm()!.posterUrl, 'w342')
+                  getPosterUrl(getCurrentComparisonFilm()!.posterUrl, 'w780')
                 "
                 [alt]="getCurrentComparisonFilm()!.title"
               />
@@ -363,7 +363,7 @@
             [disabled]="isSubmittingComparison"
           >
             <lord-icon
-              src="https://cdn.lordicon.com/abvsilkn.json"
+              src="https://cdn.lordicon.com/bduzytli.json"
               trigger="hover"
               style="width: 24px; height: 24px"
             >
