@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"cinema.log.server.golang/internal/domain"
+	"cinema.log.server.golang/internal/middleware"
 	"github.com/google/uuid"
 )
 
@@ -159,6 +160,7 @@ func TestHandler_CompareFilms_Success(t *testing.T) {
 	userId := uuid.New()
 	filmAId := uuid.New()
 	filmBId := uuid.New()
+	user := &domain.User{ID: userId, Name: "Test User", Username: "testuser"}
 
 	comparison := `{
 		"userId": "` + userId.String() + `",
@@ -169,6 +171,8 @@ func TestHandler_CompareFilms_Success(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/ratings/compare-films", strings.NewReader(comparison))
 	req.Header.Set("Content-Type", "application/json")
+	ctx := context.WithValue(req.Context(), middleware.KeyUser, user)
+	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
 	handler.CompareFilms(w, req)
@@ -180,9 +184,13 @@ func TestHandler_CompareFilms_Success(t *testing.T) {
 
 func TestHandler_CompareFilms_InvalidJSON(t *testing.T) {
 	handler := NewHandler(&mockRatingService{})
+	userId := uuid.New()
+	user := &domain.User{ID: userId, Name: "Test User", Username: "testuser"}
 
 	req := httptest.NewRequest(http.MethodPost, "/ratings/compare-films", strings.NewReader("invalid json"))
 	req.Header.Set("Content-Type", "application/json")
+	ctx := context.WithValue(req.Context(), middleware.KeyUser, user)
+	req = req.WithContext(ctx)
 	w := httptest.NewRecorder()
 
 	handler.CompareFilms(w, req)
