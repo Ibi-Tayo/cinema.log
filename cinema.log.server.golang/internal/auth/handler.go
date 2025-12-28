@@ -15,11 +15,12 @@ import (
 
 var GithubClientID = os.Getenv("GITHUB_CLIENT_ID")
 var GithubClientSecret = os.Getenv("GITHUB_CLIENT_SECRET")
+var BackendURL = os.Getenv("BACKEND_URL")
 
 var conf *oauth2.Config = &oauth2.Config{
 	ClientID:     GithubClientID,
 	ClientSecret: GithubClientSecret,
-	RedirectURL:  "http://localhost:8080/auth/github-callback",
+	RedirectURL:  BackendURL + "/auth/github-callback",
 	Scopes:       []string{"user:email", "read:user"},
 	Endpoint:     oauth2github.Endpoint,
 }
