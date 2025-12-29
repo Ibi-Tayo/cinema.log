@@ -16,3 +16,4 @@ cinema.log.client/.angular
 cinema.log.client/.vscode
 *.zsh
 .vscode/launch.json
+.vscode/mcp.json
