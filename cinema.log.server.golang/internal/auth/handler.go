@@ -17,6 +17,21 @@ var GithubClientID = os.Getenv("GITHUB_CLIENT_ID")
 var GithubClientSecret = os.Getenv("GITHUB_CLIENT_SECRET")
 var BackendURL = os.Getenv("BACKEND_URL")
 
+func isProduction() bool {
+	return os.Getenv("ENVIRONMENT") == "production"
+}
+
+func getCookieSameSite() http.SameSite {
+	if isProduction() {
+		return http.SameSiteNoneMode // Required for cross-origin in production
+	}
+	return http.SameSiteLaxMode // Works for localhost in dev
+}
+
+func getCookieSecure() bool {
+	return isProduction() // true in production (HTTPS), false in dev (HTTP)
+}
+
 var conf *oauth2.Config = &oauth2.Config{
 	ClientID:     GithubClientID,
 	ClientSecret: GithubClientSecret,
@@ -26,14 +41,14 @@ var conf *oauth2.Config = &oauth2.Config{
 }
 
 // Cookie configuration for OAuth state parameter
-// Using SameSite=Lax allows cookies to be sent on OAuth redirect callbacks
+// Automatically adjusts based on ENVIRONMENT variable
 var cookieConf gologin.CookieConfig = gologin.CookieConfig{
 	Name:     "oauth_state",
 	Path:     "/",
 	MaxAge:   300, // 5 minutes
 	HTTPOnly: true,
-	Secure:   false, // Set to true in production with HTTPS
-	SameSite: http.SameSiteLaxMode,
+	Secure:   getCookieSecure(),
+	SameSite: getCookieSameSite(),
 }
 
 type Handler struct {
@@ -87,20 +102,22 @@ func (h *Handler) meHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) logoutHandler(w http.ResponseWriter, r *http.Request) {
-	// Clear cookies - need to match SameSite setting for proper deletion
+	// Clear cookies - settings must match how they were set
 	http.SetCookie(w, &http.Cookie{
 		Name:     "cinema-log-access-token",
 		Value:    "",
 		Path:     "/",
 		MaxAge:   -1,
-		SameSite: http.SameSiteLaxMode,
+		Secure:   getCookieSecure(),
+		SameSite: getCookieSameSite(),
 	})
 	http.SetCookie(w, &http.Cookie{
 		Name:     "cinema-log-refresh-token",
 		Value:    "",
 		Path:     "/",
 		MaxAge:   -1,
-		SameSite: http.SameSiteLaxMode,
+		Secure:   getCookieSecure(),
+		SameSite: getCookieSameSite(),
 	})
 }
 
@@ -149,15 +166,16 @@ func (h *Handler) refreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (*Handler) setCookies(w http.ResponseWriter, jwt string, refreshToken string) {
-	// Using SameSite=Lax allows cookies to work with OAuth redirects
-	// For cross-site requests, use SameSite=None with Secure=true
+	// Cookie settings automatically adjust based on ENVIRONMENT variable:
+	// - Development: SameSite=Lax, Secure=false (works on localhost)
+	// - Production: SameSite=None, Secure=true (works cross-origin with HTTPS)
 	http.SetCookie(w, &http.Cookie{
 		Name:     "cinema-log-access-token",
 		Value:    jwt,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false, // Set to true in production with HTTPS
-		SameSite: http.SameSiteLaxMode,
+		Secure:   getCookieSecure(),
+		SameSite: getCookieSameSite(),
 		MaxAge:   86400, // 24 hours to match JWT expiration
 	})
 	http.SetCookie(w, &http.Cookie{
@@ -165,8 +183,8 @@ func (*Handler) setCookies(w http.ResponseWriter, jwt string, refreshToken strin
 		Value:    refreshToken,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false, // Set to true in production with HTTPS
-		SameSite: http.SameSiteLaxMode,
+		Secure:   getCookieSecure(),
+		SameSite: getCookieSameSite(),
 		MaxAge:   604800,
 	})
 }
