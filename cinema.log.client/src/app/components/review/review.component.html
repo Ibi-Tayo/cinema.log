@@ -206,211 +206,213 @@
     <!-- Film Comparison Section -->
     @if (showComparisons) {
     <div class="comparison-section">
-      <h3>
-        <lord-icon
-          src="https://cdn.lordicon.com/jzeyjfkz.json"
-          trigger="loop"
-          style="width: 28px; height: 28px"
-        >
-        </lord-icon>
-        Head-to-Head Comparison
-      </h3>
-      <p class="comparison-subtitle">
-        Help refine your ELO rating by comparing this film with others you've
-        reviewed
-      </p>
-      <!-- Loading State -->
-      @if (isLoadingComparisons) {
-      <div class="comparison-loading">
-        <lord-icon
-          src="https://cdn.lordicon.com/xjovhxra.json"
-          trigger="loop"
-          style="width: 60px; height: 60px"
-        >
-        </lord-icon>
-        <p>Loading films for comparison...</p>
-      </div>
-      }
-      <!-- Error State -->
-      @if (comparisonError && !isLoadingComparisons) {
-      <div class="error-message">
-        <lord-icon
-          src="https://cdn.lordicon.com/tdrtiskw.json"
-          trigger="loop"
-          style="width: 24px; height: 24px"
-        >
-        </lord-icon>
-        <p>{{ comparisonError }}</p>
-      </div>
-      }
-      <!-- No Films Available -->
-      @if (!isLoadingComparisons && filmsForComparison.length === 0 &&
-      !comparisonError) {
-      <div class="no-comparisons">
-        <lord-icon
-          src="https://cdn.lordicon.com/nocovwne.json"
-          trigger="hover"
-          style="width: 60px; height: 60px"
-        >
-        </lord-icon>
-        <p>No more films available for comparison right now.</p>
-        <button class="finish-button" (click)="finishComparisons()">
-          Go to Profile
-        </button>
-      </div>
-      }
-      <!-- Comparison Interface -->
-      @if (!isLoadingComparisons && getCurrentComparisonFilm()) {
-      <div class="comparison-interface">
-        <div class="comparison-progress">
-          <span>Comparison {{ getComparisonProgress() }}</span>
-        </div>
-        <div class="comparison-cards">
-          <!-- Current Film Card -->
-          <div class="comparison-card current-film">
-            <div class="card-header">
+      <p-card
+        [style]="{
+          background: 'transparent',
+          border: 'none',
+          'box-shadow': 'none'
+        }"
+      >
+        <ng-template pTemplate="header">
+          <div class="comparison-header">
+            <h3>
               <lord-icon
-                src="https://cdn.lordicon.com/nocovwne.json"
-                trigger="hover"
-                style="width: 24px; height: 24px"
+                src="https://cdn.lordicon.com/jzeyjfkz.json"
+                trigger="loop"
+                style="width: 28px; height: 28px"
               >
               </lord-icon>
-              <span>This Film</span>
-            </div>
-            <div class="card-poster">
-              @if (film.posterUrl) {
-              <img
-                [src]="getPosterUrl(film.posterUrl, 'w780')"
-                [alt]="film.title"
-              />
-              } @if (!film.posterUrl) {
-              <div class="poster-placeholder">
-                <lord-icon
-                  src="https://cdn.lordicon.com/ugllxeyl.json"
-                  trigger="hover"
-                  style="width: 60px; height: 60px"
-                >
-                </lord-icon>
-              </div>
-              }
-            </div>
-            <div class="card-info">
-              <h4>{{ film.title }}</h4>
-              <p class="card-year">{{ film.releaseYear }}</p>
-            </div>
+              Head-to-Head Comparison
+            </h3>
+            <p class="comparison-subtitle">
+              Help refine your ELO rating by comparing this film with others
+              you've reviewed
+            </p>
           </div>
-          <div class="vs-divider">
-            <span>VS</span>
+        </ng-template>
+        <ng-template pTemplate="content">
+          <!-- Loading State -->
+          @if (isLoadingComparisons) {
+          <div class="comparison-loading">
+            <p-progressSpinner
+              [style]="{ width: '60px', height: '60px' }"
+              styleClass="custom-spinner"
+              strokeWidth="4"
+            ></p-progressSpinner>
+            <p>Loading films for comparison...</p>
           </div>
-          <!-- Comparison Film Card -->
-          <div class="comparison-card challenger-film">
-            <div class="card-header">
-              <lord-icon
-                src="https://cdn.lordicon.com/weqkkuwt.json"
-                trigger="hover"
-                style="width: 24px; height: 24px"
-              >
-              </lord-icon>
-              <span>Challenger</span>
-            </div>
-            <div class="card-poster">
-              @if (getCurrentComparisonFilm()?.posterUrl) {
-              <img
-                [src]="
-                  getPosterUrl(getCurrentComparisonFilm()!.posterUrl, 'w780')
-                "
-                [alt]="getCurrentComparisonFilm()!.title"
-              />
-              } @if (!getCurrentComparisonFilm()?.posterUrl) {
-              <div class="poster-placeholder">
-                <lord-icon
-                  src="https://cdn.lordicon.com/ugllxeyl.json"
-                  trigger="hover"
-                  style="width: 60px; height: 60px"
-                >
-                </lord-icon>
-              </div>
-              }
-            </div>
-            <div class="card-info">
-              <h4>{{ getCurrentComparisonFilm()!.title }}</h4>
-              <p class="card-year">
-                {{ getCurrentComparisonFilm()!.releaseYear }}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="comparison-question">
-          <p>Which film do you prefer?</p>
-        </div>
-        <div class="comparison-actions">
-          <button
-            class="comparison-button better"
-            (click)="submitComparison('better')"
-            [disabled]="isSubmittingComparison"
-          >
+          }
+          <!-- Error State -->
+          @if (comparisonError && !isLoadingComparisons) {
+          <p-message severity="error" styleClass="comparison-error-message">
+            {{ comparisonError }}
+          </p-message>
+          }
+          <!-- No Films Available -->
+          @if (!isLoadingComparisons && filmsForComparison.length === 0 &&
+          !comparisonError) {
+          <div class="no-comparisons">
             <lord-icon
-              src="https://cdn.lordicon.com/yqzmiobz.json"
+              src="https://cdn.lordicon.com/nocovwne.json"
               trigger="hover"
-              style="width: 24px; height: 24px"
+              style="width: 60px; height: 60px"
             >
             </lord-icon>
-            {{ film.title }}
-          </button>
-          <button
-            class="comparison-button same"
-            (click)="submitComparison('same')"
-            [disabled]="isSubmittingComparison"
-          >
+            <p>No more films available for comparison right now.</p>
+            <p-button
+              label="Go to Profile"
+              icon="pi pi-user"
+              (onClick)="finishComparisons()"
+              styleClass="finish-button"
+            ></p-button>
+          </div>
+          }
+          <!-- Comparison Interface -->
+          @if (!isLoadingComparisons && getCurrentComparisonFilm()) {
+          <div class="comparison-interface">
+            <div class="comparison-progress">
+              <span>Comparison {{ getComparisonProgress() }}</span>
+            </div>
+            <div class="comparison-cards">
+              <!-- Current Film Card -->
+              <p-card styleClass="comparison-card current-film">
+                <ng-template pTemplate="header">
+                  <div class="card-header">
+                    <lord-icon
+                      src="https://cdn.lordicon.com/zczzhvwa.json"
+                      trigger="hover"
+                      style="width: 24px; height: 24px"
+                    >
+                    </lord-icon>
+                    <span>This Film</span>
+                  </div>
+                  <div class="card-poster">
+                    @if (film.posterUrl) {
+                    <img
+                      [src]="getPosterUrl(film.posterUrl, 'w780')"
+                      [alt]="film.title"
+                    />
+                    } @if (!film.posterUrl) {
+                    <div class="poster-placeholder">
+                      <lord-icon
+                        src="https://cdn.lordicon.com/ugllxeyl.json"
+                        trigger="hover"
+                        style="width: 60px; height: 60px"
+                      >
+                      </lord-icon>
+                    </div>
+                    }
+                  </div>
+                </ng-template>
+                <ng-template pTemplate="content">
+                  <div class="card-info">
+                    <h4>{{ film.title }}</h4>
+                    <p class="card-year">{{ film.releaseYear }}</p>
+                  </div>
+                </ng-template>
+              </p-card>
+
+              <p-divider layout="vertical" styleClass="vs-divider">
+                <span>VS</span>
+              </p-divider>
+
+              <!-- Comparison Film Card -->
+              <p-card styleClass="comparison-card challenger-film">
+                <ng-template pTemplate="header">
+                  <div class="card-header">
+                    <lord-icon
+                      src="https://cdn.lordicon.com/uwnsxkfm.json"
+                      trigger="hover"
+                      style="width: 24px; height: 24px"
+                    >
+                    </lord-icon>
+                    <span>Challenger</span>
+                  </div>
+                  <div class="card-poster">
+                    @if (getCurrentComparisonFilm()?.posterUrl) {
+                    <img
+                      [src]="
+                        getPosterUrl(
+                          getCurrentComparisonFilm()!.posterUrl,
+                          'w780'
+                        )
+                      "
+                      [alt]="getCurrentComparisonFilm()!.title"
+                    />
+                    } @if (!getCurrentComparisonFilm()?.posterUrl) {
+                    <div class="poster-placeholder">
+                      <lord-icon
+                        src="https://cdn.lordicon.com/ugllxeyl.json"
+                        trigger="hover"
+                        style="width: 60px; height: 60px"
+                      >
+                      </lord-icon>
+                    </div>
+                    }
+                  </div>
+                </ng-template>
+                <ng-template pTemplate="content">
+                  <div class="card-info">
+                    <h4>{{ getCurrentComparisonFilm()!.title }}</h4>
+                    <p class="card-year">
+                      {{ getCurrentComparisonFilm()!.releaseYear }}
+                    </p>
+                  </div>
+                </ng-template>
+              </p-card>
+            </div>
+            <div class="comparison-question">
+              <p>Which film do you prefer?</p>
+            </div>
+            <div class="comparison-actions">
+              <p-button
+                [label]="film.title"
+                icon="pi pi-thumbs-up"
+                (onClick)="submitComparison('better')"
+                [disabled]="isSubmittingComparison"
+                styleClass="comparison-button better"
+                [loading]="isSubmittingComparison"
+              ></p-button>
+
+              <p-button
+                [label]="getCurrentComparisonFilm()!.title"
+                icon="pi pi-thumbs-down"
+                (onClick)="submitComparison('worse')"
+                [disabled]="isSubmittingComparison"
+                styleClass="comparison-button worse"
+                [loading]="isSubmittingComparison"
+              ></p-button>
+            </div>
+            <div class="same-section">
+              <p-button
+                label="About the Same"
+                icon="pi pi-equals"
+                (onClick)="submitComparison('same')"
+                [disabled]="isSubmittingComparison"
+                styleClass="comparison-button same"
+                [loading]="isSubmittingComparison"
+              ></p-button>
+            </div>
+          </div>
+          }
+          <!-- All Comparisons Done -->
+          @if (!isLoadingComparisons && currentComparisonIndex >=
+          filmsForComparison.length && filmsForComparison.length > 0) {
+          <div class="comparisons-complete">
             <lord-icon
-              src="https://cdn.lordicon.com/bduzytli.json"
-              trigger="hover"
-              style="width: 24px; height: 24px"
+              src="https://cdn.lordicon.com/lomfljuq.json"
+              trigger="loop"
+              style="width: 80px; height: 80px"
             >
             </lord-icon>
-            About the Same
-          </button>
-          <button
-            class="comparison-button worse"
-            (click)="submitComparison('worse')"
-            [disabled]="isSubmittingComparison"
-          >
-            <lord-icon
-              src="https://cdn.lordicon.com/rmkahxvq.json"
-              trigger="hover"
-              style="width: 24px; height: 24px"
-            >
-            </lord-icon>
-            {{ getCurrentComparisonFilm()!.title }}
-          </button>
-        </div>
-        <div class="skip-section">
-          <button
-            class="skip-button"
-            (click)="skipComparison()"
-            [disabled]="isSubmittingComparison"
-          >
-            Skip this comparison
-          </button>
-        </div>
-      </div>
-      }
-      <!-- All Comparisons Done -->
-      @if (!isLoadingComparisons && currentComparisonIndex >=
-      filmsForComparison.length && filmsForComparison.length > 0) {
-      <div class="comparisons-complete">
-        <lord-icon
-          src="https://cdn.lordicon.com/lomfljuq.json"
-          trigger="loop"
-          style="width: 80px; height: 80px"
-        >
-        </lord-icon>
-        <h4>All Comparisons Complete!</h4>
-        <p>
-          Your ELO ratings have been updated. Redirecting to your profile...
-        </p>
-      </div>
-      }
+            <h4>All Comparisons Complete!</h4>
+            <p>
+              Your ELO ratings have been updated. Redirecting to your profile...
+            </p>
+          </div>
+          }
+        </ng-template>
+      </p-card>
     </div>
     }
   </div>

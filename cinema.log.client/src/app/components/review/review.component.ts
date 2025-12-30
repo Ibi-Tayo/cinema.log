@@ -15,10 +15,25 @@ import {
 } from '../../services/rating.service';
 import { getTMDBPosterUrl, TMDBPosterSize } from '../../utils/tmdb-image.util';
 
+// PrimeNG imports
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { MessageModule } from 'primeng/message';
+import { DividerModule } from 'primeng/divider';
+
 @Component({
   selector: 'app-review',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    CardModule,
+    ButtonModule,
+    ProgressSpinnerModule,
+    MessageModule,
+    DividerModule,
+  ],
   templateUrl: './review.component.html',
   styleUrl: './review.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -235,14 +250,6 @@ export class ReviewComponent implements OnInit {
         this.isSubmittingComparison = false;
       },
     });
-  }
-
-  skipComparison(): void {
-    if (this.currentComparisonIndex < this.filmsForComparison.length - 1) {
-      this.currentComparisonIndex++;
-    } else {
-      this.finishComparisons();
-    }
   }
 
   finishComparisons(): void {
