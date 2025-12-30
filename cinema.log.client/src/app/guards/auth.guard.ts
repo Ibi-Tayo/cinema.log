@@ -3,6 +3,7 @@ import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,10 @@ export class AuthGuard {
   constructor(private authService: AuthService, private router: Router) {}
 
   canActivate(): Observable<boolean> {
+    // If we are in development mode, bypass all auth restrictions
+    if (!environment.production) {
+      return of(true);
+    }
     // If we already have the current user cached, allow access
     if (this.authService.currentUser) {
       return of(true);

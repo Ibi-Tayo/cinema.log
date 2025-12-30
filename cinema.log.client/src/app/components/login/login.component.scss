@@ -66,6 +66,14 @@
       i {
         margin-right: 0.5rem;
       }
+
+      &.dev {
+        background-color: get-color(secondary, 500);
+
+        &:hover {
+          background-color: get-color(secondary, 400);
+        }
+      }
     }
   }
 }

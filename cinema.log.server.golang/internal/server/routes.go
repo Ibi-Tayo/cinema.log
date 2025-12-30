@@ -14,6 +14,7 @@ func isAuthExempt(path string) bool {
 		"/auth/github-login",
 		"/auth/github-callback",
 		"/auth/refresh-token",
+		"/auth/dev/login",
 	}
 	for _, exemptPath := range exemptPaths {
 		if path == exemptPath {
@@ -41,6 +42,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.Handle("GET /auth/github-callback", s.authHandler.Callback())
 	mux.Handle("GET /auth/refresh-token", s.authHandler.RefreshToken())
 	mux.Handle("GET /auth/me", s.authHandler.Me())
+	mux.Handle("GET /auth/dev/login", s.authHandler.DevLogin()) // only in dev environment
 
 	// Film routes
 	mux.HandleFunc("GET /films/{id}", s.filmHandler.GetFilmById)

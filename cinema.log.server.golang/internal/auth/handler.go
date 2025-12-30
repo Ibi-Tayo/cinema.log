@@ -188,3 +188,23 @@ func (*Handler) setCookies(w http.ResponseWriter, jwt string, refreshToken strin
 		MaxAge:   604800,
 	})
 }
+
+func (h *Handler) DevLogin() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Only allow in non-production environments
+		if isProduction() {
+			http.Error(w, "not found", http.StatusNotFound)
+			return
+		}
+
+		jwtResponse, err := h.authService.HandleDevLogin(r.Context())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		
+		w.Header().Set("Content-type", "application/json")
+		h.setCookies(w, jwtResponse.Jwt, jwtResponse.RefreshToken)
+		w.WriteHeader(http.StatusOK)
+	})
+}

@@ -145,3 +145,21 @@ func (s *AuthService) ValidateRefreshToken(tkn string) (*domain.User, error) {
 
 	return nil, fmt.Errorf("invalid token")
 }
+
+func (s *AuthService) HandleDevLogin(ctx context.Context) (*JwtResponse, error) {
+	user, err := s.userService.GetOrCreateUserByGithubId(ctx, 0, "Dev User", "devuser", "")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get first user: %w", err)
+	}
+
+	jwt, refreshToken, err := s.GenerateJWT(user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate JWT: %w", err)
+	}
+
+	return &JwtResponse{
+		User:         user,
+		Jwt:          jwt,
+		RefreshToken: refreshToken,
+	}, nil
+}
