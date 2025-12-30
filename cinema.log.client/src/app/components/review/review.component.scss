@@ -2,32 +2,79 @@
 @use "mixins" as *;
 @use "sass:map";
 
+// Reusable mixins
+@mixin gradient-background($opacity1: 1, $opacity2: 1) {
+  background: linear-gradient(
+    135deg,
+    rgba(get-color(primary, 700), $opacity1) 0%,
+    rgba(get-color(secondary, 700), $opacity2) 100%
+  );
+}
+
+@mixin card-container {
+  padding: 2rem;
+  @include gradient-background;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@mixin section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: map.get($font-sizes, "2xl");
+  font-weight: 500;
+  color: get-color(neutral, 400);
+  margin: 0 0 2rem 0;
+
+  lord-icon {
+    flex-shrink: 0;
+  }
+}
+
+@mixin primeng-button-base {
+  padding: 1rem 1.5rem;
+  border-radius: 2rem;
+  font-size: map.get($font-sizes, "base");
+  font-weight: 600;
+  font-family: $font-family-primary;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  border: none;
+
+  &:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
 .review-container {
   min-height: calc(100vh - 200px);
   padding: 2rem;
   background-color: get-color(backgroundColor);
   color: get-color(neutral, 500);
 
-  // Loading State
-  .loading-state {
-    @include flex-center;
-    flex-direction: column;
-    min-height: 50vh;
-    gap: 1rem;
-
-    p {
-      font-size: map.get($font-sizes, "xl");
-      color: get-color(neutral, 700);
-    }
-  }
-
-  // Error State
+  // Loading & Error States
+  .loading-state,
   .error-state {
     @include flex-center;
     flex-direction: column;
     min-height: 50vh;
-    gap: 2rem;
+    gap: 1rem;
+  }
 
+  .loading-state p {
+    font-size: map.get($font-sizes, "xl");
+    color: get-color(neutral, 700);
+  }
+
+  .error-state {
+    gap: 2rem;
     p {
       font-size: map.get($font-sizes, "lg");
       color: get-color(error);
@@ -224,27 +271,10 @@
 
     // Review Form Section
     .review-form-section {
-      padding: 2rem;
-      background: linear-gradient(
-        135deg,
-        get-color(primary, 800) 0%,
-        get-color(secondary, 900) 100%
-      );
-      border-radius: 1rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      @include card-container;
 
       > h3 {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        font-size: map.get($font-sizes, "2xl");
-        font-weight: 500;
-        color: get-color(neutral, 400);
-        margin: 0 0 2rem 0;
-
-        lord-icon {
-          flex-shrink: 0;
-        }
+        @include section-title;
       }
 
       // Success Message
@@ -417,47 +447,50 @@
     // Comparison Section
     .comparison-section {
       margin-top: 3rem;
-      padding: 2rem;
-      background: linear-gradient(
-        135deg,
-        get-color(primary, 800) 0%,
-        get-color(secondary, 900) 100%
-      );
-      border-radius: 1rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      @include card-container;
 
-      // Override PrimeNG Card styles
-      ::ng-deep p-card {
-        .p-card {
+      // PrimeNG overrides
+      ::ng-deep {
+        p-card .p-card {
           background: transparent;
           border: none;
           box-shadow: none;
           color: inherit;
-
-          .p-card-body {
-            padding: 0;
-          }
-
+          .p-card-body,
           .p-card-content {
             padding: 0;
           }
         }
-      }
 
-      .comparison-header {
-        > h3 {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          font-size: map.get($font-sizes, "2xl");
-          font-weight: 500;
-          color: get-color(neutral, 400);
-          margin: 0 0 0.5rem 0;
+        .custom-spinner .p-progress-spinner-circle {
+          stroke: get-color(primary, 400);
+        }
 
-          lord-icon {
-            flex-shrink: 0;
+        .comparison-error-message {
+          width: 100%;
+          margin: 1rem 0;
+          .p-message {
+            background: rgba(255, 82, 82, 0.1);
+            border: 1px solid get-color(error);
+            color: get-color(error);
           }
         }
+
+        .finish-button .p-button {
+          @include primeng-button-base;
+          background: get-color(primary, 500);
+          border-color: get-color(primary, 500);
+          color: white;
+          &:hover {
+            background: get-color(primary, 400);
+            border-color: get-color(primary, 400);
+          }
+        }
+      }
+
+      .comparison-header > h3 {
+        @include section-title;
+        margin-bottom: 0.5rem;
 
         .comparison-subtitle {
           font-size: map.get($font-sizes, "base");
@@ -485,48 +518,6 @@
           font-size: map.get($font-sizes, "xl");
           color: get-color(success);
           margin: 0;
-        }
-      }
-
-      // PrimeNG ProgressSpinner customization
-      ::ng-deep .custom-spinner {
-        .p-progress-spinner-circle {
-          stroke: get-color(primary, 400);
-          animation: p-progress-spinner-dash 1.5s ease-in-out infinite;
-        }
-      }
-
-      // PrimeNG Message customization
-      ::ng-deep .comparison-error-message {
-        width: 100%;
-        margin: 1rem 0;
-
-        .p-message {
-          background: rgba(255, 82, 82, 0.1);
-          border: 1px solid get-color(error);
-          color: get-color(error);
-        }
-      }
-
-      // PrimeNG Button customization for finish button
-      ::ng-deep .finish-button {
-        margin-top: 1rem;
-
-        .p-button {
-          padding: 0.75rem 1.5rem;
-          background: get-color(primary, 500);
-          border-color: get-color(primary, 500);
-          color: white;
-          border-radius: 2rem;
-          font-size: map.get($font-sizes, "base");
-          font-weight: 600;
-          transition: all 0.3s ease;
-
-          &:hover {
-            background: get-color(primary, 400);
-            border-color: get-color(primary, 400);
-            transform: translateY(-2px);
-          }
         }
       }
 
@@ -610,11 +601,6 @@
                 font-weight: 600;
               }
             }
-            font-size: map.get($font-sizes, "sm");
-            color: get-color(neutral, 600);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
           }
         }
 
@@ -724,61 +710,34 @@
       gap: 1rem;
       margin-bottom: 1.5rem;
 
-      // PrimeNG Button styling for comparison buttons
-      ::ng-deep .comparison-button {
-        .p-button {
-          padding: 1rem 1.5rem;
-          border-radius: 2rem;
-          font-size: map.get($font-sizes, "base");
-          font-weight: 600;
-          font-family: $font-family-primary;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-          transition: all 0.3s ease;
-          border: none;
+      ::ng-deep .comparison-button .p-button {
+        @include primeng-button-base;
+      }
 
-          &:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-          }
-
-          &:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-          }
-
-          .p-button-label {
-            font-weight: 600;
-          }
+      ::ng-deep .comparison-button.better .p-button {
+        background: get-color(primary, 500);
+        border-color: get-color(primary, 500);
+        &:not(:disabled):hover {
+          background: get-color(primary, 400);
+          border-color: get-color(primary, 400);
         }
+      }
 
-        &.better .p-button {
-          background: get-color(primary, 500);
-          border-color: get-color(primary, 500);
-
-          &:not(:disabled):hover {
-            background: get-color(primary, 400);
-            border-color: get-color(primary, 400);
-          }
+      ::ng-deep .comparison-button.same .p-button {
+        background: get-color(neutral, 900);
+        border-color: get-color(neutral, 900);
+        &:not(:disabled):hover {
+          background: get-color(neutral, 800);
+          border-color: get-color(neutral, 800);
         }
+      }
 
-        &.same .p-button {
-          background: get-color(neutral, 900);
-          border-color: get-color(neutral, 900);
-
-          &:not(:disabled):hover {
-            background: get-color(neutral, 800);
-            border-color: get-color(neutral, 800);
-          }
-        }
-
-        &.worse .p-button {
-          background: get-color(secondary, 500);
-          border-color: get-color(secondary, 500);
-
-          &:not(:disabled):hover {
-            background: get-color(secondary, 400);
-            border-color: get-color(secondary, 400);
-          }
+      ::ng-deep .comparison-button.worse .p-button {
+        background: get-color(secondary, 500);
+        border-color: get-color(secondary, 500);
+        &:not(:disabled):hover {
+          background: get-color(secondary, 400);
+          border-color: get-color(secondary, 400);
         }
       }
     }
@@ -788,39 +747,34 @@
       margin-bottom: 1.5rem;
     }
   }
-}
 
-.review-container {
-  padding: 1rem;
+  // Mobile Responsive
+  @media (max-width: 768px) {
+    padding: 1rem;
 
-  .review-content {
-    .review-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
-
-      h1 {
-        font-size: map.get($font-sizes, "3xl");
+    .review-content {
+      .review-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        h1 {
+          font-size: map.get($font-sizes, "3xl");
+        }
       }
-    }
 
-    .film-section {
-      padding: 1.5rem;
-      gap: 2rem;
-
-      .film-poster {
-        width: 100%;
-        max-width: 300px;
+      .film-section {
+        padding: 1.5rem;
+        gap: 2rem;
+        .film-poster {
+          width: 100%;
+          max-width: 300px;
+        }
       }
-    }
 
-    .review-form-section {
-      padding: 1.5rem;
-
-      .review-form {
-        .submit-section {
+      .review-form-section {
+        padding: 1.5rem;
+        .review-form .submit-section {
           justify-content: stretch;
-
           .submit-button {
             width: 100%;
             justify-content: center;
