@@ -75,7 +75,7 @@ export class ReviewComponent implements OnInit {
     private authService: AuthService,
     private ratingService: RatingService
   ) {
-    const navigation = this.router.getCurrentNavigation();
+    const navigation = this.router.currentNavigation?.();
     const film = navigation?.extras.state?.['film'];
     if (film) {
       this.film = film;
