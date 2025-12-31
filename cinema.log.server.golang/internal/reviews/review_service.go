@@ -19,6 +19,7 @@ type Service struct {
 }
 
 type ReviewStore interface {
+	GetReview(ctx context.Context, reviewId uuid.UUID) (*domain.Review, error)
 	GetAllReviewsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.Review, error)
 	CreateReview(ctx context.Context, review domain.Review) (*domain.Review, error)
 	UpdateReview(ctx context.Context, review domain.Review) (*domain.Review, error)
@@ -29,6 +30,10 @@ func NewService(reviewStore ReviewStore) *Service {
 	return &Service{
 		ReviewStore: reviewStore,
 	}
+}
+
+func (s *Service) GetReview(ctx context.Context, reviewId uuid.UUID) (*domain.Review, error) {
+	return s.ReviewStore.GetReview(ctx, reviewId)
 }
 
 func (s *Service) GetAllReviewsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.Review, error) {

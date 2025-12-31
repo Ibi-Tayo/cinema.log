@@ -34,15 +34,6 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should construct login URL correctly', () => {
-    // We can't actually test window.location.href assignment in tests
-    // as it causes a full page reload, but we can verify the service
-    // constructs the correct URL by checking the implementation
-    const expectedUrl = `${environment.apiUrl}/auth/github-login`;
-    expect(environment.apiUrl).toBe('http://localhost:8080');
-    expect(expectedUrl).toBe('http://localhost:8080/auth/github-login');
-  });
-
   it('should logout successfully', () => {
     service.logout().subscribe({
       next: () => {

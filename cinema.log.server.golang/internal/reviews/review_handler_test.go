@@ -16,10 +16,18 @@ import (
 )
 
 type mockReviewService struct {
+	getReview 				  func(ctx context.Context, reviewId uuid.UUID) (*domain.Review, error)
 	getAllReviewsByUserIdFunc func(ctx context.Context, userId uuid.UUID) ([]domain.Review, error)
 	createReviewFunc          func(ctx context.Context, review domain.Review) (*domain.Review, error)
 	updateReviewFunc          func(ctx context.Context, review domain.Review) (*domain.Review, error)
 	deleteReviewFunc          func(ctx context.Context, reviewId uuid.UUID) error
+}
+
+func (m *mockReviewService) GetReview(ctx context.Context, reviewId uuid.UUID) (*domain.Review, error) {
+	if m.getReview != nil {
+		return m.getReview(ctx, reviewId)
+	}
+	return &domain.Review{ID: reviewId}, nil
 }
 
 func (m *mockReviewService) GetAllReviewsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.Review, error) {
@@ -216,13 +224,16 @@ func TestHandler_UpdateReview_Success(t *testing.T) {
 
 	userId := uuid.New()
 	reviewId := uuid.New()
-	filmId := uuid.New()
 	user := &domain.User{ID: userId, Name: "Test User", Username: "testuser"}
+
+	// Put a dummy review in the mock service to be updated
+	mockReviewSvc.getReview = func(ctx context.Context, reviewId uuid.UUID) (*domain.Review, error) {
+		return &domain.Review{ID: reviewId, UserId: userId, Content: "Old review"}, nil
+	}
 
 	updateReq := map[string]interface{}{
 		"content": "Updated review!",
-		"rating":  5.0,
-		"filmId":  filmId.String(),
+		"reviewId": reviewId.String(),
 	}
 	body, _ := json.Marshal(updateReq)
 

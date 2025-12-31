@@ -6,6 +6,8 @@ import { FilmService, Film } from '../../services/film.service';
 import {
   ReviewService,
   CreateReviewRequest,
+  UpdateReviewRequest,
+  Review,
 } from '../../services/review.service';
 import { AuthService } from '../../services/auth.service';
 import {
@@ -15,10 +17,25 @@ import {
 } from '../../services/rating.service';
 import { getTMDBPosterUrl, TMDBPosterSize } from '../../utils/tmdb-image.util';
 
+// PrimeNG imports
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { MessageModule } from 'primeng/message';
+import { DividerModule } from 'primeng/divider';
+
 @Component({
   selector: 'app-review',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    CardModule,
+    ButtonModule,
+    ProgressSpinnerModule,
+    MessageModule,
+    DividerModule,
+  ],
   templateUrl: './review.component.html',
   styleUrl: './review.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -27,6 +44,7 @@ export class ReviewComponent implements OnInit {
   private static readonly REDIRECT_DELAY_MS = 1500;
 
   film: Film | null = null;
+  review: Review | null = null;
   isLoading = true;
   errorMessage = '';
 
@@ -76,6 +94,8 @@ export class ReviewComponent implements OnInit {
         this.isLoading = false;
         // Check if the user has already rated this film
         this.checkForExistingRating(filmId);
+        // Check if the user has already reviewed this film
+        this.checkForExistingReview();
       },
       error: (error) => {
         console.error('Error loading film:', error);
@@ -104,11 +124,30 @@ export class ReviewComponent implements OnInit {
     });
   }
 
+  checkForExistingReview(): void {
+    const userId = this.authService.currentUser?.id;
+    if (!userId || !this.film) return;
+
+    this.reviewService.getAllReviewsByUserId(userId).subscribe({
+      next: (reviews) => {
+        const existingReview = reviews.find(
+          (review) => review.filmId === this.film?.id
+        );
+        if (existingReview) {
+          this.reviewText = existingReview.title;
+          this.review = existingReview;
+        }
+      },
+      error: (error) => {
+        console.error('Error checking for existing review:', error);
+      },
+    });
+  }
+
   selectRating(rating: number): void {
     this.selectedRating = rating;
   }
 
-  // TODO: Implement edit/update review functionality
   submitReview(): void {
     if (!this.film || this.selectedRating === 0 || !this.reviewText.trim()) {
       this.submitError = 'Please provide both a rating and a review.';
@@ -141,6 +180,45 @@ export class ReviewComponent implements OnInit {
       error: (error) => {
         console.error('Error submitting review:', error);
         this.submitError = 'Failed to submit review. Please try again.';
+        this.isSubmitting = false;
+      },
+    });
+  }
+
+  updateReview(): void {
+    if (!this.film || !this.reviewText.trim()) {
+      this.submitError = 'Please provide a review.';
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.submitError = '';
+    this.submitSuccess = false;
+
+    const updateReviewRequest: UpdateReviewRequest = {
+      reviewId: this.review?.id || '',
+      content: this.reviewText.trim(),
+    };
+
+    this.reviewService.updateReview(updateReviewRequest).subscribe({
+      next: () => {
+        this.submitSuccess = true;
+        this.isSubmitting = false;
+        // Reset form
+        this.reviewText = '';
+        // Load the rating and comparisons
+        if (this.film) {
+          this.checkForExistingRating(this.film.id);
+          this.loadFilmsForComparison();
+        }
+        // wait then refresh the page
+        setTimeout(() => {
+          window.location.reload();
+        }, ReviewComponent.REDIRECT_DELAY_MS);
+      },
+      error: (error) => {
+        console.error('Error submitting review update:', error);
+        this.submitError = 'Failed to submit review update. Please try again.';
         this.isSubmitting = false;
       },
     });
@@ -235,14 +313,6 @@ export class ReviewComponent implements OnInit {
         this.isSubmittingComparison = false;
       },
     });
-  }
-
-  skipComparison(): void {
-    if (this.currentComparisonIndex < this.filmsForComparison.length - 1) {
-      this.currentComparisonIndex++;
-    } else {
-      this.finishComparisons();
-    }
   }
 
   finishComparisons(): void {

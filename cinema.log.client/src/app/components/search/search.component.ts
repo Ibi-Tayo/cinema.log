@@ -7,14 +7,30 @@ import {
 
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { FilmService, Film } from '../../services/film.service';
 import { debounceTime, Subject } from 'rxjs';
 import { getTMDBPosterUrl, TMDBPosterSize } from '../../utils/tmdb-image.util';
+import { DataViewModule } from 'primeng/dataview';
+import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { CardModule } from 'primeng/card';
+import { SkeletonModule } from 'primeng/skeleton';
 
 @Component({
   selector: 'app-search',
   standalone: true,
-  imports: [FormsModule],
+  imports: [
+    FormsModule,
+    CommonModule,
+    DataViewModule,
+    InputTextModule,
+    IconFieldModule,
+    InputIconModule,
+    CardModule,
+    SkeletonModule,
+  ],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

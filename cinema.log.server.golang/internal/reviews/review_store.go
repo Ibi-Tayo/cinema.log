@@ -18,6 +18,24 @@ func NewStore(db *sql.DB) ReviewStore {
 	}
 }
 
+func (s *store) GetReview(ctx context.Context, reviewId uuid.UUID) (*domain.Review, error) {
+	query := `SELECT review_id, content, date, rating, film_id, user_id 
+	          FROM reviews WHERE review_id = $1`
+
+	row := s.db.QueryRowContext(ctx, query, reviewId)
+
+	var review domain.Review
+	err := row.Scan(&review.ID, &review.Content, &review.Date, &review.Rating, &review.FilmId, &review.UserId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrReviewNotFound
+		}
+		return nil, err
+	}
+
+	return &review, nil
+}
+
 func (s *store) GetAllReviewsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.Review, error) {
 	query := `SELECT review_id, content, date, rating, film_id, user_id 
 	          FROM reviews WHERE user_id = $1`

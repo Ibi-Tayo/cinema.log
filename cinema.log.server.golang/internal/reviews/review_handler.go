@@ -18,6 +18,7 @@ type Handler struct {
 }
 
 type ReviewService interface {
+	GetReview(ctx context.Context, reviewId uuid.UUID) (*domain.Review, error)
 	GetAllReviewsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.Review, error)
 	CreateReview(ctx context.Context, review domain.Review) (*domain.Review, error)
 	UpdateReview(ctx context.Context, review domain.Review) (*domain.Review, error)
@@ -119,8 +120,9 @@ func (h *Handler) UpdateReview(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Content string  `json:"content"`
-		Rating  float32 `json:"rating"`
+		Content  string    `json:"content"`
+		ReviewId uuid.UUID `json:"reviewId"`
+		// May add more things to update in the future
 	}
 
 	if err := utils.DecodeJSON(r, &req); err != nil {
@@ -128,12 +130,28 @@ func (h *Handler) UpdateReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	reviewToUpdate, err := h.ReviewService.GetReview(r.Context(), reviewId)
+	if err != nil {
+		if err == ErrReviewNotFound {
+			http.Error(w, ErrReviewNotFound.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if reviewToUpdate.UserId != user.ID {
+		http.Error(w, "Forbidden: cannot update others' reviews", http.StatusForbidden)
+		return
+	}
+	
 	review := domain.Review{
 		ID:      reviewId,
 		Content: req.Content,
 		Date:    time.Now(),
-		Rating:  req.Rating,
+		Rating:  reviewToUpdate.Rating, // keep existing rating as this is an initial rating that cannot be changed
 		UserId:  user.ID,
+		FilmId:  reviewToUpdate.FilmId,
 	}
 
 	updatedReview, err := h.ReviewService.UpdateReview(r.Context(), review)

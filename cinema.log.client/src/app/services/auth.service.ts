@@ -8,8 +8,11 @@ import { environment } from '../../environments/environment';
 })
 export class AuthService {
   currentUser: User | null = null;
+  env: Env;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.env = environment.production ? Env.PROD : Env.DEV;
+  }
 
   getCurrentUser(): Observable<User> {
     return this.http
@@ -27,6 +30,21 @@ export class AuthService {
   login(): void {
     // Redirect directly to the GitHub login endpoint
     window.location.href = `${environment.apiUrl}/auth/github-login`;
+  }
+
+  devLogin(): Observable<void> {
+    return this.http
+      .get<void>(`${environment.apiUrl}/auth/dev/login`, {
+        withCredentials: true,
+      })
+      .pipe(
+        catchError((error) => {
+          console.error('Dev login failed:', error);
+          return throwError(
+            () => new Error('Dev login failed. Please try again.')
+          );
+        })
+      );
   }
 
   logout(): Observable<void> {
@@ -82,4 +100,9 @@ export interface User {
   profilePicUrl: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export enum Env {
+  DEV = 'development',
+  PROD = 'production',
 }

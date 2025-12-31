@@ -15,33 +15,36 @@
 
     <!-- Search Input -->
     <div class="search-input-wrapper">
-      <div class="search-input-container">
-        <lord-icon
-          src="https://cdn.lordicon.com/wjyqkiew.json"
-          trigger="hover"
-          style="width: 24px; height: 24px"
-        >
-        </lord-icon>
+      <p-iconfield iconPosition="left">
+        <p-inputicon styleClass="pi pi-search" />
         <input
           type="text"
+          pInputText
           [(ngModel)]="searchQuery"
           (input)="onSearchInput()"
           placeholder="Search for a film by title..."
-          class="search-input"
+          class="w-full"
         />
-      </div>
+      </p-iconfield>
     </div>
 
     <!-- Loading State -->
     @if (isLoading) {
     <div class="loading-state">
-      <lord-icon
-        src="https://cdn.lordicon.com/xjovhxra.json"
-        trigger="loop"
-        style="width: 80px; height: 80px"
-      >
-      </lord-icon>
-      <p>Searching for films...</p>
+      <p-card>
+        <div class="skeleton-list">
+          @for (item of [1,2,3,4]; track item) {
+          <div class="skeleton-item">
+            <p-skeleton width="100px" height="150px" />
+            <div class="skeleton-content">
+              <p-skeleton width="70%" height="1.5rem" />
+              <p-skeleton width="30%" height="1rem" />
+              <p-skeleton width="100%" height="3rem" />
+            </div>
+          </div>
+          }
+        </div>
+      </p-card>
     </div>
     }
 
@@ -58,35 +61,49 @@
     </div>
     }
 
-    <!-- Search Results -->
+    <!-- Search Results with DataView -->
     @if (searchResults.length > 0 && !isLoading) {
     <div class="search-results">
-      <h2>Search Results ({{ searchResults.length }})</h2>
-      <div class="film-grid">
-        @for (film of searchResults; track film) {
-        <div class="film-card" (click)="selectFilm(film)">
-          <div class="film-poster">
-            @if (film.posterUrl) {
-            <img [src]="getPosterUrl(film.posterUrl)" [alt]="film.title" />
-            } @if (!film.posterUrl) {
-            <div class="poster-placeholder">
-              <lord-icon
-                src="https://cdn.lordicon.com/ugllxeyl.json"
-                trigger="hover"
-                style="width: 60px; height: 60px"
-              >
-              </lord-icon>
+      <p-dataview #dv [value]="searchResults" layout="list">
+        <ng-template #header>
+          <div class="results-header">
+            <h2>Search Results ({{ searchResults.length }})</h2>
+          </div>
+        </ng-template>
+
+        <ng-template #list let-films>
+          <div class="film-list">
+            @for (film of films; track film.id; let first = $first) {
+            <div
+              class="film-list-item"
+              [ngClass]="{ 'border-top': !first }"
+              (click)="selectFilm(film)"
+            >
+              <div class="film-poster-compact">
+                @if (film.posterUrl) {
+                <img
+                  [src]="getPosterUrl(film.posterUrl, 'w342')"
+                  [alt]="film.title"
+                  class="poster-image"
+                />
+                } @else {
+                <div class="poster-placeholder-compact">
+                  <i class="pi pi-image"></i>
+                </div>
+                }
+              </div>
+              <div class="film-details">
+                <div class="film-title-row">
+                  <h3 class="film-title">{{ film.title }}</h3>
+                  <span class="film-year">{{ film.releaseYear }}</span>
+                </div>
+                <p class="film-description">{{ film.description }}</p>
+              </div>
             </div>
             }
           </div>
-          <div class="film-info">
-            <h3>{{ film.title }}</h3>
-            <p class="film-year">{{ film.releaseYear }}</p>
-            <p class="film-description">{{ film.description }}</p>
-          </div>
-        </div>
-        }
-      </div>
+        </ng-template>
+      </p-dataview>
     </div>
     }
 

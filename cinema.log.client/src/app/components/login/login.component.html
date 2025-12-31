@@ -14,9 +14,17 @@
     <div class="subtitle">
       We don't want any of your details, just sign in with a GitHub account
     </div>
-    <button class="join-button" (click)="login()">
+    @if (auth.env == 'development') {
+      <button class="join-button dev" (click)="devLogin()">
       <i class="pi pi-github"></i>
       Join Now / Sign In
     </button>
+    } @else {
+      <button class="join-button" (click)="login()">
+      <i class="pi pi-github"></i>
+      Join Now / Sign In
+    </button>
+    }
+
   </div>
 </div>
