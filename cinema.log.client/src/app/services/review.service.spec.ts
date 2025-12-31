@@ -112,7 +112,7 @@ describe('ReviewService', () => {
     const reviewId = '123e4567-e89b-12d3-a456-426614174000';
     const updateRequest: UpdateReviewRequest = {
       content: 'Updated content',
-      rating: 8.5,
+      reviewId: reviewId,
     };
 
     const updatedReview: Review = {
@@ -121,7 +121,7 @@ describe('ReviewService', () => {
       rating: 8.5,
     };
 
-    service.updateReview(reviewId, updateRequest).subscribe((review) => {
+    service.updateReview(updateRequest).subscribe((review) => {
       expect(review).toEqual(updatedReview);
     });
 
@@ -136,10 +136,10 @@ describe('ReviewService', () => {
     const reviewId = 'invalid-review-id';
     const updateRequest: UpdateReviewRequest = {
       content: 'Updated content',
-      rating: 8.5,
+      reviewId: reviewId,
     };
 
-    service.updateReview(reviewId, updateRequest).subscribe({
+    service.updateReview(updateRequest).subscribe({
       next: () => fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to update review');

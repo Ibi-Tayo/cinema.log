@@ -105,104 +105,6 @@
         </div>
       </div>
     </div>
-    <!-- Review Form Section -->
-    <div class="review-form-section">
-      <h3>
-        <lord-icon
-          src="https://cdn.lordicon.com/cvwrvyjv.json"
-          trigger="hover"
-          style="width: 28px; height: 28px"
-        >
-        </lord-icon>
-        Your Review
-      </h3>
-      <!-- Success Message -->
-      @if (submitSuccess) {
-      <div class="success-message">
-        <lord-icon
-          src="https://cdn.lordicon.com/lomfljuq.json"
-          trigger="loop"
-          style="width: 60px; height: 60px"
-        >
-        </lord-icon>
-        <p>Review submitted successfully</p>
-      </div>
-      }
-      <!-- Review Form -->
-      @if (!submitSuccess) {
-      <div class="review-form">
-        <!-- Rating Section -->
-        <div class="rating-section">
-          <label>Rating (out of 5)</label>
-          <div class="star-rating">
-            @for (star of getStars(); track star) {
-            <span
-              class="star"
-              [class.selected]="star <= selectedRating"
-              [class.hover]="star <= selectedRating"
-              (click)="selectRating(star)"
-            >
-              ★
-            </span>
-            }
-          </div>
-          <p class="rating-hint">
-            Click to rate ({{ selectedRating || "Not rated" }})
-          </p>
-        </div>
-        <!-- Review Text Section -->
-        <div class="review-text-section">
-          <label for="reviewText">Your Thoughts</label>
-          <textarea
-            id="reviewText"
-            [(ngModel)]="reviewText"
-            placeholder="Share your thoughts about this film..."
-            rows="8"
-            [disabled]="isSubmitting"
-          ></textarea>
-        </div>
-        <!-- Error Message -->
-        @if (submitError) {
-        <div class="error-message">
-          <lord-icon
-            src="https://cdn.lordicon.com/tdrtiskw.json"
-            trigger="loop"
-            style="width: 24px; height: 24px"
-          >
-          </lord-icon>
-          <p>{{ submitError }}</p>
-        </div>
-        }
-        <!-- Submit Button -->
-        <div class="submit-section">
-          <button
-            class="submit-button"
-            (click)="submitReview()"
-            [disabled]="
-              isSubmitting || selectedRating === 0 || !reviewText.trim()
-            "
-          >
-            @if (!isSubmitting) {
-            <lord-icon
-              src="https://cdn.lordicon.com/jvucoldz.json"
-              trigger="hover"
-              style="width: 24px; height: 24px"
-            >
-            </lord-icon>
-            } @if (isSubmitting) {
-            <lord-icon
-              src="https://cdn.lordicon.com/xjovhxra.json"
-              trigger="loop"
-              style="width: 24px; height: 24px"
-            >
-            </lord-icon>
-            }
-            {{ isSubmitting ? "Submitting..." : "Submit Review" }}
-          </button>
-        </div>
-      </div>
-      }
-    </div>
     <!-- Film Comparison Section -->
     @if (showComparisons) {
     <div class="comparison-section">
@@ -415,6 +317,143 @@
       </p-card>
     </div>
     }
+    <!-- Review Form Section -->
+    <div class="review-form-section">
+      @if (hasRating) {
+      <h3>
+        <lord-icon
+          src="https://cdn.lordicon.com/cvwrvyjv.json"
+          trigger="hover"
+          style="width: 28px; height: 28px"
+        >
+        </lord-icon>
+        Update Review
+      </h3>
+      } @else {
+      <h3>
+        <lord-icon
+          src="https://cdn.lordicon.com/cvwrvyjv.json"
+          trigger="hover"
+          style="width: 28px; height: 28px"
+        >
+        </lord-icon>
+        Review
+      </h3>
+      }
+      <!-- Success Message -->
+      @if (submitSuccess) {
+      <div class="success-message">
+        <lord-icon
+          src="https://cdn.lordicon.com/lomfljuq.json"
+          trigger="loop"
+          style="width: 60px; height: 60px"
+        >
+        </lord-icon>
+        <p>Review submitted successfully</p>
+      </div>
+      }
+      <!-- Review Form -->
+      @if (!submitSuccess) {
+      <div class="review-form">
+        <!-- Rating Section -->
+        @if (!hasRating) {
+        <div class="rating-section">
+          <label>Rating (out of 5)</label>
+          <div class="star-rating">
+            @for (star of getStars(); track star) {
+            <span
+              class="star"
+              [class.selected]="star <= selectedRating"
+              [class.hover]="star <= selectedRating"
+              (click)="selectRating(star)"
+            >
+              ★
+            </span>
+            }
+          </div>
+          <p class="rating-hint">
+            Click to rate ({{ selectedRating || "Not rated" }})
+          </p>
+        </div>
+        }
+        <!-- Review Text Section -->
+        <div class="review-text-section">
+          <label for="reviewText">Your Thoughts</label>
+          <textarea
+            id="reviewText"
+            [(ngModel)]="reviewText"
+            placeholder="Share your thoughts about this film..."
+            rows="8"
+            [disabled]="isSubmitting"
+          ></textarea>
+        </div>
+        <!-- Error Message -->
+        @if (submitError) {
+        <div class="error-message">
+          <lord-icon
+            src="https://cdn.lordicon.com/tdrtiskw.json"
+            trigger="loop"
+            style="width: 24px; height: 24px"
+          >
+          </lord-icon>
+          <p>{{ submitError }}</p>
+        </div>
+        }
+        <!-- Submit Button -->
+        <div class="submit-section">
+          @if (!hasRating) {
+          <button
+            class="submit-button"
+            (click)="submitReview()"
+            [disabled]="
+              isSubmitting || selectedRating === 0 || !reviewText.trim()
+            "
+          >
+            @if (!isSubmitting) {
+            <lord-icon
+              src="https://cdn.lordicon.com/jvucoldz.json"
+              trigger="hover"
+              style="width: 24px; height: 24px"
+            >
+            </lord-icon>
+            } @if (isSubmitting) {
+            <lord-icon
+              src="https://cdn.lordicon.com/xjovhxra.json"
+              trigger="loop"
+              style="width: 24px; height: 24px"
+            >
+            </lord-icon>
+            }
+            {{ isSubmitting ? "Submitting..." : "Submit Review" }}
+          </button>
+          } @else {
+          <button
+            class="submit-button"
+            (click)="updateReview()"
+            [disabled]="isSubmitting || !reviewText.trim()"
+          >
+            @if (!isSubmitting) {
+            <lord-icon
+              src="https://cdn.lordicon.com/jvucoldz.json"
+              trigger="hover"
+              style="width: 24px; height: 24px"
+            >
+            </lord-icon>
+            } @if (isSubmitting) {
+            <lord-icon
+              src="https://cdn.lordicon.com/xjovhxra.json"
+              trigger="loop"
+              style="width: 24px; height: 24px"
+            >
+            </lord-icon>
+            }
+            {{ isSubmitting ? "Submitting..." : "Update Review" }}
+          </button>
+          }
+        </div>
+      </div>
+      }
+    </div>
   </div>
   }
 </div>

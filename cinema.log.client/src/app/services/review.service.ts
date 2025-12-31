@@ -20,7 +20,7 @@ export interface CreateReviewRequest {
 
 export interface UpdateReviewRequest {
   content: string;
-  rating: number;
+  reviewId: string;
 }
 
 @Injectable({
@@ -51,9 +51,9 @@ export class ReviewService {
       );
   }
 
-  updateReview(id: string, review: UpdateReviewRequest): Observable<Review> {
+  updateReview(review: UpdateReviewRequest): Observable<Review> {
     return this.http
-      .put<Review>(`${environment.apiUrl}/reviews/${id}`, review, { withCredentials: true })
+      .put<Review>(`${environment.apiUrl}/reviews/${review.reviewId}`, review, { withCredentials: true })
       .pipe(
         catchError((error) => {
           console.error('Error updating review:', error);

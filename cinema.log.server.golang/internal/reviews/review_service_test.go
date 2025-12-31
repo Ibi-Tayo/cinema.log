@@ -11,6 +11,10 @@ import (
 
 type mockReviewStore struct{}
 
+func (m *mockReviewStore) GetReview(ctx context.Context, reviewId uuid.UUID) (*domain.Review, error) {
+	return &domain.Review{ID: reviewId}, nil
+}
+
 func (m *mockReviewStore) GetAllReviewsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.Review, error) {
 	return []domain.Review{{ID: uuid.New(), UserId: userId}}, nil
 }
@@ -71,6 +75,10 @@ func TestService_DeleteReview(t *testing.T) {
 }
 
 type errorStore struct{}
+
+func (e *errorStore) GetReview(ctx context.Context, reviewId uuid.UUID) (*domain.Review, error) {
+	return nil, errors.New("database error")
+}
 
 func (e *errorStore) GetAllReviewsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.Review, error) {
 	return nil, errors.New("database error")

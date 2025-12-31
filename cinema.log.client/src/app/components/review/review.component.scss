@@ -272,6 +272,7 @@
     // Review Form Section
     .review-form-section {
       @include card-container;
+      margin-top: 2rem;
 
       > h3 {
         @include section-title;
