@@ -3,6 +3,9 @@ import {
   OnInit,
   OnDestroy,
   CUSTOM_ELEMENTS_SCHEMA,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
@@ -34,14 +37,18 @@ import { SkeletonModule } from 'primeng/skeleton';
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchComponent implements OnInit, OnDestroy {
-  searchQuery = '';
-  searchResults: Film[] = [];
-  isLoading = false;
-  errorMessage = '';
-  hasSearched = false;
+  searchQuery = signal('');
+  searchResults = signal<Film[]>([]);
+  isLoading = signal(false);
+  errorMessage = signal('');
+  hasSearched = signal(false);
   private searchSubject = new Subject<string>();
+
+  // Computed signals
+  hasResults = computed(() => this.searchResults().length > 0);
 
   constructor(private filmService: FilmService, private router: Router) {}
 
@@ -57,12 +64,13 @@ export class SearchComponent implements OnInit, OnDestroy {
   }
 
   onSearchInput(): void {
-    if (this.searchQuery.trim().length > 0) {
-      this.searchSubject.next(this.searchQuery.trim());
+    const query = this.searchQuery();
+    if (query.trim().length > 0) {
+      this.searchSubject.next(query.trim());
     } else {
-      this.searchResults = [];
-      this.hasSearched = false;
-      this.errorMessage = '';
+      this.searchResults.set([]);
+      this.hasSearched.set(false);
+      this.errorMessage.set('');
     }
   }
 
@@ -71,30 +79,30 @@ export class SearchComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.hasSearched = true;
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.hasSearched.set(true);
 
     this.filmService.searchFilms(query).subscribe({
       next: (results) => {
-        this.searchResults = results;
-        this.isLoading = false;
+        this.searchResults.set(results);
+        this.isLoading.set(false);
         if (results.length === 0) {
-          this.errorMessage = 'No films found matching your search.';
+          this.errorMessage.set('No films found matching your search.');
         }
       },
       error: (error) => {
         console.error('Error searching films:', error);
-        this.errorMessage = 'Failed to search films. Please try again.';
-        this.isLoading = false;
-        this.searchResults = [];
+        this.errorMessage.set('Failed to search films. Please try again.');
+        this.isLoading.set(false);
+        this.searchResults.set([]);
       },
     });
   }
 
   selectFilm(film: Film): void {
     // Navigate to review page with film ID
-    this.router.navigate(['/review', film.id], { state: { film }});
+    this.router.navigate(['/review', film.id], { state: { film } });
   }
 
   /**

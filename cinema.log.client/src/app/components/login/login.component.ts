@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   schemas: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
   constructor(public auth: AuthService, private router: Router) {}

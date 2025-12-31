@@ -1,6 +1,6 @@
 <div class="profile-container">
   <!-- Loading State -->
-  @if (isLoading) {
+  @if (isLoading()) {
   <div class="loading-state">
     <lord-icon
       src="https://cdn.lordicon.com/xjovhxra.json"
@@ -13,7 +13,7 @@
   }
 
   <!-- Error State -->
-  @if (errorMessage && !isLoading) {
+  @if (errorMessage() && !isLoading()) {
   <div class="error-state">
     <lord-icon
       src="https://cdn.lordicon.com/tdrtiskw.json"
@@ -21,21 +21,21 @@
       style="width: 80px; height: 80px"
     >
     </lord-icon>
-    <p>{{ errorMessage }}</p>
+    <p>{{ errorMessage() }}</p>
   </div>
   }
 
   <!-- Profile Content -->
-  @if (user && !isLoading) {
+  @if (user() && !isLoading()) {
   <div class="profile-content">
     <!-- User Header -->
     <div class="profile-header">
       <div class="profile-avatar">
-        <img [src]="user.profilePicUrl" [alt]="user.name" />
+        <img [src]="user()!.profilePicUrl" [alt]="user()!.name" />
       </div>
       <div class="profile-info">
-        <h1>{{ user.name }}</h1>
-        <p class="username">{{ "@" + user.username }}</p>
+        <h1>{{ user()!.name }}</h1>
+        <p class="username">{{ "@" + user()!.username }}</p>
         <div class="profile-meta">
           <div class="meta-item">
             <lord-icon
@@ -44,7 +44,9 @@
               style="width: 24px; height: 24px"
             >
             </lord-icon>
-            <span>Member since {{ user.createdAt | date : "MMMM yyyy" }}</span>
+            <span
+              >Member since {{ user()!.createdAt | date : "MMMM yyyy" }}</span
+            >
           </div>
         </div>
       </div>
@@ -61,7 +63,7 @@
         Recently Reviewed Films
       </h2>
       <!-- No Reviews Placeholder -->
-      @if (recentReviews.length === 0) {
+      @if (recentReviews().length === 0) {
       <div class="no-reviews-placeholder">
         <lord-icon
           src="https://cdn.lordicon.com/fpmskzsv.json"
@@ -76,12 +78,12 @@
       </div>
       }
       <!-- Reviews Carousel -->
-      @if (recentReviews.length > 0) {
+      @if (recentReviews().length > 0) {
       <div class="carousel-container">
         <button
           class="carousel-button prev"
           (click)="previousCarouselSlide()"
-          [disabled]="recentReviews.length <= 1"
+          [disabled]="recentReviews().length <= 1"
         >
           <lord-icon
             src="https://cdn.lordicon.com/zmkotitn.json"
@@ -91,10 +93,10 @@
           </lord-icon>
         </button>
         <div class="carousel-track">
-          @for (review of recentReviews; track review; let i = $index) {
+          @for (review of recentReviews(); track review; let i = $index) {
           <div
             class="carousel-slide"
-            [class.active]="i === currentCarouselIndex"
+            [class.active]="i === currentCarouselIndex()"
           >
             <div class="review-card">
               <div class="film-poster" (click)="selectFilm(review.film!.id)">
@@ -133,21 +135,21 @@
         <button
           class="carousel-button next"
           (click)="nextCarouselSlide()"
-          [disabled]="recentReviews.length <= 1"
+          [disabled]="recentReviews().length <= 1"
         >
           <lord-icon
             src="https://cdn.lordicon.com/zmkotitn.json"
             trigger="hover"
-            style="width: 40px; height: 40px;"
+            style="width: 40px; height: 40px"
           >
           </lord-icon>
         </button>
         <!-- Carousel Indicators -->
         <div class="carousel-indicators">
-          @for (review of recentReviews; track review; let i = $index) {
+          @for (review of recentReviews(); track review; let i = $index) {
           <button
             class="indicator"
-            [class.active]="i === currentCarouselIndex"
+            [class.active]="i === currentCarouselIndex()"
             (click)="goToSlide(i)"
           ></button>
           }

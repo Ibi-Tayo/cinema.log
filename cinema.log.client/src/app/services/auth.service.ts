@@ -1,14 +1,17 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { catchError, Observable } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { catchError, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { handleHttpError, handleExpectedError } from '../utils/error-handler.util';
+import {
+  handleHttpError,
+  handleExpectedError,
+} from '../utils/error-handler.util';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  currentUser: User | null = null;
+  currentUser = signal<User | null>(null);
   env: Env;
 
   constructor(private http: HttpClient) {
@@ -19,8 +22,11 @@ export class AuthService {
     return this.http
       .get<User>(`${environment.apiUrl}/auth/me`, { withCredentials: true })
       .pipe(
+        tap((user) => this.currentUser.set(user)),
         // Use handleExpectedError because 401/403 is expected when user is not logged in
-        catchError(handleExpectedError('Failed to authenticate. Please log in.'))
+        catchError(
+          handleExpectedError('Failed to authenticate. Please log in.')
+        )
       );
   }
 
@@ -48,11 +54,9 @@ export class AuthService {
     return this.http
       .get<void>(`${environment.apiUrl}/auth/logout`, { withCredentials: true })
       .pipe(
+        tap(() => this.currentUser.set(null)),
         catchError(
-          handleHttpError(
-            'during logout',
-            'Logout failed. Please try again.'
-          )
+          handleHttpError('during logout', 'Logout failed. Please try again.')
         )
       );
   }
