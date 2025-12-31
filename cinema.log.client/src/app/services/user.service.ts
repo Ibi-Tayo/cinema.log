@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { handleHttpError } from '../utils/error-handler.util';
 
 export interface User {
   id: string;
@@ -23,10 +24,12 @@ export class UserService {
     return this.http
       .get<User>(`${environment.apiUrl}/users/${id}`, { withCredentials: true })
       .pipe(
-        catchError((error) => {
-          console.error('Error fetching user:', error);
-          return throwError(() => new Error('Failed to fetch user. Please try again later.'));
-        })
+        catchError(
+          handleHttpError(
+            'fetching user',
+            'Failed to fetch user. Please try again later.'
+          )
+        )
       );
   }
 
@@ -34,10 +37,12 @@ export class UserService {
     return this.http
       .get<User[]>(`${environment.apiUrl}/users`, { withCredentials: true })
       .pipe(
-        catchError((error) => {
-          console.error('Error fetching users:', error);
-          return throwError(() => new Error('Failed to fetch users. Please try again later.'));
-        })
+        catchError(
+          handleHttpError(
+            'fetching users',
+            'Failed to fetch users. Please try again later.'
+          )
+        )
       );
   }
 
@@ -45,10 +50,12 @@ export class UserService {
     return this.http
       .post<User>(`${environment.apiUrl}/users`, user, { withCredentials: true })
       .pipe(
-        catchError((error) => {
-          console.error('Error creating user:', error);
-          return throwError(() => new Error('Failed to create user. Please try again later.'));
-        })
+        catchError(
+          handleHttpError(
+            'creating user',
+            'Failed to create user. Please try again later.'
+          )
+        )
       );
   }
 
@@ -56,10 +63,12 @@ export class UserService {
     return this.http
       .put<User>(`${environment.apiUrl}/users`, user, { withCredentials: true })
       .pipe(
-        catchError((error) => {
-          console.error('Error updating user:', error);
-          return throwError(() => new Error('Failed to update user. Please try again later.'));
-        })
+        catchError(
+          handleHttpError(
+            'updating user',
+            'Failed to update user. Please try again later.'
+          )
+        )
       );
   }
 
@@ -67,10 +76,12 @@ export class UserService {
     return this.http
       .delete<void>(`${environment.apiUrl}/users/${id}`, { withCredentials: true })
       .pipe(
-        catchError((error) => {
-          console.error('Error deleting user:', error);
-          return throwError(() => new Error('Failed to delete user. Please try again later.'));
-        })
+        catchError(
+          handleHttpError(
+            'deleting user',
+            'Failed to delete user. Please try again later.'
+          )
+        )
       );
   }
 }

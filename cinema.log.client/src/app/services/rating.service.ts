@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { handleHttpError, handleExpectedError } from '../utils/error-handler.util';
 
 export interface UserFilmRating {
   id: string;
@@ -40,10 +41,8 @@ export class RatingService {
         { withCredentials: true }
       )
       .pipe(
-        catchError((error) => {
-          console.error('Error fetching rating:', error);
-          return throwError(() => new Error('Failed to fetch rating. Please try again later.'));
-        })
+        // Use handleExpectedError because 404 is expected when rating doesn't exist yet
+        catchError(handleExpectedError('Failed to fetch rating. Please try again later.'))
       );
   }
 
@@ -54,12 +53,12 @@ export class RatingService {
         { withCredentials: true }
       )
       .pipe(
-        catchError((error) => {
-          console.error('Error fetching ratings for comparison:', error);
-          return throwError(
-            () => new Error('Failed to fetch ratings for comparison. Please try again later.')
-          );
-        })
+        catchError(
+          handleHttpError(
+            'fetching ratings for comparison',
+            'Failed to fetch ratings for comparison. Please try again later.'
+          )
+        )
       );
   }
 
@@ -69,10 +68,12 @@ export class RatingService {
         withCredentials: true,
       })
       .pipe(
-        catchError((error) => {
-          console.error('Error comparing films:', error);
-          return throwError(() => new Error('Failed to compare films. Please try again later.'));
-        })
+        catchError(
+          handleHttpError(
+            'comparing films',
+            'Failed to compare films. Please try again later.'
+          )
+        )
       );
   }
 }
