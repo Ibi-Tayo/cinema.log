@@ -18,23 +18,39 @@ func NewStore(db *sql.DB) FilmStore {
 	}
 }
 
-func (s *store) CreateFilm(ctx context.Context, film domain.Film) (*domain.Film, error) {
-	// Generate a new UUID
+func (s *store) CreateFilm(ctx context.Context, film *domain.Film) (*domain.Film, error) {
+	// Generate a new UUID if not provided
 	if film.ID == uuid.Nil {
 		film.ID = uuid.New()
 	}
 
+	// Use UPSERT to prevent race conditions
+	// If film with same external_id exists, return it; otherwise create new
 	query := `
 		INSERT INTO films (film_id, external_id, title, description, poster_url, release_year) 
-		VALUES ($1, $2, $3, $4, $5, $6)`
+		VALUES ($1, $2, $3, $4, $5, $6)
+		ON CONFLICT (external_id) DO UPDATE SET
+			title = EXCLUDED.title,
+			description = EXCLUDED.description,
+			poster_url = EXCLUDED.poster_url,
+			release_year = EXCLUDED.release_year
+		RETURNING film_id, external_id, title, description, poster_url, release_year`
 
-	_, err := s.db.ExecContext(ctx, query, film.ID, film.ExternalID, film.Title, film.Description, film.PosterUrl, film.ReleaseYear)
+	var createdFilm domain.Film
+	err := s.db.QueryRowContext(ctx, query, film.ID, film.ExternalID, film.Title, film.Description, film.PosterUrl, film.ReleaseYear).Scan(
+		&createdFilm.ID,
+		&createdFilm.ExternalID,
+		&createdFilm.Title,
+		&createdFilm.Description,
+		&createdFilm.PosterUrl,
+		&createdFilm.ReleaseYear,
+	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &film, nil
+	return &createdFilm, nil
 }
 
 func (s *store) GetFilmByExternalId(ctx context.Context, id int) (*domain.Film, error) {
