@@ -12,8 +12,16 @@ import (
 )
 
 type mockFilmService struct {
+	createFilmFunc           func(ctx context.Context, film *domain.Film) (*domain.Film, error)
 	getFilmByIdFunc          func(ctx context.Context, id uuid.UUID) (*domain.Film, error)
 	getFilmsFromExternalFunc func(ctx context.Context, query string) ([]domain.Film, error)
+}
+
+func (m *mockFilmService) CreateFilm(ctx context.Context, film *domain.Film) (*domain.Film, error) {
+	if m.createFilmFunc != nil {
+		return m.createFilmFunc(ctx, film)
+	}
+	return film, nil
 }
 
 func (m *mockFilmService) GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, error) {

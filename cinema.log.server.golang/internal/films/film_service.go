@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 
@@ -25,7 +24,7 @@ type Service struct {
 type FilmStore interface {
 	GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, error)
 	GetFilmByExternalId(ctx context.Context, id int) (*domain.Film, error)
-	CreateFilm(ctx context.Context, film domain.Film) (*domain.Film, error)
+	CreateFilm(ctx context.Context, film *domain.Film) (*domain.Film, error)
 	GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error)
 }
 
@@ -47,16 +46,14 @@ func NewService(f FilmStore) *Service {
 	}
 }
 
-func (s Service) CreateFilm(ctx context.Context, film domain.Film) (*domain.Film, error) {
+func (s Service) CreateFilm(ctx context.Context, film *domain.Film) (*domain.Film, error) {
+	// Store layer handles UPSERT - if film with same external_id exists,
+	// it will update and return existing film; otherwise creates new
 	return s.FilmStore.CreateFilm(ctx, film)
 }
 
 func (s Service) GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, error) {
-	film, err := s.FilmStore.GetFilmById(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return film, nil
+	return s.FilmStore.GetFilmById(ctx, id)
 }
 
 func (s Service) GetFilmsFromExternal(ctx context.Context, query string) ([]domain.Film, error) {
@@ -90,28 +87,15 @@ func (s Service) GetFilmsFromExternal(ctx context.Context, query string) ([]doma
 	films := make([]domain.Film, 0, len(tmdbResponse.Results))
 
 	for _, filmResult := range tmdbResponse.Results {
-		// check if film already exists in db
-		film, err := s.FilmStore.GetFilmByExternalId(ctx, filmResult.ID)
-		if err != nil {
-			// create new film and put in database
-			createdFilm, err := s.FilmStore.CreateFilm(ctx, domain.Film{
-				ID:          uuid.New(),
-				ExternalID:  filmResult.ID,
-				Title:       filmResult.Title,
-				Description: filmResult.Overview,
-				PosterUrl:   filmResult.PosterPath,
-				ReleaseYear: filmResult.ReleaseDate,
-			})
-			if err != nil {
-				log.Printf("could not add film: %s to database:", filmResult.Title)
-				continue
-			}
-			film = createdFilm
-		}
-		// if film exists then add to list
-		films = append(films, *film)
+		films = append(films, domain.Film{
+			ID:          uuid.New(),
+			ExternalID:  filmResult.ID,
+			Title:       filmResult.Title,
+			Description: filmResult.Overview,
+			PosterUrl:   filmResult.PosterPath,
+			ReleaseYear: filmResult.ReleaseDate,
+		})
 	}
-
 	return films, nil
 }
 

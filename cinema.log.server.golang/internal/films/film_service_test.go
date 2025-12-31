@@ -13,7 +13,7 @@ import (
 type mockFilmStore struct {
 	getFilmByIdFunc         func(ctx context.Context, id uuid.UUID) (*domain.Film, error)
 	getFilmByExternalIdFunc func(ctx context.Context, id int) (*domain.Film, error)
-	createFilmFunc          func(ctx context.Context, film domain.Film) (*domain.Film, error)
+	createFilmFunc          func(ctx context.Context, film *domain.Film) (*domain.Film, error)
 	getFilmsForRatingFunc   func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error)
 }
 
@@ -31,7 +31,7 @@ func (m *mockFilmStore) GetFilmByExternalId(ctx context.Context, id int) (*domai
 	return nil, errors.New("not implemented")
 }
 
-func (m *mockFilmStore) CreateFilm(ctx context.Context, film domain.Film) (*domain.Film, error) {
+func (m *mockFilmStore) CreateFilm(ctx context.Context, film *domain.Film) (*domain.Film, error) {
 	if m.createFilmFunc != nil {
 		return m.createFilmFunc(ctx, film)
 	}
@@ -67,16 +67,16 @@ func TestService_CreateFilm(t *testing.T) {
 	}
 
 	mockStore := &mockFilmStore{
-		createFilmFunc: func(ctx context.Context, film domain.Film) (*domain.Film, error) {
+		createFilmFunc: func(ctx context.Context, film *domain.Film) (*domain.Film, error) {
 			if film.ID != testFilm.ID {
 				t.Errorf("expected film ID %v, got %v", testFilm.ID, film.ID)
 			}
-			return &film, nil
+			return film, nil
 		},
 	}
 
 	service := NewService(mockStore)
-	createdFilm, err := service.CreateFilm(ctx, testFilm)
+	createdFilm, err := service.CreateFilm(ctx, &testFilm)
 
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
@@ -95,13 +95,13 @@ func TestService_CreateFilm_Error(t *testing.T) {
 
 	expectedError := errors.New("database error")
 	mockStore := &mockFilmStore{
-		createFilmFunc: func(ctx context.Context, film domain.Film) (*domain.Film, error) {
+		createFilmFunc: func(ctx context.Context, film *domain.Film) (*domain.Film, error) {
 			return nil, expectedError
 		},
 	}
 
 	service := NewService(mockStore)
-	_, err := service.CreateFilm(ctx, testFilm)
+	_, err := service.CreateFilm(ctx, &testFilm)
 
 	if err == nil {
 		t.Fatal("expected error, got nil")

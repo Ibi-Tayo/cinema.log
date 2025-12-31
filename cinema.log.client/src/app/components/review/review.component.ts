@@ -74,7 +74,13 @@ export class ReviewComponent implements OnInit {
     private reviewService: ReviewService,
     private authService: AuthService,
     private ratingService: RatingService
-  ) {}
+  ) {
+    const navigation = this.router.getCurrentNavigation();
+    const film = navigation?.extras.state?.['film'];
+    if (film) {
+      this.film = film;
+    }
+  }
 
   ngOnInit(): void {
     const filmId = this.route.snapshot.paramMap.get('filmId');
@@ -88,21 +94,13 @@ export class ReviewComponent implements OnInit {
 
   loadFilm(filmId: string): void {
     this.isLoading = true;
-    this.filmService.getFilmById(filmId).subscribe({
-      next: (film) => {
-        this.film = film;
-        this.isLoading = false;
-        // Check if the user has already rated this film
-        this.checkForExistingRating(filmId);
-        // Check if the user has already reviewed this film
-        this.checkForExistingReview();
-      },
-      error: (error) => {
-        console.error('Error loading film:', error);
-        this.errorMessage = 'Failed to load film details. Please try again.';
-        this.isLoading = false;
-      },
-    });
+    if (this.film) {
+      // Film was passed via navigation state - user probably came from search and thus we already have the film object
+      this.loadFilmFromObject(this.film);
+    } else {
+      // Film not passed via navigation, fetch from server directly
+      this.loadFilmFromId(filmId);
+    }
   }
 
   checkForExistingRating(filmId: string): void {
@@ -339,5 +337,41 @@ export class ReviewComponent implements OnInit {
     size: TMDBPosterSize = 'original'
   ): string {
     return getTMDBPosterUrl(posterPath, size);
+  }
+
+  private loadFilmFromId(filmId: string) {
+    this.filmService.getFilmById(filmId).subscribe({
+      next: (film) => {
+        this.film = film;
+        this.isLoading = false;
+        // Check if the user has already rated this film
+        this.checkForExistingRating(filmId);
+        // Check if the user has already reviewed this film
+        this.checkForExistingReview();
+      },
+      error: (error) => {
+        console.error('Error loading film:', error);
+        this.errorMessage = 'Failed to load film details. Please try again.';
+        this.isLoading = false;
+      },
+    });
+  }
+
+  private loadFilmFromObject(film: Film) {
+    this.filmService.createFilm(film).subscribe({
+      next: (film) => {
+        this.film = film;
+        this.isLoading = false;
+        // Check if the user has already rated this film
+        this.checkForExistingRating(film.id);
+        // Check if the user has already reviewed this film
+        this.checkForExistingReview();
+      },
+      error: (error) => {
+        console.error('Error loading film:', error);
+        this.errorMessage = 'Failed to load film details. Please try again.';
+        this.isLoading = false;
+      },
+    });
   }
 }

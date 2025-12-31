@@ -19,6 +19,21 @@ export interface Film {
 export class FilmService {
   constructor(private http: HttpClient) {}
 
+  createFilm(film: Film): Observable<Film> {
+    return this.http
+      .post<Film>(`${environment.apiUrl}/films`, film, {
+        withCredentials: true,
+      })
+      .pipe(
+        catchError((error) => {
+          console.error('Error creating film:', error);
+          return throwError(
+            () => new Error('Failed to create film. Please try again later.')
+          );
+        })
+      );
+  }
+
   getFilmById(id: string): Observable<Film> {
     return this.http
       .get<Film>(`${environment.apiUrl}/films/${id}`, { withCredentials: true })
@@ -34,9 +49,12 @@ export class FilmService {
 
   searchFilms(query: string): Observable<Film[]> {
     return this.http
-      .get<Film[]>(`${environment.apiUrl}/films/search?f=${encodeURIComponent(query)}`, {
-        withCredentials: true,
-      })
+      .get<Film[]>(
+        `${environment.apiUrl}/films/search?f=${encodeURIComponent(query)}`,
+        {
+          withCredentials: true,
+        }
+      )
       .pipe(
         catchError(
           handleHttpError(

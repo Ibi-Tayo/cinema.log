@@ -94,7 +94,7 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   selectFilm(film: Film): void {
     // Navigate to review page with film ID
-    this.router.navigate(['/review', film.id]);
+    this.router.navigate(['/review', film.id], { state: { film }});
   }
 
   /**

@@ -26,7 +26,11 @@ describe('ReviewComponent', () => {
       'getFilmsForComparison',
       'compareFilms',
     ]);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockRouter = jasmine.createSpyObj('Router', [
+      'navigate',
+      'getCurrentNavigation',
+    ]);
+    mockRouter.getCurrentNavigation.and.returnValue(null);
     mockActivatedRoute = {
       snapshot: {
         paramMap: {
