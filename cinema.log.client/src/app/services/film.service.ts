@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { handleHttpError } from '../utils/error-handler.util';
 
 export interface Film {
   id: string;
@@ -37,12 +38,12 @@ export class FilmService {
     return this.http
       .get<Film>(`${environment.apiUrl}/films/${id}`, { withCredentials: true })
       .pipe(
-        catchError((error) => {
-          console.error('Error fetching film:', error);
-          return throwError(
-            () => new Error('Failed to fetch film. Please try again later.')
-          );
-        })
+        catchError(
+          handleHttpError(
+            'fetching film',
+            'Failed to fetch film. Please try again later.'
+          )
+        )
       );
   }
 
@@ -55,12 +56,12 @@ export class FilmService {
         }
       )
       .pipe(
-        catchError((error) => {
-          console.error('Error searching films:', error);
-          return throwError(
-            () => new Error('Failed to search films. Please try again later.')
-          );
-        })
+        catchError(
+          handleHttpError(
+            'searching films',
+            'Failed to search films. Please try again later.'
+          )
+        )
       );
   }
 
@@ -70,15 +71,12 @@ export class FilmService {
         withCredentials: true,
       })
       .pipe(
-        catchError((error) => {
-          console.error('Error fetching film candidates:', error);
-          return throwError(
-            () =>
-              new Error(
-                'Failed to fetch film candidates. Please try again later.'
-              )
-          );
-        })
+        catchError(
+          handleHttpError(
+            'fetching film candidates',
+            'Failed to fetch film candidates. Please try again later.'
+          )
+        )
       );
   }
 
@@ -89,15 +87,12 @@ export class FilmService {
         { withCredentials: true }
       )
       .pipe(
-        catchError((error) => {
-          console.error('Error fetching films for comparison:', error);
-          return throwError(
-            () =>
-              new Error(
-                'Failed to fetch films for comparison. Please try again later.'
-              )
-          );
-        })
+        catchError(
+          handleHttpError(
+            'fetching films for comparison',
+            'Failed to fetch films for comparison. Please try again later.'
+          )
+        )
       );
   }
 }

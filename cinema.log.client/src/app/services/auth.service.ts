@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, throwError } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { handleHttpError, handleExpectedError } from '../utils/error-handler.util';
 
 @Injectable({
   providedIn: 'root',
@@ -18,12 +19,8 @@ export class AuthService {
     return this.http
       .get<User>(`${environment.apiUrl}/auth/me`, { withCredentials: true })
       .pipe(
-        catchError((error) => {
-          console.error('Failed to get current user:', error);
-          return throwError(
-            () => new Error('Failed to authenticate. Please log in.')
-          );
-        })
+        // Use handleExpectedError because 401/403 is expected when user is not logged in
+        catchError(handleExpectedError('Failed to authenticate. Please log in.'))
       );
   }
 
@@ -38,12 +35,12 @@ export class AuthService {
         withCredentials: true,
       })
       .pipe(
-        catchError((error) => {
-          console.error('Dev login failed:', error);
-          return throwError(
-            () => new Error('Dev login failed. Please try again.')
-          );
-        })
+        catchError(
+          handleHttpError(
+            'during dev login',
+            'Dev login failed. Please try again.'
+          )
+        )
       );
   }
 
@@ -51,12 +48,12 @@ export class AuthService {
     return this.http
       .get<void>(`${environment.apiUrl}/auth/logout`, { withCredentials: true })
       .pipe(
-        catchError((error) => {
-          console.error('Logout failed:', error);
-          return throwError(
-            () => new Error('Logout failed. Please try again.')
-          );
-        })
+        catchError(
+          handleHttpError(
+            'during logout',
+            'Logout failed. Please try again.'
+          )
+        )
       );
   }
 
@@ -66,13 +63,12 @@ export class AuthService {
         withCredentials: true,
       })
       .pipe(
-        catchError((error) => {
-          console.error('Token refresh failed:', error);
-          return throwError(
-            () =>
-              new Error('Authentication session expired. Please log in again.')
-          );
-        })
+        catchError(
+          handleHttpError(
+            'during token refresh',
+            'Authentication session expired. Please log in again.'
+          )
+        )
       );
   }
 

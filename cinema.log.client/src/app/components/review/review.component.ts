@@ -103,7 +103,6 @@ export class ReviewComponent implements OnInit {
     }
   }
 
-  // TODO: Not sure that I like having a 400 error show up in the console for normal flow
   checkForExistingRating(filmId: string): void {
     const userId = this.authService.currentUser?.id;
     if (!userId) return;
