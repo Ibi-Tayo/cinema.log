@@ -45,9 +45,13 @@ export function handleHttpError(
 /**
  * Handles expected errors that should not be logged to console.
  * Use this for operations where the absence of a resource is part of normal flow.
+ * This is a convenience wrapper around handleHttpError with silent mode enabled.
  * 
  * @param errorMessage - User-friendly error message to return
  */
 export function handleExpectedError(errorMessage: string): (error: any) => Observable<never> {
-  return handleHttpError('', errorMessage, true);
+  return (error: any) => {
+    // Never log expected errors - they're part of normal application flow
+    return throwError(() => new Error(errorMessage));
+  };
 }
