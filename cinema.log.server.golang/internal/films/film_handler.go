@@ -22,6 +22,7 @@ type Handler struct {
 }
 
 type FilmService interface {
+	CreateFilm(ctx context.Context, film *domain.Film) (*domain.Film, error)
 	GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, error)
 	GetFilmsFromExternal(ctx context.Context, query string) ([]domain.Film, error) // ? pagination?
 	GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error)
@@ -38,6 +39,22 @@ func NewHandler(filmService FilmService, ratingService RatingService) *Handler {
 		FilmService:   filmService,
 		RatingService: ratingService,
 	}
+}
+
+func (h *Handler) CreateFilm(w http.ResponseWriter, r *http.Request) {
+	var film domain.Film
+	if err := utils.DecodeJSON(r, &film); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	createdFilm, err := h.FilmService.CreateFilm(r.Context(), &film)
+	if err != nil {
+		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	utils.SendJSON(w, createdFilm)
 }
 
 func (h *Handler) GetFilmById(w http.ResponseWriter, r *http.Request) {

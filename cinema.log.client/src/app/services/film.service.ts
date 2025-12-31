@@ -18,26 +18,48 @@ export interface Film {
 export class FilmService {
   constructor(private http: HttpClient) {}
 
+  createFilm(film: Film): Observable<Film> {
+    return this.http
+      .post<Film>(`${environment.apiUrl}/films`, film, {
+        withCredentials: true,
+      })
+      .pipe(
+        catchError((error) => {
+          console.error('Error creating film:', error);
+          return throwError(
+            () => new Error('Failed to create film. Please try again later.')
+          );
+        })
+      );
+  }
+
   getFilmById(id: string): Observable<Film> {
     return this.http
       .get<Film>(`${environment.apiUrl}/films/${id}`, { withCredentials: true })
       .pipe(
         catchError((error) => {
           console.error('Error fetching film:', error);
-          return throwError(() => new Error('Failed to fetch film. Please try again later.'));
+          return throwError(
+            () => new Error('Failed to fetch film. Please try again later.')
+          );
         })
       );
   }
 
   searchFilms(query: string): Observable<Film[]> {
     return this.http
-      .get<Film[]>(`${environment.apiUrl}/films/search?f=${encodeURIComponent(query)}`, {
-        withCredentials: true,
-      })
+      .get<Film[]>(
+        `${environment.apiUrl}/films/search?f=${encodeURIComponent(query)}`,
+        {
+          withCredentials: true,
+        }
+      )
       .pipe(
         catchError((error) => {
           console.error('Error searching films:', error);
-          return throwError(() => new Error('Failed to search films. Please try again later.'));
+          return throwError(
+            () => new Error('Failed to search films. Please try again later.')
+          );
         })
       );
   }
@@ -51,7 +73,10 @@ export class FilmService {
         catchError((error) => {
           console.error('Error fetching film candidates:', error);
           return throwError(
-            () => new Error('Failed to fetch film candidates. Please try again later.')
+            () =>
+              new Error(
+                'Failed to fetch film candidates. Please try again later.'
+              )
           );
         })
       );
@@ -67,7 +92,10 @@ export class FilmService {
         catchError((error) => {
           console.error('Error fetching films for comparison:', error);
           return throwError(
-            () => new Error('Failed to fetch films for comparison. Please try again later.')
+            () =>
+              new Error(
+                'Failed to fetch films for comparison. Please try again later.'
+              )
           );
         })
       );
