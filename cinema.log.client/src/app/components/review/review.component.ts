@@ -1,4 +1,11 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  CUSTOM_ELEMENTS_SCHEMA,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -39,33 +46,50 @@ import { DividerModule } from 'primeng/divider';
   templateUrl: './review.component.html',
   styleUrl: './review.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReviewComponent implements OnInit {
   private static readonly REDIRECT_DELAY_MS = 1500;
 
-  film: Film | null = null;
-  review: Review | null = null;
-  isLoading = true;
-  errorMessage = '';
+  // Core data signals
+  film = signal<Film | null>(null);
+  review = signal<Review | null>(null);
+  isLoading = signal(true);
+  errorMessage = signal('');
 
-  // Review form data
-  selectedRating = 0;
-  reviewText = '';
-  isSubmitting = false;
-  submitSuccess = false;
-  submitError = '';
+  // Review form data signals
+  selectedRating = signal(0);
+  reviewText = signal('');
+  isSubmitting = signal(false);
+  submitSuccess = signal(false);
+  submitError = signal('');
 
-  // ELO rating data
-  filmRating: UserFilmRating | null = null;
-  hasRating = false;
+  // ELO rating data signals
+  filmRating = signal<UserFilmRating | null>(null);
 
-  // Comparison data
-  filmsForComparison: Film[] = [];
-  isLoadingComparisons = false;
-  comparisonError = '';
-  currentComparisonIndex = 0;
-  isSubmittingComparison = false;
-  showComparisons = false;
+  // Comparison data signals
+  filmsForComparison = signal<Film[]>([]);
+  isLoadingComparisons = signal(false);
+  comparisonError = signal('');
+  currentComparisonIndex = signal(0);
+  isSubmittingComparison = signal(false);
+  showComparisons = signal(false);
+
+  // Computed signals
+  hasRating = computed(() => this.filmRating() !== null);
+  canSubmit = computed(
+    () => this.selectedRating() > 0 && this.reviewText().trim().length > 0
+  );
+  currentComparisonFilm = computed(() => {
+    const index = this.currentComparisonIndex();
+    const films = this.filmsForComparison();
+    return index < films.length ? films[index] : null;
+  });
+  comparisonProgress = computed(() => {
+    const index = this.currentComparisonIndex();
+    const total = this.filmsForComparison().length;
+    return `${index + 1} / ${total}`;
+  });
 
   constructor(
     private route: ActivatedRoute,
@@ -76,9 +100,9 @@ export class ReviewComponent implements OnInit {
     private ratingService: RatingService
   ) {
     const navigation = this.router.currentNavigation?.();
-    const film = navigation?.extras.state?.['film'];
-    if (film) {
-      this.film = film;
+    const filmFromState = navigation?.extras.state?.['film'];
+    if (filmFromState) {
+      this.film.set(filmFromState);
     }
   }
 
@@ -87,16 +111,16 @@ export class ReviewComponent implements OnInit {
     if (filmId) {
       this.loadFilm(filmId);
     } else {
-      this.errorMessage = 'Film ID is required';
-      this.isLoading = false;
+      this.errorMessage.set('Film ID is required');
+      this.isLoading.set(false);
     }
   }
 
   loadFilm(filmId: string): void {
-    this.isLoading = true;
-    if (this.film) {
+    this.isLoading.set(true);
+    if (this.film()) {
       // Film was passed via navigation state - user probably came from search and thus we already have the film object
-      this.loadFilmFromObject(this.film);
+      this.loadFilmFromObject(this.film()!);
     } else {
       // Film not passed via navigation, fetch from server directly
       this.loadFilmFromId(filmId);
@@ -104,35 +128,34 @@ export class ReviewComponent implements OnInit {
   }
 
   checkForExistingRating(filmId: string): void {
-    const userId = this.authService.currentUser?.id;
+    const userId = this.authService.currentUser()?.id;
     if (!userId) return;
 
     this.ratingService.getRating(userId, filmId).subscribe({
       next: (rating) => {
-        this.filmRating = rating;
-        this.hasRating = true;
+        this.filmRating.set(rating);
         // Load comparisons if user already has a rating for this film
         this.loadFilmsForComparison();
       },
       error: () => {
         // Rating doesn't exist yet, which is fine
-        this.hasRating = false;
+        this.filmRating.set(null);
       },
     });
   }
 
   checkForExistingReview(): void {
-    const userId = this.authService.currentUser?.id;
-    if (!userId || !this.film) return;
+    const userId = this.authService.currentUser()?.id;
+    if (!userId || !this.film()) return;
 
     this.reviewService.getAllReviewsByUserId(userId).subscribe({
       next: (reviews) => {
         const existingReview = reviews.find(
-          (review) => review.filmId === this.film?.id
+          (review) => review.filmId === this.film()?.id
         );
         if (existingReview) {
-          this.reviewText = existingReview.title;
-          this.review = existingReview;
+          this.reviewText.set(existingReview.title);
+          this.review.set(existingReview);
         }
       },
       error: (error) => {
@@ -142,70 +165,76 @@ export class ReviewComponent implements OnInit {
   }
 
   selectRating(rating: number): void {
-    this.selectedRating = rating;
+    this.selectedRating.set(rating);
   }
 
   submitReview(): void {
-    if (!this.film || this.selectedRating === 0 || !this.reviewText.trim()) {
-      this.submitError = 'Please provide both a rating and a review.';
+    if (
+      !this.film() ||
+      this.selectedRating() === 0 ||
+      !this.reviewText().trim()
+    ) {
+      this.submitError.set('Please provide both a rating and a review.');
       return;
     }
 
-    this.isSubmitting = true;
-    this.submitError = '';
-    this.submitSuccess = false;
+    this.isSubmitting.set(true);
+    this.submitError.set('');
+    this.submitSuccess.set(false);
 
     const reviewRequest: CreateReviewRequest = {
-      filmId: this.film.id,
-      rating: this.selectedRating,
-      content: this.reviewText.trim(),
+      filmId: this.film()!.id,
+      rating: this.selectedRating(),
+      content: this.reviewText().trim(),
     };
 
     this.reviewService.createReview(reviewRequest).subscribe({
       next: () => {
-        this.submitSuccess = true;
-        this.isSubmitting = false;
+        this.submitSuccess.set(true);
+        this.isSubmitting.set(false);
         // Reset form
-        this.selectedRating = 0;
-        this.reviewText = '';
+        this.selectedRating.set(0);
+        this.reviewText.set('');
         // Load the rating and comparisons
-        if (this.film) {
-          this.checkForExistingRating(this.film.id);
+        const film = this.film();
+        if (film) {
+          this.checkForExistingRating(film.id);
           this.loadFilmsForComparison();
         }
       },
       error: (error) => {
         console.error('Error submitting review:', error);
-        this.submitError = 'Failed to submit review. Please try again.';
-        this.isSubmitting = false;
+        this.submitError.set('Failed to submit review. Please try again.');
+        this.isSubmitting.set(false);
       },
     });
   }
 
   updateReview(): void {
-    if (!this.film || !this.reviewText.trim()) {
-      this.submitError = 'Please provide a review.';
+    if (!this.film() || !this.reviewText().trim()) {
+      this.submitError.set('Please provide a review.');
       return;
     }
 
-    this.isSubmitting = true;
-    this.submitError = '';
-    this.submitSuccess = false;
+    this.isSubmitting.set(true);
+    this.submitError.set('');
+    this.submitSuccess.set(false);
 
     const updateReviewRequest: UpdateReviewRequest = {
-      reviewId: this.review?.id || '',
-      content: this.reviewText.trim(),
+      reviewId: this.review()?.id || '',
+      content: this.reviewText().trim(),
     };
 
     this.reviewService.updateReview(updateReviewRequest).subscribe({
       next: () => {
-        this.submitSuccess = true;
-        this.isSubmitting = false;
+        this.submitSuccess.set(true);
+        this.isSubmitting.set(false);
         // Reset form
-        this.reviewText = '';
+        this.reviewText.set('');
         // Load the rating and comparisons
-        if (this.film) {
-          this.checkForExistingRating(this.film.id);
+        const film = this.film();
+        if (film) {
+          this.checkForExistingRating(film.id);
           this.loadFilmsForComparison();
         }
         // wait then refresh the page
@@ -215,8 +244,10 @@ export class ReviewComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error submitting review update:', error);
-        this.submitError = 'Failed to submit review update. Please try again.';
-        this.isSubmitting = false;
+        this.submitError.set(
+          'Failed to submit review update. Please try again.'
+        );
+        this.isSubmitting.set(false);
       },
     });
   }
@@ -230,60 +261,57 @@ export class ReviewComponent implements OnInit {
   }
 
   loadFilmsForComparison(): void {
-    const userId = this.authService.currentUser?.id;
-    if (!userId || !this.film) return;
+    const userId = this.authService.currentUser()?.id;
+    const film = this.film();
+    if (!userId || !film) return;
 
-    this.isLoadingComparisons = true;
-    this.comparisonError = '';
-    this.showComparisons = true;
+    this.isLoadingComparisons.set(true);
+    this.comparisonError.set('');
+    this.showComparisons.set(true);
 
-    this.filmService.getFilmsForComparison(userId, this.film.id).subscribe({
+    this.filmService.getFilmsForComparison(userId, film.id).subscribe({
       next: (films) => {
-        this.filmsForComparison = films ?? []; // This is because the server might return null
-        this.isLoadingComparisons = false;
-        this.currentComparisonIndex = 0;
+        console.log('Loaded films for comparison:', films);
+        this.filmsForComparison.set(films ?? []); // This is because the server might return null
+        this.isLoadingComparisons.set(false);
+        this.currentComparisonIndex.set(0);
+        console.log('Reset comparison index to 0, total films:', films?.length);
       },
       error: (error) => {
         console.error('Error loading films for comparison:', error);
-        this.comparisonError = 'Failed to load films for comparison.';
-        this.isLoadingComparisons = false;
+        this.comparisonError.set('Failed to load films for comparison.');
+        this.isLoadingComparisons.set(false);
       },
     });
   }
 
-  getCurrentComparisonFilm(): Film | null {
-    if (this.currentComparisonIndex < this.filmsForComparison.length) {
-      return this.filmsForComparison[this.currentComparisonIndex];
-    }
-    return null;
-  }
-
   submitComparison(result: 'better' | 'worse' | 'same'): void {
-    const userId = this.authService.currentUser?.id;
-    if (!userId || !this.film) return;
+    const userId = this.authService.currentUser()?.id;
+    const film = this.film();
+    if (!userId || !film) return;
 
-    const comparisonFilm = this.getCurrentComparisonFilm();
+    const comparisonFilm = this.currentComparisonFilm();
     if (!comparisonFilm) return;
 
-    this.isSubmittingComparison = true;
-    this.comparisonError = '';
+    this.isSubmittingComparison.set(true);
+    this.comparisonError.set('');
 
     let winningFilmId: string;
     let wasEqual = false;
 
     if (result === 'better') {
-      winningFilmId = this.film.id;
+      winningFilmId = film.id;
     } else if (result === 'worse') {
       winningFilmId = comparisonFilm.id;
     } else {
       // same
-      winningFilmId = this.film.id; // For equal, we'll use the current film's ID
+      winningFilmId = film.id; // For equal, we'll use the current film's ID
       wasEqual = true;
     }
 
     const comparisonRequest: ComparisonRequest = {
       userId: userId,
-      filmAId: this.film.id,
+      filmAId: film.id,
       filmBId: comparisonFilm.id,
       winningFilmId: winningFilmId,
       wasEqual: wasEqual,
@@ -291,14 +319,27 @@ export class ReviewComponent implements OnInit {
 
     this.ratingService.compareFilms(comparisonRequest).subscribe({
       next: () => {
-        this.isSubmittingComparison = false;
-        // Refresh the rating
-        if (this.film) {
-          this.checkForExistingRating(this.film.id);
+        this.isSubmittingComparison.set(false);
+        // Refresh the rating (but don't reload comparisons)
+        const currentFilm = this.film();
+        if (currentFilm) {
+          const userId = this.authService.currentUser()?.id;
+          if (userId) {
+            this.ratingService.getRating(userId, currentFilm.id).subscribe({
+              next: (rating) => {
+                this.filmRating.set(rating);
+              },
+              error: () => {
+                this.filmRating.set(null);
+              },
+            });
+          }
         }
         // Move to next comparison or finish
-        if (this.currentComparisonIndex < this.filmsForComparison.length - 1) {
-          this.currentComparisonIndex++;
+        const currentIndex = this.currentComparisonIndex();
+        const totalFilms = this.filmsForComparison().length;
+        if (currentIndex < totalFilms - 1) {
+          this.currentComparisonIndex.set(currentIndex + 1);
         } else {
           // All comparisons done, redirect to profile
           this.finishComparisons();
@@ -306,25 +347,21 @@ export class ReviewComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error submitting comparison:', error);
-        this.comparisonError = 'Failed to submit comparison. Please try again.';
-        this.isSubmittingComparison = false;
+        this.comparisonError.set(
+          'Failed to submit comparison. Please try again.'
+        );
+        this.isSubmittingComparison.set(false);
       },
     });
   }
 
   finishComparisons(): void {
-    const userId = this.authService.currentUser?.id;
+    const userId = this.authService.currentUser()?.id;
     if (userId) {
       setTimeout(() => {
         this.router.navigate(['/profile', userId]);
       }, ReviewComponent.REDIRECT_DELAY_MS);
     }
-  }
-
-  getComparisonProgress(): string {
-    return `${this.currentComparisonIndex + 1} / ${
-      this.filmsForComparison.length
-    }`;
   }
 
   /**
@@ -342,8 +379,8 @@ export class ReviewComponent implements OnInit {
   private loadFilmFromId(filmId: string) {
     this.filmService.getFilmById(filmId).subscribe({
       next: (film) => {
-        this.film = film;
-        this.isLoading = false;
+        this.film.set(film);
+        this.isLoading.set(false);
         // Check if the user has already rated this film
         this.checkForExistingRating(filmId);
         // Check if the user has already reviewed this film
@@ -351,8 +388,8 @@ export class ReviewComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading film:', error);
-        this.errorMessage = 'Failed to load film details. Please try again.';
-        this.isLoading = false;
+        this.errorMessage.set('Failed to load film details. Please try again.');
+        this.isLoading.set(false);
       },
     });
   }
@@ -360,8 +397,8 @@ export class ReviewComponent implements OnInit {
   private loadFilmFromObject(film: Film) {
     this.filmService.createFilm(film).subscribe({
       next: (film) => {
-        this.film = film;
-        this.isLoading = false;
+        this.film.set(film);
+        this.isLoading.set(false);
         // Check if the user has already rated this film
         this.checkForExistingRating(film.id);
         // Check if the user has already reviewed this film
@@ -369,8 +406,8 @@ export class ReviewComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading film:', error);
-        this.errorMessage = 'Failed to load film details. Please try again.';
-        this.isLoading = false;
+        this.errorMessage.set('Failed to load film details. Please try again.');
+        this.isLoading.set(false);
       },
     });
   }

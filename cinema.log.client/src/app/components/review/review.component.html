@@ -1,6 +1,6 @@
 <div class="review-container">
   <!-- Loading State -->
-  @if (isLoading) {
+  @if (isLoading()) {
   <div class="loading-state">
     <lord-icon
       src="https://cdn.lordicon.com/xjovhxra.json"
@@ -13,7 +13,7 @@
   }
 
   <!-- Error State -->
-  @if (errorMessage && !isLoading) {
+  @if (errorMessage() && !isLoading()) {
   <div class="error-state">
     <lord-icon
       src="https://cdn.lordicon.com/tdrtiskw.json"
@@ -21,7 +21,7 @@
       style="width: 80px; height: 80px"
     >
     </lord-icon>
-    <p>{{ errorMessage }}</p>
+    <p>{{ errorMessage() }}</p>
     <button class="back-button" (click)="goBackToSearch()">
       <lord-icon
         src="https://cdn.lordicon.com/jarmuava.json"
@@ -35,7 +35,7 @@
   }
 
   <!-- Film Details & Review Form -->
-  @if (film && !isLoading) {
+  @if (film() && !isLoading()) {
   <div class="review-content">
     <!-- Header -->
     <div class="review-header">
@@ -53,9 +53,9 @@
     <!-- Film Display Section -->
     <div class="film-section">
       <div class="film-poster">
-        @if (film.posterUrl) {
-        <img [src]="getPosterUrl(film.posterUrl)" [alt]="film.title" />
-        } @if (!film.posterUrl) {
+        @if (film()?.posterUrl) {
+        <img [src]="getPosterUrl(film()!.posterUrl)" [alt]="film()!.title" />
+        } @if (!film()?.posterUrl) {
         <div class="poster-placeholder">
           <lord-icon
             src="https://cdn.lordicon.com/ugllxeyl.json"
@@ -67,10 +67,10 @@
         }
       </div>
       <div class="film-details">
-        <h2>{{ film.title }}</h2>
-        <p class="film-year">{{ film.releaseYear }}</p>
+        <h2>{{ film()!.title }}</h2>
+        <p class="film-year">{{ film()!.releaseYear }}</p>
         <!-- ELO Rating Display (only shown if user has rated) -->
-        @if (hasRating && filmRating) {
+        @if (hasRating() && filmRating()) {
         <div class="elo-rating-section">
           <div class="elo-rating-badge">
             <lord-icon
@@ -82,12 +82,12 @@
             <div class="elo-info">
               <span class="elo-label">ELO Rating</span>
               <span class="elo-value">{{
-                filmRating.eloRating | number : "1.0-0"
+                filmRating()!.eloRating | number : "1.0-0"
               }}</span>
             </div>
           </div>
           <p class="elo-hint">
-            Based on {{ filmRating.numberOfComparisons }} comparisons
+            Based on {{ filmRating()!.numberOfComparisons }} comparisons
           </p>
         </div>
         }
@@ -101,12 +101,12 @@
             </lord-icon>
             Description
           </h3>
-          <p class="film-description">{{ film.description }}</p>
+          <p class="film-description">{{ film()!.description }}</p>
         </div>
       </div>
     </div>
     <!-- Film Comparison Section -->
-    @if (showComparisons) {
+    @if (showComparisons()) {
     <div class="comparison-section">
       <p-card
         [style]="{
@@ -134,7 +134,7 @@
         </ng-template>
         <ng-template pTemplate="content">
           <!-- Loading State -->
-          @if (isLoadingComparisons) {
+          @if (isLoadingComparisons()) {
           <div class="comparison-loading">
             <p-progressSpinner
               [style]="{ width: '60px', height: '60px' }"
@@ -145,14 +145,14 @@
           </div>
           }
           <!-- Error State -->
-          @if (comparisonError && !isLoadingComparisons) {
+          @if (comparisonError() && !isLoadingComparisons()) {
           <p-message severity="error" styleClass="comparison-error-message">
-            {{ comparisonError }}
+            {{ comparisonError() }}
           </p-message>
           }
           <!-- No Films Available -->
-          @if (!isLoadingComparisons && filmsForComparison.length === 0 &&
-          !comparisonError) {
+          @if (!isLoadingComparisons() && filmsForComparison().length === 0 &&
+          !comparisonError()) {
           <div class="no-comparisons">
             <lord-icon
               src="https://cdn.lordicon.com/yhtmwrae.json"
@@ -170,10 +170,10 @@
           </div>
           }
           <!-- Comparison Interface -->
-          @if (!isLoadingComparisons && getCurrentComparisonFilm()) {
+          @if (!isLoadingComparisons() && currentComparisonFilm()) {
           <div class="comparison-interface">
             <div class="comparison-progress">
-              <span>Comparison {{ getComparisonProgress() }}</span>
+              <span>Comparison {{ comparisonProgress() }}</span>
             </div>
             <div class="comparison-cards">
               <!-- Current Film Card -->
@@ -189,12 +189,12 @@
                     <span>This Film</span>
                   </div>
                   <div class="card-poster">
-                    @if (film.posterUrl) {
+                    @if (film()?.posterUrl) {
                     <img
-                      [src]="getPosterUrl(film.posterUrl, 'w780')"
-                      [alt]="film.title"
+                      [src]="getPosterUrl(film()!.posterUrl, 'w780')"
+                      [alt]="film()!.title"
                     />
-                    } @if (!film.posterUrl) {
+                    } @if (!film()?.posterUrl) {
                     <div class="poster-placeholder">
                       <lord-icon
                         src="https://cdn.lordicon.com/ugllxeyl.json"
@@ -208,8 +208,8 @@
                 </ng-template>
                 <ng-template pTemplate="content">
                   <div class="card-info">
-                    <h4>{{ film.title }}</h4>
-                    <p class="card-year">{{ film.releaseYear }}</p>
+                    <h4>{{ film()!.title }}</h4>
+                    <p class="card-year">{{ film()!.releaseYear }}</p>
                   </div>
                 </ng-template>
               </p-card>
@@ -231,17 +231,14 @@
                     <span>Challenger</span>
                   </div>
                   <div class="card-poster">
-                    @if (getCurrentComparisonFilm()?.posterUrl) {
+                    @if (currentComparisonFilm()?.posterUrl) {
                     <img
                       [src]="
-                        getPosterUrl(
-                          getCurrentComparisonFilm()!.posterUrl,
-                          'w780'
-                        )
+                        getPosterUrl(currentComparisonFilm()!.posterUrl, 'w780')
                       "
-                      [alt]="getCurrentComparisonFilm()!.title"
+                      [alt]="currentComparisonFilm()!.title"
                     />
-                    } @if (!getCurrentComparisonFilm()?.posterUrl) {
+                    } @if (!currentComparisonFilm()?.posterUrl) {
                     <div class="poster-placeholder">
                       <lord-icon
                         src="https://cdn.lordicon.com/ugllxeyl.json"
@@ -255,9 +252,9 @@
                 </ng-template>
                 <ng-template pTemplate="content">
                   <div class="card-info">
-                    <h4>{{ getCurrentComparisonFilm()!.title }}</h4>
+                    <h4>{{ currentComparisonFilm()!.title }}</h4>
                     <p class="card-year">
-                      {{ getCurrentComparisonFilm()!.releaseYear }}
+                      {{ currentComparisonFilm()!.releaseYear }}
                     </p>
                   </div>
                 </ng-template>
@@ -268,21 +265,21 @@
             </div>
             <div class="comparison-actions">
               <p-button
-                [label]="film.title"
+                [label]="film()!.title"
                 icon="pi pi-thumbs-up"
                 (onClick)="submitComparison('better')"
-                [disabled]="isSubmittingComparison"
+                [disabled]="isSubmittingComparison()"
                 styleClass="comparison-button better"
-                [loading]="isSubmittingComparison"
+                [loading]="isSubmittingComparison()"
               ></p-button>
 
               <p-button
-                [label]="getCurrentComparisonFilm()!.title"
+                [label]="currentComparisonFilm()!.title"
                 icon="pi pi-thumbs-down"
                 (onClick)="submitComparison('worse')"
-                [disabled]="isSubmittingComparison"
+                [disabled]="isSubmittingComparison()"
                 styleClass="comparison-button worse"
-                [loading]="isSubmittingComparison"
+                [loading]="isSubmittingComparison()"
               ></p-button>
             </div>
             <div class="same-section">
@@ -290,16 +287,16 @@
                 label="About the Same"
                 icon="pi pi-equals"
                 (onClick)="submitComparison('same')"
-                [disabled]="isSubmittingComparison"
+                [disabled]="isSubmittingComparison()"
                 styleClass="comparison-button same"
-                [loading]="isSubmittingComparison"
+                [loading]="isSubmittingComparison()"
               ></p-button>
             </div>
           </div>
           }
           <!-- All Comparisons Done -->
-          @if (!isLoadingComparisons && currentComparisonIndex >=
-          filmsForComparison.length && filmsForComparison.length > 0) {
+          @if (!isLoadingComparisons() && currentComparisonIndex() >=
+          filmsForComparison().length && filmsForComparison().length > 0) {
           <div class="comparisons-complete">
             <lord-icon
               src="https://cdn.lordicon.com/lomfljuq.json"
@@ -319,7 +316,7 @@
     }
     <!-- Review Form Section -->
     <div class="review-form-section">
-      @if (hasRating) {
+      @if (hasRating()) {
       <h3>
         <lord-icon
           src="https://cdn.lordicon.com/cvwrvyjv.json"
@@ -341,7 +338,7 @@
       </h3>
       }
       <!-- Success Message -->
-      @if (submitSuccess) {
+      @if (submitSuccess()) {
       <div class="success-message">
         <lord-icon
           src="https://cdn.lordicon.com/lomfljuq.json"
@@ -353,18 +350,18 @@
       </div>
       }
       <!-- Review Form -->
-      @if (!submitSuccess) {
+      @if (!submitSuccess()) {
       <div class="review-form">
         <!-- Rating Section -->
-        @if (!hasRating) {
+        @if (!hasRating()) {
         <div class="rating-section">
           <label>Rating (out of 5)</label>
           <div class="star-rating">
             @for (star of getStars(); track star) {
             <span
               class="star"
-              [class.selected]="star <= selectedRating"
-              [class.hover]="star <= selectedRating"
+              [class.selected]="star <= selectedRating()"
+              [class.hover]="star <= selectedRating()"
               (click)="selectRating(star)"
             >
               ★
@@ -372,7 +369,7 @@
             }
           </div>
           <p class="rating-hint">
-            Click to rate ({{ selectedRating || "Not rated" }})
+            Click to rate ({{ selectedRating() || "Not rated" }})
           </p>
         </div>
         }
@@ -381,14 +378,15 @@
           <label for="reviewText">Your Thoughts</label>
           <textarea
             id="reviewText"
-            [(ngModel)]="reviewText"
+            [value]="reviewText()"
+            (input)="reviewText.set($any($event.target).value)"
             placeholder="Share your thoughts about this film..."
             rows="8"
-            [disabled]="isSubmitting"
+            [disabled]="isSubmitting()"
           ></textarea>
         </div>
         <!-- Error Message -->
-        @if (submitError) {
+        @if (submitError()) {
         <div class="error-message">
           <lord-icon
             src="https://cdn.lordicon.com/tdrtiskw.json"
@@ -396,27 +394,27 @@
             style="width: 24px; height: 24px"
           >
           </lord-icon>
-          <p>{{ submitError }}</p>
+          <p>{{ submitError() }}</p>
         </div>
         }
         <!-- Submit Button -->
         <div class="submit-section">
-          @if (!hasRating) {
+          @if (!hasRating()) {
           <button
             class="submit-button"
             (click)="submitReview()"
             [disabled]="
-              isSubmitting || selectedRating === 0 || !reviewText.trim()
+              isSubmitting() || selectedRating() === 0 || !reviewText().trim()
             "
           >
-            @if (!isSubmitting) {
+            @if (!isSubmitting()) {
             <lord-icon
               src="https://cdn.lordicon.com/jvucoldz.json"
               trigger="hover"
               style="width: 24px; height: 24px"
             >
             </lord-icon>
-            } @if (isSubmitting) {
+            } @if (isSubmitting()) {
             <lord-icon
               src="https://cdn.lordicon.com/xjovhxra.json"
               trigger="loop"
@@ -424,22 +422,22 @@
             >
             </lord-icon>
             }
-            {{ isSubmitting ? "Submitting..." : "Submit Review" }}
+            {{ isSubmitting() ? "Submitting..." : "Submit Review" }}
           </button>
           } @else {
           <button
             class="submit-button"
             (click)="updateReview()"
-            [disabled]="isSubmitting || !reviewText.trim()"
+            [disabled]="isSubmitting() || !reviewText().trim()"
           >
-            @if (!isSubmitting) {
+            @if (!isSubmitting()) {
             <lord-icon
               src="https://cdn.lordicon.com/jvucoldz.json"
               trigger="hover"
               style="width: 24px; height: 24px"
             >
             </lord-icon>
-            } @if (isSubmitting) {
+            } @if (isSubmitting()) {
             <lord-icon
               src="https://cdn.lordicon.com/xjovhxra.json"
               trigger="loop"
@@ -447,7 +445,7 @@
             >
             </lord-icon>
             }
-            {{ isSubmitting ? "Submitting..." : "Update Review" }}
+            {{ isSubmitting() ? "Submitting..." : "Update Review" }}
           </button>
           }
         </div>

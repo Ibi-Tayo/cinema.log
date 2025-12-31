@@ -1,6 +1,11 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import {
+  Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  computed,
+  effect,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-
 
 @Component({
   selector: 'app-home',
@@ -9,20 +14,15 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent {
+  isLoggedIn = computed(() => this.auth.currentUser() !== null);
 
-  isLoggedIn = false;
-
-  constructor(private auth: AuthService){}
-
-  ngOnInit(): void {
-    this.auth.getCurrentUser().subscribe({
-      next: (_) => {
-        this.isLoggedIn = true;
-      },
-      error: (_) => {
-        this.isLoggedIn = false;
+  constructor(private auth: AuthService) {
+    effect(() => {
+      if (!this.auth.currentUser()) {
+        this.auth.getCurrentUser().subscribe();
       }
     });
   }

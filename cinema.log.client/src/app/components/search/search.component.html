@@ -20,8 +20,8 @@
         <input
           type="text"
           pInputText
-          [(ngModel)]="searchQuery"
-          (input)="onSearchInput()"
+          [value]="searchQuery()"
+          (input)="searchQuery.set($any($event.target).value); onSearchInput()"
           placeholder="Search for a film by title..."
           class="w-full"
         />
@@ -29,7 +29,7 @@
     </div>
 
     <!-- Loading State -->
-    @if (isLoading) {
+    @if (isLoading()) {
     <div class="loading-state">
       <p-card>
         <div class="skeleton-list">
@@ -49,7 +49,7 @@
     }
 
     <!-- Error State -->
-    @if (errorMessage && !isLoading) {
+    @if (errorMessage() && !isLoading()) {
     <div class="error-state">
       <lord-icon
         src="https://cdn.lordicon.com/tdrtiskw.json"
@@ -57,17 +57,17 @@
         style="width: 60px; height: 60px"
       >
       </lord-icon>
-      <p>{{ errorMessage }}</p>
+      <p>{{ errorMessage() }}</p>
     </div>
     }
 
     <!-- Search Results with DataView -->
-    @if (searchResults.length > 0 && !isLoading) {
+    @if (searchResults().length > 0 && !isLoading()) {
     <div class="search-results">
-      <p-dataview #dv [value]="searchResults" layout="list">
+      <p-dataview #dv [value]="searchResults()" layout="list">
         <ng-template #header>
           <div class="results-header">
-            <h2>Search Results ({{ searchResults.length }})</h2>
+            <h2>Search Results ({{ searchResults().length }})</h2>
           </div>
         </ng-template>
 
@@ -108,7 +108,7 @@
     }
 
     <!-- No Search Yet State -->
-    @if (!hasSearched && !isLoading && searchResults.length === 0) {
+    @if (!hasSearched() && !isLoading() && searchResults().length === 0) {
     <div class="empty-state">
       <lord-icon
         src="https://cdn.lordicon.com/fpmskzsv.json"

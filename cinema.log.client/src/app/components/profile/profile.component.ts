@@ -1,4 +1,11 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  CUSTOM_ELEMENTS_SCHEMA,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService, User } from '../../services/user.service';
@@ -20,13 +27,22 @@ interface ReviewWithFilm extends Review {
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileComponent implements OnInit {
-  user: User | null = null;
-  recentReviews: ReviewWithFilm[] = [];
-  isLoading = true;
-  errorMessage = '';
-  currentCarouselIndex = 0;
+  user = signal<User | null>(null);
+  recentReviews = signal<ReviewWithFilm[]>([]);
+  isLoading = signal(true);
+  errorMessage = signal('');
+  currentCarouselIndex = signal(0);
+
+  // Computed signals
+  hasReviews = computed(() => this.recentReviews().length > 0);
+  currentReview = computed(() => {
+    const reviews = this.recentReviews();
+    const index = this.currentCarouselIndex();
+    return reviews[index];
+  });
 
   constructor(
     private route: ActivatedRoute,
@@ -42,19 +58,19 @@ export class ProfileComponent implements OnInit {
     if (userId) {
       this.loadUserProfile(userId);
     } else {
-      this.errorMessage = 'User ID is required';
-      this.isLoading = false;
+      this.errorMessage.set('User ID is required');
+      this.isLoading.set(false);
     }
   }
 
   loadUserProfile(userId: string): void {
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     this.userService
       .getUserById(userId)
       .pipe(
         switchMap((user) => {
-          this.user = user;
+          this.user.set(user);
           return this.reviewService.getAllReviewsByUserId(userId);
         }),
         switchMap((reviews) => {
@@ -75,33 +91,36 @@ export class ProfileComponent implements OnInit {
           return forkJoin(filmRequests);
         }),
         catchError((error) => {
-          this.errorMessage = error.message || 'Failed to load profile';
+          this.errorMessage.set(error.message || 'Failed to load profile');
           return of([]);
         })
       )
       .subscribe((reviewsWithFilms) => {
-        this.recentReviews = reviewsWithFilms;
-        this.isLoading = false;
+        this.recentReviews.set(reviewsWithFilms);
+        this.isLoading.set(false);
       });
   }
 
   nextCarouselSlide(): void {
-    if (this.recentReviews.length > 0) {
-      this.currentCarouselIndex =
-        (this.currentCarouselIndex + 1) % this.recentReviews.length;
+    const reviews = this.recentReviews();
+    if (reviews.length > 0) {
+      this.currentCarouselIndex.set(
+        (this.currentCarouselIndex() + 1) % reviews.length
+      );
     }
   }
 
   previousCarouselSlide(): void {
-    if (this.recentReviews.length > 0) {
-      this.currentCarouselIndex =
-        (this.currentCarouselIndex - 1 + this.recentReviews.length) %
-        this.recentReviews.length;
+    const reviews = this.recentReviews();
+    if (reviews.length > 0) {
+      this.currentCarouselIndex.set(
+        (this.currentCarouselIndex() - 1 + reviews.length) % reviews.length
+      );
     }
   }
 
   goToSlide(index: number): void {
-    this.currentCarouselIndex = index;
+    this.currentCarouselIndex.set(index);
   }
 
   getStars(rating: number): string[] {

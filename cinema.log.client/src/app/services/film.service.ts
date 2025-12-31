@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { Observable, catchError, throwError, tap, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { handleHttpError } from '../utils/error-handler.util';
 
@@ -17,6 +17,9 @@ export interface Film {
   providedIn: 'root',
 })
 export class FilmService {
+  private filmCache = signal<Map<string, Film>>(new Map());
+  private searchCache = signal<Map<string, Film[]>>(new Map());
+
   constructor(private http: HttpClient) {}
 
   createFilm(film: Film): Observable<Film> {
@@ -35,9 +38,21 @@ export class FilmService {
   }
 
   getFilmById(id: string): Observable<Film> {
+    // Check cache first
+    const cached = this.filmCache().get(id);
+    if (cached) {
+      return of(cached);
+    }
+
     return this.http
       .get<Film>(`${environment.apiUrl}/films/${id}`, { withCredentials: true })
       .pipe(
+        tap((film) => {
+          // Update cache
+          const currentCache = new Map(this.filmCache());
+          currentCache.set(id, film);
+          this.filmCache.set(currentCache);
+        }),
         catchError(
           handleHttpError(
             'fetching film',
@@ -48,6 +63,13 @@ export class FilmService {
   }
 
   searchFilms(query: string): Observable<Film[]> {
+    // Check cache first
+    const cacheKey = query.toLowerCase().trim();
+    const cached = this.searchCache().get(cacheKey);
+    if (cached) {
+      return of(cached);
+    }
+
     return this.http
       .get<Film[]>(
         `${environment.apiUrl}/films/search?f=${encodeURIComponent(query)}`,
@@ -56,6 +78,17 @@ export class FilmService {
         }
       )
       .pipe(
+        tap((films) => {
+          // Update cache
+          const currentCache = new Map(this.searchCache());
+          currentCache.set(cacheKey, films);
+          this.searchCache.set(currentCache);
+
+          // Also cache individual films
+          const filmCache = new Map(this.filmCache());
+          films.forEach((film) => filmCache.set(film.id, film));
+          this.filmCache.set(filmCache);
+        }),
         catchError(
           handleHttpError(
             'searching films',
@@ -94,5 +127,22 @@ export class FilmService {
           )
         )
       );
+  }
+
+  /**
+   * Clear all caches - useful when data needs to be refreshed
+   */
+  clearCache(): void {
+    this.filmCache.set(new Map());
+    this.searchCache.set(new Map());
+  }
+
+  /**
+   * Clear specific film from cache
+   */
+  clearFilmCache(filmId: string): void {
+    const currentCache = new Map(this.filmCache());
+    currentCache.delete(filmId);
+    this.filmCache.set(currentCache);
   }
 }
