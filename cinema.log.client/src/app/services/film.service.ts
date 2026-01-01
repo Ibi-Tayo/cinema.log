@@ -98,21 +98,6 @@ export class FilmService {
       );
   }
 
-  getCandidatesForComparison(): Observable<Film[]> {
-    return this.http
-      .get<Film[]>(`${environment.apiUrl}/films/candidates-for-comparison`, {
-        withCredentials: true,
-      })
-      .pipe(
-        catchError(
-          handleHttpError(
-            'fetching film candidates',
-            'Failed to fetch film candidates. Please try again later.'
-          )
-        )
-      );
-  }
-
   getFilmsForComparison(userId: string, filmId: string): Observable<Film[]> {
     return this.http
       .get<Film[]>(

@@ -30,7 +30,6 @@ type FilmService interface {
 
 type RatingService interface {
 	GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error)
-	FilterRatingsForComparison([]domain.UserFilmRating) []domain.UserFilmRating
 	HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error)
 }
 
@@ -89,29 +88,6 @@ func (h *Handler) GetFilmsFromExternal(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
 		return
-	}
-	utils.SendJSON(w, films)
-}
-
-func (h *Handler) GetFilmsForRating(w http.ResponseWriter, r *http.Request) {
-	// 1. Get all ratings using the rating service
-	allRatings, err := h.RatingService.GetAllRatings(r.Context())
-	if err != nil {
-		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// 2. Use rating service to priortise the top 5 or 10 based on no of comps and last updated
-	filteredRatings := h.RatingService.FilterRatingsForComparison(allRatings)
-
-	// 3. Use those film id's to get from db and send them as response
-	var films []domain.Film
-	for _, rating := range filteredRatings {
-		if film, err := h.FilmService.GetFilmById(r.Context(), rating.FilmId); err != nil {
-			log.Printf("could not find film with id %s %v", rating.FilmId, err)
-		} else {
-			films = append(films, *film)
-		}
 	}
 	utils.SendJSON(w, films)
 }
