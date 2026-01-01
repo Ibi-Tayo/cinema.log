@@ -83,41 +83,6 @@ describe('RatingService', () => {
     req.error(new ProgressEvent('error'));
   });
 
-  it('should get ratings for comparison', () => {
-    const userId = '456e7890-e89b-12d3-a456-426614174001';
-    const mockRatings: UserFilmRating[] = [mockRating];
-
-    service.getRatingsForComparison(userId).subscribe((ratings) => {
-      expect(ratings).toEqual(mockRatings);
-      expect(ratings.length).toBe(1);
-    });
-
-    const req = httpMock.expectOne(
-      `${environment.apiUrl}/ratings/for-comparison?userId=${userId}`
-    );
-    expect(req.request.method).toBe('GET');
-    expect(req.request.withCredentials).toBe(true);
-    req.flush(mockRatings);
-  });
-
-  it('should handle error when getting ratings for comparison', () => {
-    const userId = 'invalid-user-id';
-
-    service.getRatingsForComparison(userId).subscribe({
-      next: () => fail('should have failed'),
-      error: (error) => {
-        expect(error.message).toContain(
-          'Failed to fetch ratings for comparison'
-        );
-      },
-    });
-
-    const req = httpMock.expectOne(
-      `${environment.apiUrl}/ratings/for-comparison?userId=${userId}`
-    );
-    req.error(new ProgressEvent('error'));
-  });
-
   it('should compare films', () => {
     const comparisonRequest: ComparisonRequest = {
       userId: '456e7890-e89b-12d3-a456-426614174001',

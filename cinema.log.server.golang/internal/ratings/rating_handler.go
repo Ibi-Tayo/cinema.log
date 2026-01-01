@@ -19,7 +19,6 @@ type Handler struct {
 type RatingService interface {
 	GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
 	GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error)
-	GetRatingsForComparison(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error)
 	UpdateRatings(ctx context.Context, ratings domain.ComparisonPair, comparison domain.ComparisonHistory) (*domain.ComparisonPair, error)
 	CreateComparison(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error)
 	HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error)
@@ -64,30 +63,6 @@ func (h *Handler) GetRating(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SendJSON(w, rating)
-}
-
-func (h *Handler) GetRatingsForComparison(w http.ResponseWriter, r *http.Request) {
-	// TODO: Get userId from request context/auth
-	// For now, expecting it as a query parameter
-	userIDStr := r.URL.Query().Get("userId")
-	if userIDStr == "" {
-		http.Error(w, "userId is required", http.StatusBadRequest)
-		return
-	}
-
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		http.Error(w, "invalid userId", http.StatusBadRequest)
-		return
-	}
-
-	ratings, err := h.RatingService.GetRatingsForComparison(r.Context(), userID)
-	if err != nil {
-		http.Error(w, "failed to get ratings", http.StatusInternalServerError)
-		return
-	}
-
-	utils.SendJSON(w, ratings)
 }
 
 type CompareFilmsRequest struct {

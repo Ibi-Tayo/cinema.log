@@ -46,22 +46,6 @@ export class RatingService {
       );
   }
 
-  getRatingsForComparison(userId: string): Observable<UserFilmRating[]> {
-    return this.http
-      .get<UserFilmRating[]>(
-        `${environment.apiUrl}/ratings/for-comparison?userId=${userId}`,
-        { withCredentials: true }
-      )
-      .pipe(
-        catchError(
-          handleHttpError(
-            'fetching ratings for comparison',
-            'Failed to fetch ratings for comparison. Please try again later.'
-          )
-        )
-      );
-  }
-
   compareFilms(comparison: ComparisonRequest): Observable<ComparisonPair> {
     return this.http
       .post<ComparisonPair>(`${environment.apiUrl}/ratings/compare-films`, comparison, {
