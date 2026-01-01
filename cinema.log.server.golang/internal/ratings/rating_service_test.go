@@ -461,18 +461,18 @@ func TestService_UpdateKConstantValue(t *testing.T) {
 		expectedK           float64
 	}{
 		{
-			name:                "new rating (0-10 comparisons)",
+			name:                "new rating (0-20 comparisons)",
 			numberOfComparisons: 2,
 			expectedK:           40,
 		},
 		{
-			name:                "intermediate (10-20 comparisons)",
-			numberOfComparisons: 11,
+			name:                "intermediate (20-40 comparisons)",
+			numberOfComparisons: 25,
 			expectedK:           20,
 		},
 		{
-			name:                "established (20+ comparisons)",
-			numberOfComparisons: 21,
+			name:                "established (40+ comparisons)",
+			numberOfComparisons: 45,
 			expectedK:           10,
 		},
 	}

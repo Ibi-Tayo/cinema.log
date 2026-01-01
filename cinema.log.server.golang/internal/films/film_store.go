@@ -90,12 +90,31 @@ func (s *store) GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, er
 }
 
 func (s *store) GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error) {
+	// Select films rated by the user, ordered by closeness of ELO rating to the specified film (maintaining competitive balance)
+	// and then by the number of comparisons (ascending)
 	query := `
-		SELECT f.film_id, f.external_id, f.title, f.description, f.poster_url, f.release_year
+		SELECT
+			f.film_id,
+			f.external_id,
+			f.title,
+			f.description,
+			f.poster_url,
+			f.release_year
 		FROM films f
-		INNER JOIN user_film_ratings ufr ON f.film_id = ufr.film_id
-		WHERE ufr.user_id = $1 AND f.film_id != $2
-		ORDER BY ufr.number_of_comparisons ASC
+		INNER JOIN user_film_ratings ufr
+			ON f.film_id = ufr.film_id
+		WHERE
+			ufr.user_id = $1
+			AND f.film_id != $2
+		ORDER BY ABS(
+			ufr.elo_rating - (
+				SELECT elo_rating
+				FROM user_film_ratings
+				WHERE user_id = $1
+				AND film_id = $2
+			)
+		),
+		ufr.number_of_comparisons ASC;
 	`
 
 	rows, err := s.db.QueryContext(ctx, query, userId, filmId)

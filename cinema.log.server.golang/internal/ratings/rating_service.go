@@ -172,11 +172,11 @@ func (s Service) defineFilmContestResult(filmA uuid.UUID, filmB uuid.UUID, compa
 func (s Service) updateKConstantValue(film domain.UserFilmRating) float64 {
 	numberOfComparisons := film.NumberOfComparisons
 	switch {
-	case numberOfComparisons >= 0 && numberOfComparisons < 10:
+	case numberOfComparisons >= 0 && numberOfComparisons < 20:
 		return 40
-	case numberOfComparisons >= 10 && numberOfComparisons < 20:
+	case numberOfComparisons >= 20 && numberOfComparisons < 40:
 		return 20
-	case numberOfComparisons >= 20:
+	case numberOfComparisons >= 40:
 		return 10
 	default:
 		return 40
