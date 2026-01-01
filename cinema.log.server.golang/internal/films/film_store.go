@@ -95,6 +95,7 @@ func (s *store) GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId 
 		FROM films f
 		INNER JOIN user_film_ratings ufr ON f.film_id = ufr.film_id
 		WHERE ufr.user_id = $1 AND f.film_id != $2
+		ORDER BY ufr.number_of_comparisons ASC
 	`
 
 	rows, err := s.db.QueryContext(ctx, query, userId, filmId)
