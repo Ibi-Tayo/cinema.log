@@ -172,11 +172,11 @@ func (s Service) defineFilmContestResult(filmA uuid.UUID, filmB uuid.UUID, compa
 func (s Service) updateKConstantValue(film domain.UserFilmRating) float64 {
 	numberOfComparisons := film.NumberOfComparisons
 	switch {
-	case numberOfComparisons >= 0 && numberOfComparisons < 5:
+	case numberOfComparisons >= 0 && numberOfComparisons < 10:
 		return 40
-	case numberOfComparisons >= 5 && numberOfComparisons < 10:
+	case numberOfComparisons >= 10 && numberOfComparisons < 20:
 		return 20
-	case numberOfComparisons >= 10:
+	case numberOfComparisons >= 20:
 		return 10
 	default:
 		return 40
@@ -187,14 +187,14 @@ func (s Service) updateKConstantValue(film domain.UserFilmRating) float64 {
 func (s Service) getInitialEloRating(rating float32) float32 {
 	switch {
 	case rating >= 0 && rating < 2:
-		return 1400
+		return 950
 	case rating >= 2 && rating < 3:
-		return 1500
+		return 1000
 	case rating >= 3 && rating < 4:
-		return 1600
+		return 1050
 	case rating >= 4 && rating <= 5:
-		return 1700
+		return 1100
 	default:
-		return 1500
+		return 1000
 	}
 }

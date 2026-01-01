@@ -136,8 +136,8 @@ func (h *Handler) GetFilmsForComparison(w http.ResponseWriter, r *http.Request) 
 		if !hasBeenCompared {
 			filmsForComparison = append(filmsForComparison, film)
 		}
-		// Limit to 5 films
-		if len(filmsForComparison) >= 5 {
+		// Limit to 10 films
+		if len(filmsForComparison) >= 10 {
 			break
 		}
 	}

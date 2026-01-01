@@ -461,18 +461,18 @@ func TestService_UpdateKConstantValue(t *testing.T) {
 		expectedK           float64
 	}{
 		{
-			name:                "new rating (0-4 comparisons)",
+			name:                "new rating (0-10 comparisons)",
 			numberOfComparisons: 2,
 			expectedK:           40,
 		},
 		{
-			name:                "intermediate (5-9 comparisons)",
-			numberOfComparisons: 7,
+			name:                "intermediate (10-20 comparisons)",
+			numberOfComparisons: 11,
 			expectedK:           20,
 		},
 		{
-			name:                "established (10+ comparisons)",
-			numberOfComparisons: 15,
+			name:                "established (20+ comparisons)",
+			numberOfComparisons: 21,
 			expectedK:           10,
 		},
 	}
@@ -501,22 +501,22 @@ func TestService_GetInitialEloRating(t *testing.T) {
 		{
 			name:          "1 star rating",
 			initialRating: 1.0,
-			expectedElo:   1400,
+			expectedElo:   950,
 		},
 		{
 			name:          "2.5 star rating",
 			initialRating: 2.5,
-			expectedElo:   1500,
+			expectedElo:   1000,
 		},
 		{
 			name:          "3.5 star rating",
 			initialRating: 3.5,
-			expectedElo:   1600,
+			expectedElo:   1050,
 		},
 		{
 			name:          "5 star rating",
 			initialRating: 5.0,
-			expectedElo:   1700,
+			expectedElo:   1100,
 		},
 	}
 
