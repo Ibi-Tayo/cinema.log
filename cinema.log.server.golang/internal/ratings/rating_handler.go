@@ -68,7 +68,7 @@ func (h *Handler) GetRating(w http.ResponseWriter, r *http.Request) {
 
 // Fetch all ratings in order (ranked by elo rating)
 func (h *Handler) GetRatingsByUserId(w http.ResponseWriter, r *http.Request) {
-	userIDStr := r.URL.Query().Get("userId")
+	userIDStr := r.PathValue("userId")
 	if userIDStr == "" {
 		http.Error(w, "userId is required", http.StatusBadRequest)
 		return
