@@ -8,13 +8,20 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TableModule } from 'primeng/table';
+import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { UserService, User } from '../../services/user.service';
 import { ReviewService, Review } from '../../services/review.service';
 import { FilmService, Film } from '../../services/film.service';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { getTMDBPosterUrl, TMDBPosterSize } from '../../utils/tmdb-image.util';
-import { RatingService, UserFilmRating, UserFilmRatingDetail } from '../../services/rating.service';
+import {
+  RatingService,
+  UserFilmRatingDetail,
+} from '../../services/rating.service';
 
 interface ReviewWithFilm extends Review {
   film?: Film;
@@ -23,7 +30,13 @@ interface ReviewWithFilm extends Review {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    TableModule,
+    InputTextModule,
+    IconFieldModule,
+    InputIconModule,
+  ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -104,8 +117,12 @@ export class ProfileComponent implements OnInit {
   }
 
   loadUserRatings(userId: string): void {
+    // make film release year only the year part of the date
     this.ratingsService.getRatingsByUserId(userId).subscribe({
       next: (ratings) => {
+        ratings.forEach(rating => {
+          rating.filmReleaseYear = new Date(rating.filmReleaseYear).getFullYear();
+        });
         this.userRatings.set(ratings);
       },
       error: (error) => {
