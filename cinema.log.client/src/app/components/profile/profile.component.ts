@@ -117,7 +117,6 @@ export class ProfileComponent implements OnInit {
   }
 
   loadUserRatings(userId: string): void {
-    // make film release year only the year part of the date
     this.ratingsService.getRatingsByUserId(userId).subscribe({
       next: (ratings) => {
         ratings.forEach(rating => {
