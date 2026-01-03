@@ -19,12 +19,18 @@ func (m *mockRatingService) GetRating(ctx context.Context, userId uuid.UUID, fil
 	return &domain.UserFilmRating{ID: uuid.New(), UserId: userId, FilmId: filmId}, nil
 }
 
-func (m *mockRatingService) GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error) {
-	return nil, errors.New("not implemented")
+func (m *mockRatingService) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error) {
+	return []domain.UserFilmRatingDetail{
+		{Rating: domain.UserFilmRating{ID: uuid.New(), UserId: userId, FilmId: uuid.New()}},
+		{Rating: domain.UserFilmRating{ID: uuid.New(), UserId: userId, FilmId: uuid.New()}},
+	}, nil
 }
 
-func (m *mockRatingService) GetRatingsForComparison(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error) {
-	return []domain.UserFilmRating{{ID: uuid.New()}}, nil
+func (m *mockRatingService) GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error) {
+	return []domain.UserFilmRating{
+		{ID: uuid.New(), UserId: uuid.New(), FilmId: uuid.New()},
+		{ID: uuid.New(), UserId: uuid.New(), FilmId: uuid.New()},
+	}, nil
 }
 
 func (m *mockRatingService) UpdateRatings(ctx context.Context, ratings domain.ComparisonPair, comparison domain.ComparisonHistory) (*domain.ComparisonPair, error) {
@@ -58,16 +64,6 @@ func TestHandler_GetRating_InvalidUserId(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/ratings?userId=invalid&filmId="+uuid.New().String(), nil)
 	w := httptest.NewRecorder()
 	handler.GetRating(w, req)
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("expected status %d, got %d", http.StatusBadRequest, w.Code)
-	}
-}
-
-func TestHandler_GetRatingsForComparison_MissingUserId(t *testing.T) {
-	handler := NewHandler(&mockRatingService{})
-	req := httptest.NewRequest(http.MethodGet, "/ratings/for-comparison", nil)
-	w := httptest.NewRecorder()
-	handler.GetRatingsForComparison(w, req)
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("expected status %d, got %d", http.StatusBadRequest, w.Code)
 	}
@@ -122,33 +118,6 @@ func TestHandler_GetRating_InvalidFilmId(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	handler.GetRating(w, req)
-
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("expected status %d, got %d", http.StatusBadRequest, w.Code)
-	}
-}
-
-func TestHandler_GetRatingsForComparison_Success(t *testing.T) {
-	handler := NewHandler(&mockRatingService{})
-	userId := uuid.New()
-
-	req := httptest.NewRequest(http.MethodGet, "/ratings/for-comparison?userId="+userId.String(), nil)
-	w := httptest.NewRecorder()
-
-	handler.GetRatingsForComparison(w, req)
-
-	if w.Code != http.StatusOK {
-		t.Errorf("expected status %d, got %d", http.StatusOK, w.Code)
-	}
-}
-
-func TestHandler_GetRatingsForComparison_InvalidUserId(t *testing.T) {
-	handler := NewHandler(&mockRatingService{})
-
-	req := httptest.NewRequest(http.MethodGet, "/ratings/for-comparison?userId=invalid", nil)
-	w := httptest.NewRecorder()
-
-	handler.GetRatingsForComparison(w, req)
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("expected status %d, got %d", http.StatusBadRequest, w.Code)

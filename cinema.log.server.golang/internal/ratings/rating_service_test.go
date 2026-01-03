@@ -9,81 +9,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func TestService_FilterRatingsForComparison(t *testing.T) {
-	service := NewService(nil) // No store needed for this test
-
-	tests := []struct {
-		name     string
-		ratings  []domain.UserFilmRating
-		expected int
-	}{
-		{
-			name: "returns all when less than 10",
-			ratings: []domain.UserFilmRating{
-				{NumberOfComparisons: 0, LastUpdated: time.Now().Add(-2 * time.Hour)},
-				{NumberOfComparisons: 1, LastUpdated: time.Now().Add(-1 * time.Hour)},
-				{NumberOfComparisons: 0, LastUpdated: time.Now()},
-			},
-			expected: 3,
-		},
-		{
-			name: "returns first 10 when more than 10",
-			ratings: func() []domain.UserFilmRating {
-				ratings := make([]domain.UserFilmRating, 15)
-				for i := 0; i < 15; i++ {
-					ratings[i] = domain.UserFilmRating{
-						NumberOfComparisons: i,
-						LastUpdated:         time.Now().Add(-time.Duration(i) * time.Hour),
-					}
-				}
-				return ratings
-			}(),
-			expected: 10,
-		},
-		{
-			name:     "returns empty when no ratings",
-			ratings:  []domain.UserFilmRating{},
-			expected: 0,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := service.FilterRatingsForComparison(tt.ratings)
-			if len(result) != tt.expected {
-				t.Errorf("expected %d ratings, got %d", tt.expected, len(result))
-			}
-		})
-	}
-}
-
-func TestService_FilterRatingsForComparison_Sorting(t *testing.T) {
-	service := NewService(nil)
-
-	now := time.Now()
-	ratings := []domain.UserFilmRating{
-		{ID: uuid.New(), NumberOfComparisons: 5, LastUpdated: now.Add(-1 * time.Hour)},
-		{ID: uuid.New(), NumberOfComparisons: 0, LastUpdated: now.Add(-3 * time.Hour)}, // Should be first (least comparisons, oldest)
-		{ID: uuid.New(), NumberOfComparisons: 0, LastUpdated: now.Add(-2 * time.Hour)}, // Should be second
-		{ID: uuid.New(), NumberOfComparisons: 3, LastUpdated: now},
-	}
-
-	result := service.FilterRatingsForComparison(ratings)
-
-	if result[0].NumberOfComparisons != 0 {
-		t.Errorf("expected first rating to have 0 comparisons, got %d", result[0].NumberOfComparisons)
-	}
-
-	if result[0].LastUpdated.After(result[1].LastUpdated) {
-		t.Error("expected ratings with same comparison count to be sorted by oldest first")
-	}
-}
-
 // Add mock store for service testing
 type mockRatingStore struct {
 	getRatingFunc            func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
 	getAllRatingsFunc        func(ctx context.Context) ([]domain.UserFilmRating, error)
-	getRatingsByUserIdFunc   func(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error)
+	getRatingsByUserIdFunc   func(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error)
 	createRatingFunc         func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
 	updateRatingFunc         func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
 	updateRatingsFunc        func(ctx context.Context, ratings domain.ComparisonPair) (*domain.ComparisonPair, error)
@@ -106,7 +36,7 @@ func (m *mockRatingStore) GetAllRatings(ctx context.Context) ([]domain.UserFilmR
 	return nil, nil
 }
 
-func (m *mockRatingStore) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error) {
+func (m *mockRatingStore) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error) {
 	if m.getRatingsByUserIdFunc != nil {
 		return m.getRatingsByUserIdFunc(ctx, userId)
 	}
@@ -246,42 +176,6 @@ func TestService_CreateRating(t *testing.T) {
 	}
 	if rating.UserId != userId {
 		t.Errorf("expected user ID %v, got %v", userId, rating.UserId)
-	}
-}
-
-func TestService_GetRatingsForComparison(t *testing.T) {
-	ctx := context.Background()
-	userId := uuid.New()
-
-	now := time.Now()
-	allRatings := []domain.UserFilmRating{
-		{ID: uuid.New(), UserId: userId, NumberOfComparisons: 5, LastUpdated: now.Add(-1 * time.Hour)},
-		{ID: uuid.New(), UserId: userId, NumberOfComparisons: 0, LastUpdated: now.Add(-3 * time.Hour)},
-		{ID: uuid.New(), UserId: userId, NumberOfComparisons: 0, LastUpdated: now.Add(-2 * time.Hour)},
-		{ID: uuid.New(), UserId: userId, NumberOfComparisons: 3, LastUpdated: now},
-	}
-
-	mock := &mockRatingStore{
-		getRatingsByUserIdFunc: func(ctx context.Context, uid uuid.UUID) ([]domain.UserFilmRating, error) {
-			if uid != userId {
-				return nil, nil
-			}
-			return allRatings, nil
-		},
-	}
-
-	service := NewService(mock)
-	ratings, err := service.GetRatingsForComparison(ctx, userId)
-
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
-	if len(ratings) != 4 {
-		t.Errorf("expected 4 ratings, got %d", len(ratings))
-	}
-	// Check that they're sorted correctly
-	if ratings[0].NumberOfComparisons != 0 {
-		t.Errorf("expected first rating to have 0 comparisons, got %d", ratings[0].NumberOfComparisons)
 	}
 }
 
@@ -567,18 +461,18 @@ func TestService_UpdateKConstantValue(t *testing.T) {
 		expectedK           float64
 	}{
 		{
-			name:                "new rating (0-4 comparisons)",
+			name:                "new rating (0-20 comparisons)",
 			numberOfComparisons: 2,
 			expectedK:           40,
 		},
 		{
-			name:                "intermediate (5-9 comparisons)",
-			numberOfComparisons: 7,
+			name:                "intermediate (20-40 comparisons)",
+			numberOfComparisons: 25,
 			expectedK:           20,
 		},
 		{
-			name:                "established (10+ comparisons)",
-			numberOfComparisons: 15,
+			name:                "established (40+ comparisons)",
+			numberOfComparisons: 45,
 			expectedK:           10,
 		},
 	}
@@ -607,22 +501,22 @@ func TestService_GetInitialEloRating(t *testing.T) {
 		{
 			name:          "1 star rating",
 			initialRating: 1.0,
-			expectedElo:   1400,
+			expectedElo:   950,
 		},
 		{
 			name:          "2.5 star rating",
 			initialRating: 2.5,
-			expectedElo:   1500,
+			expectedElo:   1000,
 		},
 		{
 			name:          "3.5 star rating",
 			initialRating: 3.5,
-			expectedElo:   1600,
+			expectedElo:   1050,
 		},
 		{
 			name:          "5 star rating",
 			initialRating: 5.0,
-			expectedElo:   1700,
+			expectedElo:   1100,
 		},
 	}
 

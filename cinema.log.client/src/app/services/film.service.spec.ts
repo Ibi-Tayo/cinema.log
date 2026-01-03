@@ -94,34 +94,4 @@ describe('FilmService', () => {
     const req = httpMock.expectOne(`${environment.apiUrl}/films/search?f=test`);
     req.error(new ProgressEvent('error'));
   });
-
-  it('should get candidates for comparison', () => {
-    const mockFilms: Film[] = [mockFilm];
-
-    service.getCandidatesForComparison().subscribe((films) => {
-      expect(films).toEqual(mockFilms);
-      expect(films.length).toBe(1);
-    });
-
-    const req = httpMock.expectOne(
-      `${environment.apiUrl}/films/candidates-for-comparison`
-    );
-    expect(req.request.method).toBe('GET');
-    expect(req.request.withCredentials).toBe(true);
-    req.flush(mockFilms);
-  });
-
-  it('should handle error when getting candidates for comparison', () => {
-    service.getCandidatesForComparison().subscribe({
-      next: () => fail('should have failed'),
-      error: (error) => {
-        expect(error.message).toContain('Failed to fetch film candidates');
-      },
-    });
-
-    const req = httpMock.expectOne(
-      `${environment.apiUrl}/films/candidates-for-comparison`
-    );
-    req.error(new ProgressEvent('error'));
-  });
 });

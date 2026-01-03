@@ -218,7 +218,7 @@ func TestRatingStore_GetRatingsByUserId(t *testing.T) {
 	filmId1 := createTestFilm(ctx, t)
 	filmId2 := createTestFilm(ctx, t)
 	
-	// Create ratings for specific user
+	// Create two ratings for the same user
 	rating1 := domain.UserFilmRating{
 		ID:                   uuid.New(),
 		UserId:               userId,
@@ -257,16 +257,10 @@ func TestRatingStore_GetRatingsByUserId(t *testing.T) {
 		t.Fatalf("failed to get ratings by user ID: %v", err)
 	}
 
-	if len(ratings) < 2 {
-		t.Errorf("expected at least 2 ratings for user, got %d", len(ratings))
+	if len(ratings) != 2 {
+		t.Errorf("expected 2 ratings, got %d", len(ratings))
 	}
 
-	// Verify all ratings belong to the user
-	for _, rating := range ratings {
-		if rating.UserId != userId {
-			t.Errorf("expected user ID %v, got %v", userId, rating.UserId)
-		}
-	}
 }
 
 func TestRatingStore_UpdateRating(t *testing.T) {

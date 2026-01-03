@@ -157,6 +157,104 @@
       </div>
       }
     </div>
+
+    <!-- Film Ratings Table Section -->
+    <div class="ratings-table-section">
+      <h2>
+        Film Rankings
+      </h2>
+
+      @if (userRatings().length === 0) {
+      <div class="no-ratings-placeholder">
+        <lord-icon
+          src="https://cdn.lordicon.com/nocovwne.json"
+          trigger="loop"
+          style="width: 120px; height: 120px"
+        >
+        </lord-icon>
+        <p class="placeholder-title">No Ratings Yet</p>
+        <p class="placeholder-subtitle">
+          Start rating films to see your rankings here
+        </p>
+      </div>
+      } @if (userRatings().length > 0) {
+      <div class="table-container">
+        <p-table
+          [value]="userRatings()"
+          [paginator]="true"
+          [rows]="10"
+          [rowsPerPageOptions]="[5, 10, 25, 50]"
+          [tableStyle]="{ 'min-width': '10rem' }"
+          [globalFilterFields]="['filmTitle', 'filmReleaseYear']"
+          #ratingsTable
+        >
+          <ng-template #header>
+            <tr>
+              <th pSortableColumn="filmTitle">
+                Film <p-sortIcon field="filmTitle" />
+              </th>
+              <th pSortableColumn="filmReleaseYear" style="width: 150px">
+                Release Year <p-sortIcon field="filmReleaseYear" />
+              </th>
+              <th pSortableColumn="rating.eloRating" style="width: 150px">
+                Elo Rating <p-sortIcon field="rating.eloRating" />
+              </th>
+              <th pSortableColumn="rating.initialRating" style="width: 150px">
+                Review <p-sortIcon field="rating.initialRating" />
+              </th>
+            </tr>
+            <tr>
+              <th>
+                <p-iconfield iconPosition="right">
+                  <input
+                    pInputText
+                    type="text"
+                    (input)="
+                      ratingsTable.filterGlobal(
+                        $any($event.target).value,
+                        'contains'
+                      )
+                    "
+                    placeholder="Search films..."
+                  />
+                </p-iconfield>
+              </th>
+              <th></th>
+              <th></th>
+              <th></th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-ratingDetail>
+            <tr>
+              <td
+                (click)="selectFilm(ratingDetail.rating.filmId)"
+                style="cursor: pointer"
+              >
+                {{ ratingDetail.filmTitle }}
+              </td>
+              <td>{{ ratingDetail.filmReleaseYear }}</td>
+              <td>{{ ratingDetail.rating.eloRating | number : "1.0-0" }}</td>
+              <td>
+                <div class="rating-stars">
+                  @for (star of getStars(ratingDetail.rating.initialRating);
+                  track star) {
+                  <span class="star" [class.filled]="star === 'full'"> ★ </span>
+                  }
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="5" style="text-align: center">
+                No films found matching your criteria.
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+      }
+    </div>
   </div>
   }
 </div>

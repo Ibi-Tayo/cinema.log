@@ -15,6 +15,13 @@ export interface UserFilmRating {
   kConstantValue: number;
 }
 
+export interface UserFilmRatingDetail {
+  rating: UserFilmRating;
+  filmTitle: string;
+  filmReleaseYear: number;
+  filmPosterURL: string;
+}
+
 export interface ComparisonPair {
   filmA: UserFilmRating;
   filmB: UserFilmRating;
@@ -46,17 +53,16 @@ export class RatingService {
       );
   }
 
-  getRatingsForComparison(userId: string): Observable<UserFilmRating[]> {
+  getRatingsByUserId(userId: string): Observable<UserFilmRatingDetail[]> {
     return this.http
-      .get<UserFilmRating[]>(
-        `${environment.apiUrl}/ratings/for-comparison?userId=${userId}`,
-        { withCredentials: true }
-      )
+      .get<UserFilmRatingDetail[]>(`${environment.apiUrl}/ratings/${userId}`, {
+        withCredentials: true,
+      })
       .pipe(
         catchError(
           handleHttpError(
-            'fetching ratings for comparison',
-            'Failed to fetch ratings for comparison. Please try again later.'
+            'fetching ratings by user ID',
+            'Failed to fetch ratings. Please try again later.'
           )
         )
       );

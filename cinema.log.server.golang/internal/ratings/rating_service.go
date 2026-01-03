@@ -3,7 +3,6 @@ package ratings
 import (
 	"context"
 	"math"
-	"sort"
 	"time"
 
 	"cinema.log.server.golang/internal/domain"
@@ -17,7 +16,7 @@ type Service struct {
 type RatingStore interface {
 	GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
 	GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error)
-	GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error)
+	GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error)
 	CreateRating(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
 	UpdateRating(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
 	UpdateRatings(ctx context.Context, ratings domain.ComparisonPair) (*domain.ComparisonPair, error)
@@ -38,6 +37,10 @@ func (s Service) GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UU
 
 func (s Service) GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error) {
 	return s.RatingStore.GetAllRatings(ctx)
+}
+
+func (s Service) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error) {
+	return s.RatingStore.GetRatingsByUserId(ctx, userId)
 }
 
 func (s Service) CreateComparison(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error) {
@@ -66,39 +69,6 @@ func (s Service) CreateRating(ctx context.Context, userId uuid.UUID, filmId uuid
 	}
 
 	return s.RatingStore.CreateRating(ctx, rating)
-}
-
-func (s Service) GetRatingsForComparison(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error) {
-	// Get all ratings for the user
-	ratings, err := s.RatingStore.GetRatingsByUserId(ctx, userId)
-	if err != nil {
-		return nil, err
-	}
-	if (len(ratings) == 0) {
-		return []domain.UserFilmRating{}, nil
-	}
-
-	// Filter and sort them for comparison
-	return s.FilterRatingsForComparison(ratings), nil
-}
-
-func (s Service) FilterRatingsForComparison(ratings []domain.UserFilmRating) []domain.UserFilmRating {
-	// Sort films based on:
-	// 1. Least number of comparisons first
-	// 2. Oldest last_updated date (for films with same comparison count)
-	sort.Slice(ratings, func(i, j int) bool {
-		if ratings[i].NumberOfComparisons != ratings[j].NumberOfComparisons {
-			return ratings[i].NumberOfComparisons < ratings[j].NumberOfComparisons
-		}
-		return ratings[i].LastUpdated.Before(ratings[j].LastUpdated)
-	})
-
-	// Take up to the first 10 films for comparison
-	maxFilms := 10
-	if len(ratings) < maxFilms {
-		return ratings
-	}
-	return ratings[:maxFilms]
 }
 
 func (s Service) UpdateRatings(ctx context.Context, ratings domain.ComparisonPair, comparison domain.ComparisonHistory) (*domain.ComparisonPair, error) {
@@ -206,11 +176,11 @@ func (s Service) defineFilmContestResult(filmA uuid.UUID, filmB uuid.UUID, compa
 func (s Service) updateKConstantValue(film domain.UserFilmRating) float64 {
 	numberOfComparisons := film.NumberOfComparisons
 	switch {
-	case numberOfComparisons >= 0 && numberOfComparisons < 5:
+	case numberOfComparisons >= 0 && numberOfComparisons < 20:
 		return 40
-	case numberOfComparisons >= 5 && numberOfComparisons < 10:
+	case numberOfComparisons >= 20 && numberOfComparisons < 40:
 		return 20
-	case numberOfComparisons >= 10:
+	case numberOfComparisons >= 40:
 		return 10
 	default:
 		return 40
@@ -221,14 +191,14 @@ func (s Service) updateKConstantValue(film domain.UserFilmRating) float64 {
 func (s Service) getInitialEloRating(rating float32) float32 {
 	switch {
 	case rating >= 0 && rating < 2:
-		return 1400
+		return 950
 	case rating >= 2 && rating < 3:
-		return 1500
+		return 1000
 	case rating >= 3 && rating < 4:
-		return 1600
+		return 1050
 	case rating >= 4 && rating <= 5:
-		return 1700
+		return 1100
 	default:
-		return 1500
+		return 1000
 	}
 }

@@ -17,6 +17,13 @@ type mockFilmService struct {
 	getFilmsFromExternalFunc func(ctx context.Context, query string) ([]domain.Film, error)
 }
 
+func (m *mockFilmService) GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error) {
+	if m.getFilmsFromExternalFunc != nil {
+		return m.getFilmsFromExternalFunc(ctx, "")
+	}
+	return []domain.Film{{ID: uuid.New(), Title: "Film for Rating"}}, nil
+}
+
 func (m *mockFilmService) CreateFilm(ctx context.Context, film *domain.Film) (*domain.Film, error) {
 	if m.createFilmFunc != nil {
 		return m.createFilmFunc(ctx, film)
@@ -36,10 +43,6 @@ func (m *mockFilmService) GetFilmsFromExternal(ctx context.Context, query string
 		return m.getFilmsFromExternalFunc(ctx, query)
 	}
 	return []domain.Film{{ID: uuid.New(), Title: "External Film"}}, nil
-}
-
-func (m *mockFilmService) GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error) {
-	return nil, errors.New("not implemented")
 }
 
 type mockRatingService struct {
@@ -204,72 +207,5 @@ func TestHandler_GetFilmsFromExternal_ServiceError(t *testing.T) {
 
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("expected status %d, got %d", http.StatusInternalServerError, w.Code)
-	}
-}
-
-func TestHandler_GetFilmsForRating_Success(t *testing.T) {
-	mockFilmSvc := &mockFilmService{}
-	mockRatingSvc := &mockRatingService{}
-
-	handler := &Handler{
-		FilmService:   mockFilmSvc,
-		RatingService: mockRatingSvc,
-	}
-
-	req := httptest.NewRequest(http.MethodGet, "/films/candidates-for-comparison", nil)
-	w := httptest.NewRecorder()
-
-	handler.GetFilmsForRating(w, req)
-
-	if w.Code != http.StatusOK {
-		t.Errorf("expected status %d, got %d, body: %s", http.StatusOK, w.Code, w.Body.String())
-	}
-}
-
-func TestHandler_GetFilmsForRating_RatingServiceError(t *testing.T) {
-	mockFilmSvc := &mockFilmService{}
-	mockRatingSvc := &mockRatingService{
-		getAllRatingsFunc: func(ctx context.Context) ([]domain.UserFilmRating, error) {
-			return nil, errors.New("rating service error")
-		},
-	}
-
-	handler := &Handler{
-		FilmService:   mockFilmSvc,
-		RatingService: mockRatingSvc,
-	}
-
-	req := httptest.NewRequest(http.MethodGet, "/films/candidates-for-comparison", nil)
-	w := httptest.NewRecorder()
-
-	handler.GetFilmsForRating(w, req)
-
-	if w.Code != http.StatusInternalServerError {
-		t.Errorf("expected status %d, got %d", http.StatusInternalServerError, w.Code)
-	}
-}
-
-func TestHandler_GetFilmsForRating_FilmNotFound(t *testing.T) {
-	// Test that handler gracefully handles films that can't be found
-	mockFilmSvc := &mockFilmService{
-		getFilmByIdFunc: func(ctx context.Context, id uuid.UUID) (*domain.Film, error) {
-			return nil, ErrFilmNotFound
-		},
-	}
-	mockRatingSvc := &mockRatingService{}
-
-	handler := &Handler{
-		FilmService:   mockFilmSvc,
-		RatingService: mockRatingSvc,
-	}
-
-	req := httptest.NewRequest(http.MethodGet, "/films/candidates-for-comparison", nil)
-	w := httptest.NewRecorder()
-
-	handler.GetFilmsForRating(w, req)
-
-	// Should still return 200 with empty array (or films that were found)
-	if w.Code != http.StatusOK {
-		t.Errorf("expected status %d, got %d", http.StatusOK, w.Code)
 	}
 }
