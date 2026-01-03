@@ -57,7 +57,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("DELETE /reviews", s.reviewHandler.DeleteReview)
 
 	// Rating routes
-	mux.HandleFunc("GET /ratings", s.ratingHandler.GetRating)                              // query params: userId, filmId
+	mux.HandleFunc("GET /ratings/{userId}", s.ratingHandler.GetRatingsByUserId)
+	mux.HandleFunc("GET /ratings", s.ratingHandler.GetRating) // query params: userId, filmId
 	mux.HandleFunc("POST /ratings/compare-films", s.ratingHandler.CompareFilms)
 
 	// Wrap the mux with middleware

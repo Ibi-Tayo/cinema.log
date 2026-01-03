@@ -15,6 +15,13 @@ export interface UserFilmRating {
   kConstantValue: number;
 }
 
+export interface UserFilmRatingDetail {
+  rating: UserFilmRating;
+  filmTitle: string;
+  filmReleaseYear: number;
+  filmPosterURL: string;
+}
+
 export interface ComparisonPair {
   filmA: UserFilmRating;
   filmB: UserFilmRating;
@@ -43,6 +50,21 @@ export class RatingService {
       .pipe(
         // Use handleExpectedError because 404 is expected when rating doesn't exist yet
         catchError(handleExpectedError('Failed to fetch rating. Please try again later.'))
+      );
+  }
+
+  getRatingsByUserId(userId: string): Observable<UserFilmRatingDetail[]> {
+    return this.http
+      .get<UserFilmRatingDetail[]>(`${environment.apiUrl}/ratings/${userId}`, {
+        withCredentials: true,
+      })
+      .pipe(
+        catchError(
+          handleHttpError(
+            'fetching ratings by user ID',
+            'Failed to fetch ratings. Please try again later.'
+          )
+        )
       );
   }
 

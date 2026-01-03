@@ -19,8 +19,18 @@ func (m *mockRatingService) GetRating(ctx context.Context, userId uuid.UUID, fil
 	return &domain.UserFilmRating{ID: uuid.New(), UserId: userId, FilmId: filmId}, nil
 }
 
+func (m *mockRatingService) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error) {
+	return []domain.UserFilmRatingDetail{
+		{Rating: domain.UserFilmRating{ID: uuid.New(), UserId: userId, FilmId: uuid.New()}},
+		{Rating: domain.UserFilmRating{ID: uuid.New(), UserId: userId, FilmId: uuid.New()}},
+	}, nil
+}
+
 func (m *mockRatingService) GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error) {
-	return nil, errors.New("not implemented")
+	return []domain.UserFilmRating{
+		{ID: uuid.New(), UserId: uuid.New(), FilmId: uuid.New()},
+		{ID: uuid.New(), UserId: uuid.New(), FilmId: uuid.New()},
+	}, nil
 }
 
 func (m *mockRatingService) UpdateRatings(ctx context.Context, ratings domain.ComparisonPair, comparison domain.ComparisonHistory) (*domain.ComparisonPair, error) {

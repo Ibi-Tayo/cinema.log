@@ -337,6 +337,179 @@
         }
       }
     }
+
+    // Film Ratings Table Section
+    .ratings-table-section {
+
+      .no-ratings-placeholder {
+        @include flex-center;
+        flex-direction: column;
+        padding: 4rem 2rem;
+        gap: 1rem;
+
+        .placeholder-title {
+          font-size: map.get($font-sizes, "2xl");
+          color: get-color(neutral, 300);
+          font-weight: 600;
+          margin: 0;
+        }
+
+        .placeholder-subtitle {
+          font-size: map.get($font-sizes, "base");
+          color: get-color(neutral, 500);
+          margin: 0;
+        }
+      }
+
+      .table-container {
+        background: get-color(secondary, 600);
+        border-radius: 10px;
+        padding: 0.5rem;
+
+        .rating-stars {
+          display: flex;
+          gap: 0.25rem;
+
+          .star {
+            font-size: map.get($font-sizes, "lg");
+            color: get-color(neutral, 600);
+
+            &.filled {
+              color: get-color(warning);
+            }
+          }
+        }
+
+        // PrimeNG Table Overrides
+        ::ng-deep {
+          .p-datatable {
+            background: transparent;
+            color: get-color(secondary, 200);
+
+            .p-datatable-header {
+              background: get-color(secondary, 700);
+              border: none;
+              border-bottom: 2px solid get-color(primary, 500);
+              padding: 1rem;
+            }
+
+            .p-datatable-column-sorted {
+              color: get-color(secondary, 100);
+            }
+
+            .p-datatable-thead > tr > th {
+              background: get-color(backgroundColor);
+              border: none;
+              border-bottom: 2px solid get-color(primary, 600);
+              padding: 1rem;
+              font-weight: 600;
+              font-size: map.get($font-sizes, "base");
+
+              .p-sortable-column-icon {
+                color: get-color(primary, 400);
+              }
+
+              .p-icon {
+                color: get-color(primary, 100);
+              }
+
+              &:hover {
+                background: get-color(secondary, 600);
+              }
+            }
+
+            .p-datatable-tbody > tr {
+              background: get-color(secondary, 600);
+              color: get-color(neutral, 200);
+              border-bottom: 1px solid get-color(neutral, 700);
+
+              &:hover {
+                background: get-color(neutral, 750);
+              }
+
+              > td {
+                padding: 1rem;
+                border: none;
+              }
+            }
+
+            .p-paginator {
+              background: get-color(backgroundColor);
+              color: get-color(secondary, 200);
+              border: none;
+              padding: 1rem;
+              // border-top: 2px solid get-color(primary, 600);
+
+              .p-paginator-first,
+              .p-paginator-prev,
+              .p-paginator-next,
+              .p-paginator-last,
+              .p-paginator-page {
+                color: get-color(neutral, 200);
+                background: transparent;
+                border: 1px solid get-color(neutral, 600);
+                min-width: 2.5rem;
+                height: 2.5rem;
+                margin: 0 0.25rem;
+                border-radius: 4px;
+
+                &:hover:not(.p-disabled) {
+                  background: get-color(primary, 600);
+                  border-color: get-color(primary, 500);
+                  color: get-color(neutral, 100);
+                }
+
+                &.p-highlight {
+                  background: get-color(primary, 500);
+                  border-color: get-color(primary, 500);
+                  color: get-color(neutral, 100);
+                }
+
+                &.p-disabled {
+                  opacity: 0.5;
+                  cursor: not-allowed;
+                }
+              }
+
+              .p-dropdown {
+                background: get-color(neutral, 600);
+                border: 1px solid get-color(neutral, 500);
+                color: get-color(neutral, 200);
+
+                &:hover {
+                  border-color: get-color(primary, 500);
+                }
+              }
+            }
+
+            .p-inputtext {
+              background: get-color(secondary, 600);
+              color: get-color(neutral, 100);
+              border: 2px solid get-color(neutral, 600);
+              padding: 0.5rem;
+              border-radius: 4px;
+
+              &:focus {
+                border-color: get-color(primary, 500);
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+              }
+
+              &::placeholder {
+                color: get-color(neutral, 500);
+              }
+            }
+
+            .p-iconfield {
+              width: 100%;
+
+              .p-inputicon {
+                color: get-color(neutral, 400);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
 

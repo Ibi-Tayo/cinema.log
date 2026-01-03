@@ -25,7 +25,7 @@ func NewStore(db *sql.DB) RatingStore {
 }
 
 func (s *store) GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error) {
-	query := `
+	query := /* sql */ `
 		SELECT user_film_rating_id, user_id, film_id, elo_rating, number_of_comparisons, last_updated, initial_rating, k_constant_value
 		FROM user_film_ratings
 		WHERE user_id = $1 AND film_id = $2
@@ -56,7 +56,7 @@ func (s *store) GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUI
 }
 
 func (s *store) GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error) {
-	query := `
+	query := /* sql */ `
 		SELECT user_film_rating_id, user_id, film_id, elo_rating, number_of_comparisons, last_updated, initial_rating, k_constant_value
 		FROM user_film_ratings
 		ORDER BY last_updated DESC
@@ -94,33 +94,38 @@ func (s *store) GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, err
 	return ratings, nil
 }
 
-func (s *store) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error) {
-	query := `
-		SELECT user_film_rating_id, user_id, film_id, elo_rating, number_of_comparisons, last_updated, initial_rating, k_constant_value
-		FROM user_film_ratings
-		WHERE user_id = $1
-		ORDER BY number_of_comparisons ASC, last_updated ASC
+func (s *store) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error) {
+	// Fetch ratings along with film details for the given userId
+	query := /* sql */ `
+		SELECT r.user_film_rating_id, r.user_id, r.film_id, r.elo_rating, r.number_of_comparisons, r.last_updated, r.initial_rating, r.k_constant_value, f.title, f.release_year, f.poster_url
+		FROM user_film_ratings r
+		JOIN films f ON r.film_id = f.film_id
+		WHERE r.user_id = $1
+		ORDER BY r.elo_rating DESC
 	`
-
 	rows, err := s.db.QueryContext(ctx, query, userId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	ratings := []domain.UserFilmRating{}
+	ratings := []domain.UserFilmRatingDetail{}
 	for rows.Next() {
-		var rating domain.UserFilmRating
+		var rating domain.UserFilmRatingDetail
 		err := rows.Scan(
-			&rating.ID,
-			&rating.UserId,
-			&rating.FilmId,
-			&rating.EloRating,
-			&rating.NumberOfComparisons,
-			&rating.LastUpdated,
-			&rating.InitialRating,
-			&rating.KConstantValue,
+			&rating.Rating.ID,
+			&rating.Rating.UserId,
+			&rating.Rating.FilmId,
+			&rating.Rating.EloRating,
+			&rating.Rating.NumberOfComparisons,
+			&rating.Rating.LastUpdated,
+			&rating.Rating.InitialRating,
+			&rating.Rating.KConstantValue,
+			&rating.FilmTitle,
+			&rating.FilmReleaseYear,
+			&rating.FilmPosterURL,
 		)
+		
 		if err != nil {
 			return nil, err
 		}
@@ -135,7 +140,7 @@ func (s *store) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]dom
 }
 
 func (s *store) CreateRating(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error) {
-	query := `
+	query := /* sql */ `
 		INSERT INTO user_film_ratings (user_film_rating_id, user_id, film_id, elo_rating, number_of_comparisons, last_updated, initial_rating, k_constant_value)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING user_film_rating_id, user_id, film_id, elo_rating, number_of_comparisons, last_updated, initial_rating, k_constant_value
@@ -172,7 +177,7 @@ func (s *store) CreateRating(ctx context.Context, rating domain.UserFilmRating) 
 }
 
 func (s *store) UpdateRating(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error) {
-	query := `
+	query := /* sql */ `
 		UPDATE user_film_ratings
 		SET elo_rating = $1,
 		    number_of_comparisons = $2,
@@ -220,7 +225,7 @@ func (s *store) UpdateRatings(ctx context.Context, ratings domain.ComparisonPair
 	}
 	defer tx.Rollback()
 
-	query := `
+	query := /* sql */ `
 		UPDATE user_film_ratings
 		SET elo_rating = $1,
 		    number_of_comparisons = $2,
@@ -296,11 +301,11 @@ func (s *store) CreateComparison(ctx context.Context, comparison domain.Comparis
 		comparison.ID = uuid.New()
 	}
 
-	query := `
-INSERT INTO comparison_histories (comparison_history_id, user_id, film_a_film_id, film_b_film_id, winning_film_film_id, comparison_date, was_equal)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING comparison_history_id, user_id, film_a_film_id, film_b_film_id, winning_film_film_id, comparison_date, was_equal
-`
+	query := /* sql */ `
+		INSERT INTO comparison_histories (comparison_history_id, user_id, film_a_film_id, film_b_film_id, winning_film_film_id, comparison_date, was_equal)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING comparison_history_id, user_id, film_a_film_id, film_b_film_id, winning_film_film_id, comparison_date, was_equal
+	`
 
 	createdComparison := &domain.ComparisonHistory{}
 	row := s.db.QueryRowContext(ctx, query,
@@ -331,16 +336,16 @@ RETURNING comparison_history_id, user_id, film_a_film_id, film_b_film_id, winnin
 }
 
 func (s *store) HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error) {
-	query := `
-SELECT COUNT(*) 
-FROM comparison_histories 
-WHERE user_id = $1 
-AND (
-(film_a_film_id = $2 AND film_b_film_id = $3) 
-OR 
-(film_a_film_id = $3 AND film_b_film_id = $2)
-)
-`
+	query := /* sql */ `
+		SELECT COUNT(*) 
+		FROM comparison_histories 
+		WHERE user_id = $1 
+		AND (
+		(film_a_film_id = $2 AND film_b_film_id = $3) 
+		OR 
+		(film_a_film_id = $3 AND film_b_film_id = $2)
+		)
+	`
 
 	var count int
 	err := s.db.QueryRowContext(ctx, query, userId, filmAId, filmBId).Scan(&count)
@@ -352,12 +357,12 @@ OR
 }
 
 func (s *store) GetComparisonHistory(ctx context.Context, userId uuid.UUID) ([]domain.ComparisonHistory, error) {
-	query := `
-SELECT comparison_history_id, user_id, film_a_film_id, film_b_film_id, winning_film_film_id, comparison_date, was_equal
-FROM comparison_histories
-WHERE user_id = $1
-ORDER BY comparison_date DESC
-`
+	query := /* sql */ `
+		SELECT comparison_history_id, user_id, film_a_film_id, film_b_film_id, winning_film_film_id, comparison_date, was_equal
+		FROM comparison_histories
+		WHERE user_id = $1
+		ORDER BY comparison_date DESC
+	`
 
 	rows, err := s.db.QueryContext(ctx, query, userId)
 	if err != nil {

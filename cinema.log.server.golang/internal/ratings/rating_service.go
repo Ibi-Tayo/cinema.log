@@ -16,7 +16,7 @@ type Service struct {
 type RatingStore interface {
 	GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
 	GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error)
-	GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error)
+	GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error)
 	CreateRating(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
 	UpdateRating(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
 	UpdateRatings(ctx context.Context, ratings domain.ComparisonPair) (*domain.ComparisonPair, error)
@@ -37,6 +37,10 @@ func (s Service) GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UU
 
 func (s Service) GetAllRatings(ctx context.Context) ([]domain.UserFilmRating, error) {
 	return s.RatingStore.GetAllRatings(ctx)
+}
+
+func (s Service) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error) {
+	return s.RatingStore.GetRatingsByUserId(ctx, userId)
 }
 
 func (s Service) CreateComparison(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error) {

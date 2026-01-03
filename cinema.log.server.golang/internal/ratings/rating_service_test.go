@@ -13,7 +13,7 @@ import (
 type mockRatingStore struct {
 	getRatingFunc            func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
 	getAllRatingsFunc        func(ctx context.Context) ([]domain.UserFilmRating, error)
-	getRatingsByUserIdFunc   func(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error)
+	getRatingsByUserIdFunc   func(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error)
 	createRatingFunc         func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
 	updateRatingFunc         func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
 	updateRatingsFunc        func(ctx context.Context, ratings domain.ComparisonPair) (*domain.ComparisonPair, error)
@@ -36,7 +36,7 @@ func (m *mockRatingStore) GetAllRatings(ctx context.Context) ([]domain.UserFilmR
 	return nil, nil
 }
 
-func (m *mockRatingStore) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRating, error) {
+func (m *mockRatingStore) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error) {
 	if m.getRatingsByUserIdFunc != nil {
 		return m.getRatingsByUserIdFunc(ctx, userId)
 	}
