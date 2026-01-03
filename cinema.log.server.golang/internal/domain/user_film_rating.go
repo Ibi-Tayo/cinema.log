@@ -17,6 +17,13 @@ type UserFilmRating struct {
 	KConstantValue      float64   `json:"kConstantValue"`
 }
 
+type UserFilmRatingDetail struct {
+	Rating    UserFilmRating `json:"rating"`
+	FilmTitle string         `json:"filmTitle"`
+	FilmReleaseYear string   `json:"filmReleaseYear"`
+	FilmPosterURL string     `json:"filmPosterUrl"`
+}
+
 type ComparisonPair struct {
     FilmA UserFilmRating
     FilmB UserFilmRating

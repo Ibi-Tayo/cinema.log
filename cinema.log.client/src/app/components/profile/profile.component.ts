@@ -11,10 +11,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UserService, User } from '../../services/user.service';
 import { ReviewService, Review } from '../../services/review.service';
 import { FilmService, Film } from '../../services/film.service';
-import { AuthService } from '../../services/auth.service';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { getTMDBPosterUrl, TMDBPosterSize } from '../../utils/tmdb-image.util';
+import { RatingService, UserFilmRating, UserFilmRatingDetail } from '../../services/rating.service';
 
 interface ReviewWithFilm extends Review {
   film?: Film;
@@ -32,6 +32,7 @@ interface ReviewWithFilm extends Review {
 export class ProfileComponent implements OnInit {
   user = signal<User | null>(null);
   recentReviews = signal<ReviewWithFilm[]>([]);
+  userRatings = signal<UserFilmRatingDetail[]>([]);
   isLoading = signal(true);
   errorMessage = signal('');
   currentCarouselIndex = signal(0);
@@ -50,13 +51,14 @@ export class ProfileComponent implements OnInit {
     private userService: UserService,
     private reviewService: ReviewService,
     private filmService: FilmService,
-    private authService: AuthService
+    private ratingsService: RatingService
   ) {}
 
   ngOnInit(): void {
     const userId = this.route.snapshot.paramMap.get('id');
     if (userId) {
       this.loadUserProfile(userId);
+      this.loadUserRatings(userId);
     } else {
       this.errorMessage.set('User ID is required');
       this.isLoading.set(false);
@@ -99,6 +101,17 @@ export class ProfileComponent implements OnInit {
         this.recentReviews.set(reviewsWithFilms);
         this.isLoading.set(false);
       });
+  }
+
+  loadUserRatings(userId: string): void {
+    this.ratingsService.getRatingsByUserId(userId).subscribe({
+      next: (ratings) => {
+        this.userRatings.set(ratings);
+      },
+      error: (error) => {
+        this.errorMessage.set(error.message || 'Failed to load user ratings');
+      },
+    });
   }
 
   nextCarouselSlide(): void {
