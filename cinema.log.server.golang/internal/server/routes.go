@@ -49,6 +49,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("POST /films", s.filmHandler.CreateFilm)
 	mux.HandleFunc("GET /films/search", s.filmHandler.GetFilmsFromExternal) // query param name = "f"
 	mux.HandleFunc("GET /films/for-comparison", s.filmHandler.GetFilmsForComparison) // query params: userId, filmId
+	mux.HandleFunc("POST /films/generate-recommendations", s.filmHandler.GenerateFilmRecommendations) // query param: userId
+	mux.HandleFunc("GET /films/seen-unrated/{userId}", s.filmHandler.GetSeenUnratedFilms) 
 
 	// Review routes
 	mux.HandleFunc("GET /reviews/{userId}", s.reviewHandler.GetAllReviews)

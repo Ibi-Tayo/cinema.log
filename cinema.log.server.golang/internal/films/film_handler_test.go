@@ -15,6 +15,8 @@ type mockFilmService struct {
 	createFilmFunc           func(ctx context.Context, film *domain.Film) (*domain.Film, error)
 	getFilmByIdFunc          func(ctx context.Context, id uuid.UUID) (*domain.Film, error)
 	getFilmsFromExternalFunc func(ctx context.Context, query string) ([]domain.Film, error)
+	generateFilmRecommendationsFunc func(ctx context.Context, userId uuid.UUID, films []domain.Film) ([]domain.Film, error)
+	getSeenUnratedFilmsFunc  func(ctx context.Context, userId uuid.UUID) ([]domain.Film, error)
 }
 
 func (m *mockFilmService) GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error) {
@@ -43,6 +45,20 @@ func (m *mockFilmService) GetFilmsFromExternal(ctx context.Context, query string
 		return m.getFilmsFromExternalFunc(ctx, query)
 	}
 	return []domain.Film{{ID: uuid.New(), Title: "External Film"}}, nil
+}
+
+func (m *mockFilmService) GenerateFilmRecommendations(ctx context.Context, userId uuid.UUID, films []domain.Film) ([]domain.Film, error) {
+	if m.generateFilmRecommendationsFunc != nil {
+		return m.generateFilmRecommendationsFunc(ctx, userId, films)
+	}
+	return films, nil
+}
+
+func (m *mockFilmService) GetSeenUnratedFilms(ctx context.Context, userId uuid.UUID) ([]domain.Film, error) {
+	if m.getSeenUnratedFilmsFunc != nil {
+		return m.getSeenUnratedFilmsFunc(ctx, userId)
+	}
+	return []domain.Film{{ID: uuid.New(), Title: "Seen Unrated Film"}}, nil
 }
 
 type mockRatingService struct {

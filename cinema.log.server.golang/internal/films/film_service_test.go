@@ -15,6 +15,11 @@ type mockFilmStore struct {
 	getFilmByExternalIdFunc func(ctx context.Context, id int) (*domain.Film, error)
 	createFilmFunc          func(ctx context.Context, film *domain.Film) (*domain.Film, error)
 	getFilmsForRatingFunc   func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error)
+	getFilmRecommendation   func(ctx context.Context, userId uuid.UUID, externalFilmId int) (*domain.FilmRecommendation, error)
+	updateFilmRecommendationFunc func(ctx context.Context, recommendation *domain.FilmRecommendation) (*domain.FilmRecommendation, error)
+	createFilmRecommendationFunc func(ctx context.Context, recommendation *domain.FilmRecommendation) (*domain.FilmRecommendation, error)
+	getSeenUnratedFilmsFunc func(ctx context.Context, userId uuid.UUID) ([]domain.Film, error)
+	generateFilmRecommendationsFunc func(ctx context.Context, userId uuid.UUID, films []domain.Film) ([]domain.Film, error)
 }
 
 func (m *mockFilmStore) GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, error) {
@@ -41,6 +46,41 @@ func (m *mockFilmStore) CreateFilm(ctx context.Context, film *domain.Film) (*dom
 func (m *mockFilmStore) GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error) {
 	if m.getFilmsForRatingFunc != nil {
 		return m.getFilmsForRatingFunc(ctx, userId, filmId)
+	}
+	return nil, errors.New("not implemented")
+}
+
+func (m *mockFilmStore) GetFilmRecommendation(ctx context.Context, userId uuid.UUID, externalFilmId int) (*domain.FilmRecommendation, error) {
+	if m.getFilmRecommendation != nil {
+		return m.getFilmRecommendation(ctx, userId, externalFilmId)
+	}
+	return nil, errors.New("not implemented")
+}
+
+func (m *mockFilmStore) CreateFilmRecommendation(ctx context.Context, recommendation *domain.FilmRecommendation) (*domain.FilmRecommendation, error) {
+	if m.createFilmRecommendationFunc != nil {
+		return m.createFilmRecommendationFunc(ctx, recommendation)
+	}
+	return nil, errors.New("not implemented")
+}
+
+func (m *mockFilmStore) GenerateFilmRecommendations(ctx context.Context, userId uuid.UUID, films []domain.Film) ([]domain.Film, error) {
+	if m.generateFilmRecommendationsFunc != nil {
+		return m.generateFilmRecommendationsFunc(ctx, userId, films)
+	}
+	return nil, errors.New("not implemented")
+}
+
+func (m *mockFilmStore) GetSeenUnratedFilms(ctx context.Context, userId uuid.UUID) ([]domain.Film, error) {
+	if m.getSeenUnratedFilmsFunc != nil {
+		return m.getSeenUnratedFilmsFunc(ctx, userId)
+	}
+	return nil, errors.New("not implemented")
+}
+
+func (m *mockFilmStore) UpdateFilmRecommendation(ctx context.Context, recommendation *domain.FilmRecommendation) (*domain.FilmRecommendation, error) {
+	if m.updateFilmRecommendationFunc != nil {
+		return m.updateFilmRecommendationFunc(ctx, recommendation)
 	}
 	return nil, errors.New("not implemented")
 }

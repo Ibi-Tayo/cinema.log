@@ -12,3 +12,13 @@ type Film struct {
 	PosterUrl   string    `json:"posterUrl"`
 	ReleaseYear string    `json:"releaseYear"`
 }
+
+// Note this is a pure backend construct to track recommendations, not exposed via API
+type FilmRecommendation struct {
+	ID                     uuid.UUID `json:"id"`
+	UserID                 uuid.UUID `json:"userId"`
+	ExternalFilmID         int       `json:"externalFilmId"`
+	HasSeen                bool      `json:"hasSeen"`
+	HasBeenRecommended     bool      `json:"hasBeenRecommended"`
+	RecommendationsGenerated bool     `json:"recommendationGenerated"`
+}
