@@ -20,7 +20,12 @@ var (
 )
 
 type Service struct {
-	FilmStore FilmStore
+	FilmStore    FilmStore
+	GraphService GraphService
+}
+
+type GraphService interface {
+	AddFilmToGraph(ctx context.Context, userID uuid.UUID, film domain.Film, recommendations []domain.Film) error
 }
 
 type FilmStore interface {
@@ -46,9 +51,10 @@ type FilmSearchResult struct {
 	PosterPath  string `json:"poster_path"`
 }
 
-func NewService(f FilmStore) *Service {
+func NewService(f FilmStore, g GraphService) *Service {
 	return &Service{
-		FilmStore: f,
+		FilmStore:    f,
+		GraphService: g,
 	}
 }
 
@@ -153,7 +159,15 @@ func (s Service) GenerateFilmRecommendations(ctx context.Context, userId uuid.UU
 			}
 		}
 
-		allRecommendations = slices.Concat(allRecommendations, getFilmRecommendationsFromTmdb(film))
+		recommendations := getFilmRecommendationsFromTmdb(film)
+
+		// Add film to user's graph with its recommendations
+		if err := s.GraphService.AddFilmToGraph(ctx, userId, film, recommendations); err != nil {
+			log.Printf("Failed to add film to graph: %v", err)
+			// Don't fail the entire operation, just log and continue
+		}
+
+		allRecommendations = slices.Concat(allRecommendations, recommendations)
 	}
 
 	// to prevent circular recommendations, we filter the all recommendations list by checking the film_recommendation_table

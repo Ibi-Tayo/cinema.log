@@ -3,10 +3,10 @@
 CREATE TABLE film_recommendation (
     film_recommendation_id UUID NOT NULL,
     user_id UUID NOT NULL,
-    external_film_id UUID NOT NULL,
+    external_film_id INT NOT NULL,
     has_seen BOOLEAN NOT NULL,
     has_been_recommended BOOLEAN NOT NULL,
-    recommendations_generated BOOLEAN NOT NULL,
+    recommendations_generated BOOLEAN NOT NULL
 );
 ALTER TABLE film_recommendation 
 ADD CONSTRAINT pk_film_recommendation PRIMARY KEY (film_recommendation_id);

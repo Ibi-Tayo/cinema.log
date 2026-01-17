@@ -47,10 +47,10 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// Film routes
 	mux.HandleFunc("GET /films/{id}", s.filmHandler.GetFilmById)
 	mux.HandleFunc("POST /films", s.filmHandler.CreateFilm)
-	mux.HandleFunc("GET /films/search", s.filmHandler.GetFilmsFromExternal) // query param name = "f"
-	mux.HandleFunc("GET /films/for-comparison", s.filmHandler.GetFilmsForComparison) // query params: userId, filmId
+	mux.HandleFunc("GET /films/search", s.filmHandler.GetFilmsFromExternal)                           // query param name = "f"
+	mux.HandleFunc("GET /films/for-comparison", s.filmHandler.GetFilmsForComparison)                  // query params: userId, filmId
 	mux.HandleFunc("POST /films/generate-recommendations", s.filmHandler.GenerateFilmRecommendations) // query param: userId
-	mux.HandleFunc("GET /films/seen-unrated/{userId}", s.filmHandler.GetSeenUnratedFilms) 
+	mux.HandleFunc("GET /films/seen-unrated/{userId}", s.filmHandler.GetSeenUnratedFilms)
 
 	// Review routes
 	mux.HandleFunc("GET /reviews/{userId}", s.reviewHandler.GetAllReviews)
@@ -62,6 +62,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("GET /ratings/{userId}", s.ratingHandler.GetRatingsByUserId)
 	mux.HandleFunc("GET /ratings", s.ratingHandler.GetRating) // query params: userId, filmId
 	mux.HandleFunc("POST /ratings/compare-films", s.ratingHandler.CompareFilms)
+
+	// Graph routes
+	mux.HandleFunc("GET /graph", s.graphHandler.GetUserGraph)
 
 	// Wrap the mux with middleware
 	return s.corsMiddleware(s.authMiddleware(mux))

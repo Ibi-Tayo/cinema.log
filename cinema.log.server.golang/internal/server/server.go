@@ -13,6 +13,7 @@ import (
 	"cinema.log.server.golang/internal/auth"
 	"cinema.log.server.golang/internal/database"
 	"cinema.log.server.golang/internal/films"
+	"cinema.log.server.golang/internal/graph"
 	"cinema.log.server.golang/internal/ratings"
 	"cinema.log.server.golang/internal/reviews"
 	"cinema.log.server.golang/internal/users"
@@ -28,6 +29,7 @@ type Server struct {
 	filmHandler   *films.Handler
 	reviewHandler *reviews.Handler
 	ratingHandler *ratings.Handler
+	graphHandler  *graph.Handler
 }
 
 func NewServer() *http.Server {
@@ -49,13 +51,16 @@ func NewServer() *http.Server {
 	ratingHandler := ratings.NewHandler(ratingService)
 
 	filmStore := films.NewStore(db)
-	filmService := films.NewService(filmStore)
+	graphStore := graph.NewStore(db)
+	graphService := graph.NewService(graphStore, filmStore)
+	graphHandler := graph.NewHandler(graphService)
+	filmService := films.NewService(filmStore, graphService)
 	filmHandler := films.NewHandler(filmService, ratingService)
 
 	reviewStore := reviews.NewStore(db)
 	reviewService := reviews.NewService(reviewStore)
 
-	reviewHandler := reviews.NewHandler(reviewService, ratingService)
+	reviewHandler := reviews.NewHandler(reviewService, ratingService, graphService, filmService)
 
 	NewServer := &Server{
 		port:          port,
@@ -66,6 +71,7 @@ func NewServer() *http.Server {
 		filmHandler:   filmHandler,
 		reviewHandler: reviewHandler,
 		ratingHandler: ratingHandler,
+		graphHandler:  graphHandler,
 	}
 
 	// Declare Server config

@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { DataSet } from 'vis-data';
 import { Data, Edge, Network, Options } from 'vis-network';
+import { GraphService } from '../../services/graph.service';
 
 @Component({
   selector: 'app-films-graph',
@@ -19,23 +20,45 @@ export class FilmsGraphComponent implements AfterViewInit, OnDestroy {
 
   private network: Network | undefined;
 
-  ngAfterViewInit(): void {
-    // 1. Define nodes
-    const nodes = new DataSet([
-      { id: 1, label: 'Film A (Seed Film)' },
-      { id: 2, label: 'Film B' },
-      { id: 3, label: 'Film C' },
-      { id: 4, label: 'Film D' },
-      { id: 5, label: 'Film E' },
-    ]);
+  constructor(private graphService: GraphService) {}
 
-    // 2. Define edges
-    const edges: DataSet<Edge> = new DataSet([
-      { id: 1, from: 1, to: 2 },
-      { id: 2, from: 1, to: 3 },
-      { id: 3, from: 1, to: 4 },
-      { id: 4, from: 1, to: 5 },
-    ]);
+  ngAfterViewInit(): void {
+    this.loadGraphData();
+  }
+
+  private loadGraphData(): void {
+    this.graphService.getUserGraph().subscribe({
+      next: (graphData) => {
+        this.renderGraph(graphData);
+      },
+      error: (error) => {
+        console.error('Error loading graph data:', error);
+        // Optionally show empty graph or error message
+        this.renderGraph({ nodes: [], edges: [] });
+      },
+    });
+  }
+
+  private renderGraph(graphData: {
+    nodes: Array<{ externalFilmId: number; title: string }>;
+    edges: Array<{ fromFilmId: number; toFilmId: number }>;
+  }): void {
+    // 1. Transform nodes to vis-network format
+    const nodes = new DataSet(
+      graphData.nodes.map((node) => ({
+        id: node.externalFilmId,
+        label: node.title,
+      }))
+    );
+
+    // 2. Transform edges to vis-network format
+    const edges: DataSet<Edge> = new DataSet(
+      graphData.edges.map((edge, index) => ({
+        id: index + 1,
+        from: edge.fromFilmId,
+        to: edge.toFilmId,
+      }))
+    );
 
     // 3. Config
     const options: Options = {

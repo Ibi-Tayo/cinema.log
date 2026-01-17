@@ -9,16 +9,28 @@ import (
 	"github.com/google/uuid"
 )
 
+// Mock GraphService for testing
+type mockGraphService struct {
+	addFilmToGraphFunc func(ctx context.Context, userID uuid.UUID, film domain.Film, recommendations []domain.Film) error
+}
+
+func (m *mockGraphService) AddFilmToGraph(ctx context.Context, userID uuid.UUID, film domain.Film, recommendations []domain.Film) error {
+	if m.addFilmToGraphFunc != nil {
+		return m.addFilmToGraphFunc(ctx, userID, film, recommendations)
+	}
+	return nil // default: no error
+}
+
 // Mock FilmStore for testing
 type mockFilmStore struct {
-	getFilmByIdFunc         func(ctx context.Context, id uuid.UUID) (*domain.Film, error)
-	getFilmByExternalIdFunc func(ctx context.Context, id int) (*domain.Film, error)
-	createFilmFunc          func(ctx context.Context, film *domain.Film) (*domain.Film, error)
-	getFilmsForRatingFunc   func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error)
-	getFilmRecommendation   func(ctx context.Context, userId uuid.UUID, externalFilmId int) (*domain.FilmRecommendation, error)
-	updateFilmRecommendationFunc func(ctx context.Context, recommendation *domain.FilmRecommendation) (*domain.FilmRecommendation, error)
-	createFilmRecommendationFunc func(ctx context.Context, recommendation *domain.FilmRecommendation) (*domain.FilmRecommendation, error)
-	getSeenUnratedFilmsFunc func(ctx context.Context, userId uuid.UUID) ([]domain.Film, error)
+	getFilmByIdFunc                 func(ctx context.Context, id uuid.UUID) (*domain.Film, error)
+	getFilmByExternalIdFunc         func(ctx context.Context, id int) (*domain.Film, error)
+	createFilmFunc                  func(ctx context.Context, film *domain.Film) (*domain.Film, error)
+	getFilmsForRatingFunc           func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error)
+	getFilmRecommendation           func(ctx context.Context, userId uuid.UUID, externalFilmId int) (*domain.FilmRecommendation, error)
+	updateFilmRecommendationFunc    func(ctx context.Context, recommendation *domain.FilmRecommendation) (*domain.FilmRecommendation, error)
+	createFilmRecommendationFunc    func(ctx context.Context, recommendation *domain.FilmRecommendation) (*domain.FilmRecommendation, error)
+	getSeenUnratedFilmsFunc         func(ctx context.Context, userId uuid.UUID) ([]domain.Film, error)
 	generateFilmRecommendationsFunc func(ctx context.Context, userId uuid.UUID, films []domain.Film) ([]domain.Film, error)
 }
 
@@ -87,7 +99,8 @@ func (m *mockFilmStore) UpdateFilmRecommendation(ctx context.Context, recommenda
 
 func TestNewService(t *testing.T) {
 	mockStore := &mockFilmStore{}
-	service := NewService(mockStore)
+	mockGraph := &mockGraphService{}
+	service := NewService(mockStore, mockGraph)
 
 	if service == nil {
 		t.Fatal("expected non-nil service")
@@ -115,7 +128,8 @@ func TestService_CreateFilm(t *testing.T) {
 		},
 	}
 
-	service := NewService(mockStore)
+	mockGraph := &mockGraphService{}
+	service := NewService(mockStore, mockGraph)
 	createdFilm, err := service.CreateFilm(ctx, &testFilm)
 
 	if err != nil {
@@ -140,7 +154,8 @@ func TestService_CreateFilm_Error(t *testing.T) {
 		},
 	}
 
-	service := NewService(mockStore)
+	mockGraph := &mockGraphService{}
+	service := NewService(mockStore, mockGraph)
 	_, err := service.CreateFilm(ctx, &testFilm)
 
 	if err == nil {
@@ -170,7 +185,8 @@ func TestService_GetFilmById(t *testing.T) {
 		},
 	}
 
-	service := NewService(mockStore)
+	mockGraph := &mockGraphService{}
+	service := NewService(mockStore, mockGraph)
 	film, err := service.GetFilmById(ctx, testID)
 
 	if err != nil {
@@ -194,7 +210,8 @@ func TestService_GetFilmById_NotFound(t *testing.T) {
 		},
 	}
 
-	service := NewService(mockStore)
+	mockGraph := &mockGraphService{}
+	service := NewService(mockStore, mockGraph)
 	_, err := service.GetFilmById(ctx, testID)
 
 	if err == nil {
@@ -208,7 +225,8 @@ func TestService_GetFilmById_NotFound(t *testing.T) {
 func TestService_GetFilmsFromExternal_EmptyQuery(t *testing.T) {
 	ctx := context.Background()
 	mockStore := &mockFilmStore{}
-	service := NewService(mockStore)
+	mockGraph := &mockGraphService{}
+	service := NewService(mockStore, mockGraph)
 
 	_, err := service.GetFilmsFromExternal(ctx, "")
 
