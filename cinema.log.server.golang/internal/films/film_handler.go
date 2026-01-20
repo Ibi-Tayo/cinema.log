@@ -12,9 +12,9 @@ import (
 )
 
 var (
-	ErrFilmNotFound = errors.New("film not found")
+	ErrFilmNotFound               = errors.New("film not found")
 	ErrFilmRecommendationNotFound = errors.New("film recommendation not found")
-	ErrServer       = errors.New("internal server error")
+	ErrServer                     = errors.New("internal server error")
 )
 
 type Handler struct {
@@ -97,7 +97,7 @@ func (h *Handler) GetFilmsFromExternal(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetFilmsForComparison(w http.ResponseWriter, r *http.Request) {
 	// Get userId and filmId from query parameters
-	userIDStr := r.PathValue("userId")
+	userIDStr := r.URL.Query().Get("userId")
 	if userIDStr == "" {
 		http.Error(w, "userId is required", http.StatusBadRequest)
 		return
@@ -177,7 +177,7 @@ func (h *Handler) GenerateFilmRecommendations(w http.ResponseWriter, r *http.Req
 }
 
 func (h *Handler) GetSeenUnratedFilms(w http.ResponseWriter, r *http.Request) {
-	userIDStr := r.URL.Query().Get("userId")
+	userIDStr := r.PathValue("userId")
 	if userIDStr == "" {
 		http.Error(w, "userId is required", http.StatusBadRequest)
 		return

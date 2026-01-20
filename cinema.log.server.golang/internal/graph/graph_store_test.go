@@ -265,3 +265,78 @@ func TestStore_GetEdgesByUser(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, edges, 2) // 2 edges, one direction each
 }
+
+func TestStore_AddEdge_PreventsDuplicates(t *testing.T) {
+	store := NewStore(testDB)
+	ctx := context.Background()
+
+	userID := uuid.New()
+	filmID1 := uuid.New()
+	filmID2 := uuid.New()
+
+	// Create test user and films first
+	createTestUser(ctx, t, userID)
+	fromFilmExtID := createTestFilm(ctx, t, filmID1)
+	toFilmExtID := createTestFilm(ctx, t, filmID2)
+
+	// Add nodes first
+	node1 := &domain.FilmGraphNode{
+		UserID:         userID,
+		ExternalFilmID: fromFilmExtID,
+		Title:          "Film 1",
+	}
+	node2 := &domain.FilmGraphNode{
+		UserID:         userID,
+		ExternalFilmID: toFilmExtID,
+		Title:          "Film 2",
+	}
+	err := store.AddNode(ctx, node1)
+	require.NoError(t, err)
+	err = store.AddNode(ctx, node2)
+	require.NoError(t, err)
+
+	// Add edge the first time
+	edge := &domain.FilmGraphEdge{
+		UserID:     userID,
+		EdgeId:     uuid.New(),
+		FromFilmID: fromFilmExtID,
+		ToFilmID:   toFilmExtID,
+	}
+	err = store.AddEdge(ctx, edge)
+	require.NoError(t, err)
+
+	// Verify edge exists
+	exists, err := store.EdgeExists(ctx, userID, fromFilmExtID, toFilmExtID)
+	require.NoError(t, err)
+	assert.True(t, exists)
+
+	// Try to add the same edge again (should not create duplicate)
+	edge2 := &domain.FilmGraphEdge{
+		UserID:     userID,
+		EdgeId:     uuid.New(), // Different edge ID
+		FromFilmID: fromFilmExtID,
+		ToFilmID:   toFilmExtID,
+	}
+	err = store.AddEdge(ctx, edge2)
+	require.NoError(t, err) // Should succeed but not add duplicate
+
+	// Verify only one edge exists (one direction)
+	edges, err := store.GetEdgesByUser(ctx, userID)
+	require.NoError(t, err)
+	assert.Len(t, edges, 1) // Should still be just one edge
+
+	// Try adding the edge in reverse direction (should also be prevented)
+	edge3 := &domain.FilmGraphEdge{
+		UserID:     userID,
+		EdgeId:     uuid.New(),
+		FromFilmID: toFilmExtID, // Swapped
+		ToFilmID:   fromFilmExtID,
+	}
+	err = store.AddEdge(ctx, edge3)
+	require.NoError(t, err) // Should succeed but not add duplicate
+
+	// Verify still only one edge exists
+	edges, err = store.GetEdgesByUser(ctx, userID)
+	require.NoError(t, err)
+	assert.Len(t, edges, 1) // Should still be just one edge
+}

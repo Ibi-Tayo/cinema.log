@@ -1,0 +1,232 @@
+<div class="recommendations-container">
+  <p-toast />
+
+  <!-- Header -->
+  <div class="recommendations-header">
+    <button class="back-button" (click)="goBack()">
+      <lord-icon
+        src="https://cdn.lordicon.com/zmkotitn.json"
+        trigger="hover"
+        style="width: 32px; height: 32px; transform: rotate(180deg)"
+        colors="primary:#D3D3D3"
+      ></lord-icon>
+    </button>
+    <h1>
+      <lord-icon
+        src="https://cdn.lordicon.com/nocovwne.json"
+        trigger="loop"
+        style="width: 40px; height: 40px; margin-right: 8px"
+        colors="primary:#D3D3D3"
+      ></lord-icon>
+      Find Films to Review
+    </h1>
+  </div>
+
+  <!-- Seed Selection Step -->
+  @if (isInSeedStep()) {
+    <div class="seed-selection-section">
+      <div class="instructions">
+        <h2>Step 1: Select 3 Films You've Seen</h2>
+        <p>
+          These films will help us understand your taste and generate
+          personalized recommendations.
+        </p>
+      </div>
+
+      <!-- Selected Seed Films -->
+      <div class="seed-films-list">
+        <h3>Selected Films ({{ seedFilms().length }}/3)</h3>
+        @if (seedFilms().length === 0) {
+          <div class="empty-state">
+            <lord-icon
+              src="https://cdn.lordicon.com/fpmskzsv.json"
+              trigger="loop"
+              style="width: 80px; height: 80px"
+              colors="primary:#D3D3D3"
+            ></lord-icon>
+            <p>Search and add 3 films below to get started</p>
+          </div>
+        }
+        <div class="seed-films-grid">
+          @for (film of seedFilms(); track film.id) {
+            <div class="seed-film-card">
+              <img
+                [src]="getPosterUrl(film.posterUrl, 'w185')"
+                [alt]="film.title"
+              />
+              <div class="film-info">
+                <h4>{{ film.title }}</h4>
+                <p>{{ film.releaseYear }}</p>
+              </div>
+              <button class="remove-button" (click)="removeSeedFilm(film)">
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Search Section -->
+      <div class="search-section">
+        <h3>Search for Films</h3>
+        <p-iconfield iconPosition="left">
+          <p-inputicon class="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchInput()"
+            placeholder="Search for a film..."
+            class="search-input"
+          />
+        </p-iconfield>
+
+        <!-- Loading State -->
+        @if (isSearching()) {
+          <div class="search-results">
+            @for (i of [1, 2, 3]; track i) {
+              <div class="skeleton-card">
+                <p-skeleton width="100%" height="200px" />
+                <p-skeleton width="80%" height="1.5rem" class="mt-2" />
+                <p-skeleton width="60%" height="1rem" class="mt-2" />
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Search Results -->
+        @if (searchResults().length > 0 && !isSearching()) {
+          <div class="search-results">
+            @for (film of searchResults(); track film.id) {
+              <div class="search-result-card" (click)="addSeedFilm(film)">
+                <img
+                  [src]="getPosterUrl(film.posterUrl, 'w780')"
+                  [alt]="film.title"
+                />
+                <div class="film-details">
+                  <h4>{{ film.title }}</h4>
+                  <p>{{ film.releaseYear }}</p>
+                </div>
+                <i class="pi pi-plus add-icon"></i>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Search Error -->
+        @if (searchError()) {
+          <div class="error-message">
+            <i class="pi pi-exclamation-circle"></i>
+            <p>{{ searchError() }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Start Button -->
+      <div class="action-section">
+        <p-button
+          label="Start Generating Recommendations"
+          icon="pi pi-play"
+          [disabled]="!canStartGenerating() || isLoadingRecommendations()"
+          [loading]="isLoadingRecommendations()"
+          (onClick)="startGeneratingRecommendations()"
+          styleClass="p-button-lg p-button-success"
+        />
+      </div>
+    </div>
+  }
+
+  <!-- Recommendations Step -->
+  @if (isInRecommendationStep()) {
+    <div class="recommendations-section">
+      <div class="round-info">
+        <h2>Round {{ currentRound() }}</h2>
+        <div class="selection-counter">
+          <p-chip
+            [label]="'Selected: ' + selectedSeenCount() + '/10'"
+            [styleClass]="selectedSeenCount() >= 10 ? 'limit-reached' : ''"
+          />
+        </div>
+      </div>
+
+      <div class="instructions">
+        <p>Select the films you've seen (maximum 10 per round):</p>
+      </div>
+
+      <!-- Loading State -->
+      @if (isLoadingRecommendations()) {
+        <div class="recommendations-grid">
+          @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+            <div class="skeleton-card">
+              <p-skeleton width="100%" height="300px" />
+              <p-skeleton width="80%" height="1.5rem" class="mt-2" />
+              <p-skeleton width="60%" height="1rem" class="mt-2" />
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Recommendations Grid -->
+      @if (!isLoadingRecommendations() && recommendedFilms().length > 0) {
+        <div class="recommendations-grid">
+          @for (selection of recommendedFilms(); track selection.film.id) {
+            <div
+              class="recommendation-card"
+              [class.selected]="selection.hasSeen"
+              (click)="toggleFilmSeen(selection)"
+            >
+              <img
+                [src]="getPosterUrl(selection.film.posterUrl, 'w342')"
+                [alt]="selection.film.title"
+              />
+              <div class="card-overlay">
+                @if (selection.hasSeen) {
+                  <div class="check-icon">
+                    <i class="pi pi-check"></i>
+                  </div>
+                }
+              </div>
+              <div class="card-content">
+                <h4>{{ selection.film.title }}</h4>
+                <p>{{ selection.film.releaseYear }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Error State -->
+      @if (recommendationsError()) {
+        <div class="error-message">
+          <lord-icon
+            src="https://cdn.lordicon.com/tdrtiskw.json"
+            trigger="loop"
+            style="width: 60px; height: 60px"
+          ></lord-icon>
+          <p>{{ recommendationsError() }}</p>
+        </div>
+      }
+
+      <!-- Action Buttons -->
+      <div class="action-section">
+        <p-button
+          label="Next Round"
+          icon="pi pi-arrow-right"
+          iconPos="right"
+          [disabled]="!canProceedToNextRound() || isLoadingRecommendations()"
+          [loading]="isLoadingRecommendations()"
+          (onClick)="nextRound()"
+          styleClass="p-button-lg"
+        />
+        <p-button
+          label="Finish"
+          icon="pi pi-check"
+          [disabled]="!canProceedToNextRound() || isLoadingRecommendations()"
+          [loading]="isLoadingRecommendations()"
+          (onClick)="finish()"
+          styleClass="p-button-lg p-button-success"
+        />
+      </div>
+    </div>
+  }
+</div>

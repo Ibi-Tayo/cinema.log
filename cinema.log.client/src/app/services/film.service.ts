@@ -31,9 +31,9 @@ export class FilmService {
         catchError((error) => {
           console.error('Error creating film:', error);
           return throwError(
-            () => new Error('Failed to create film. Please try again later.')
+            () => new Error('Failed to create film. Please try again later.'),
           );
-        })
+        }),
       );
   }
 
@@ -56,9 +56,9 @@ export class FilmService {
         catchError(
           handleHttpError(
             'fetching film',
-            'Failed to fetch film. Please try again later.'
-          )
-        )
+            'Failed to fetch film. Please try again later.',
+          ),
+        ),
       );
   }
 
@@ -75,7 +75,7 @@ export class FilmService {
         `${environment.apiUrl}/films/search?f=${encodeURIComponent(query)}`,
         {
           withCredentials: true,
-        }
+        },
       )
       .pipe(
         tap((films) => {
@@ -92,25 +92,66 @@ export class FilmService {
         catchError(
           handleHttpError(
             'searching films',
-            'Failed to search films. Please try again later.'
-          )
-        )
+            'Failed to search films. Please try again later.',
+          ),
+        ),
       );
   }
 
   getFilmsForComparison(userId: string, filmId: string): Observable<Film[]> {
     return this.http
-      .get<Film[]>(
-        `${environment.apiUrl}/films/for-comparison?userId=${userId}&filmId=${filmId}`,
-        { withCredentials: true }
-      )
+      .get<
+        Film[]
+      >(`${environment.apiUrl}/films/for-comparison?userId=${userId}&filmId=${filmId}`, { withCredentials: true })
       .pipe(
         catchError(
           handleHttpError(
             'fetching films for comparison',
-            'Failed to fetch films for comparison. Please try again later.'
-          )
-        )
+            'Failed to fetch films for comparison. Please try again later.',
+          ),
+        ),
+      );
+  }
+
+  generateRecommendations(userId: string, films: Film[]): Observable<Film[]> {
+    return this.http
+      .post<
+        Film[]
+      >(`${environment.apiUrl}/films/generate-recommendations?userId=${userId}`, films, { withCredentials: true })
+      .pipe(
+        tap((recommendedFilms) => {
+          // Cache recommended films
+          const filmCache = new Map(this.filmCache());
+          recommendedFilms.forEach((film) => filmCache.set(film.id, film));
+          this.filmCache.set(filmCache);
+        }),
+        catchError(
+          handleHttpError(
+            'generating recommendations',
+            'Failed to generate recommendations. Please try again later.',
+          ),
+        ),
+      );
+  }
+
+  getSeenUnratedFilms(userId: string): Observable<Film[]> {
+    return this.http
+      .get<Film[]>(`${environment.apiUrl}/films/seen-unrated/${userId}`, {
+        withCredentials: true,
+      })
+      .pipe(
+        tap((films) => {
+          // Cache films
+          const filmCache = new Map(this.filmCache());
+          films.forEach((film) => filmCache.set(film.id, film));
+          this.filmCache.set(filmCache);
+        }),
+        catchError(
+          handleHttpError(
+            'fetching films to review',
+            'Failed to fetch films to review. Please try again later.',
+          ),
+        ),
       );
   }
 

@@ -16,6 +16,7 @@ type GraphStore interface {
 	AddNode(ctx context.Context, node *domain.FilmGraphNode) error
 	NodeExists(ctx context.Context, userID uuid.UUID, externalFilmID int) (bool, error)
 	AddEdge(ctx context.Context, edge *domain.FilmGraphEdge) error
+	EdgeExists(ctx context.Context, userID uuid.UUID, filmID1 int, filmID2 int) (bool, error)
 	GetNodesByUser(ctx context.Context, userID uuid.UUID) ([]domain.FilmGraphNode, error)
 	GetEdgesByUser(ctx context.Context, userID uuid.UUID) ([]domain.FilmGraphEdge, error)
 }

@@ -20,8 +20,9 @@ var (
 )
 
 type Service struct {
-	FilmStore    FilmStore
-	GraphService GraphService
+	FilmStore              FilmStore
+	GraphService           GraphService
+	tmdbRecommendationFunc func(film domain.Film) []domain.Film
 }
 
 type GraphService interface {
@@ -53,8 +54,9 @@ type FilmSearchResult struct {
 
 func NewService(f FilmStore, g GraphService) *Service {
 	return &Service{
-		FilmStore:    f,
-		GraphService: g,
+		FilmStore:              f,
+		GraphService:           g,
+		tmdbRecommendationFunc: getFilmRecommendationsFromTmdb,
 	}
 }
 
@@ -159,7 +161,7 @@ func (s Service) GenerateFilmRecommendations(ctx context.Context, userId uuid.UU
 			}
 		}
 
-		recommendations := getFilmRecommendationsFromTmdb(film)
+		recommendations := s.tmdbRecommendationFunc(film)
 
 		// Add film to user's graph with its recommendations
 		if err := s.GraphService.AddFilmToGraph(ctx, userId, film, recommendations); err != nil {
@@ -168,6 +170,18 @@ func (s Service) GenerateFilmRecommendations(ctx context.Context, userId uuid.UU
 		}
 
 		allRecommendations = slices.Concat(allRecommendations, recommendations)
+	}
+
+	// Deduplicate recommendations by ExternalID
+	// Multiple seed films can recommend the same film
+	uniqueRecommendations := make(map[int]domain.Film)
+	for _, recFilm := range allRecommendations {
+		uniqueRecommendations[recFilm.ExternalID] = recFilm
+	}
+
+	allRecommendations = make([]domain.Film, 0, len(uniqueRecommendations))
+	for _, film := range uniqueRecommendations {
+		allRecommendations = append(allRecommendations, film)
 	}
 
 	// to prevent circular recommendations, we filter the all recommendations list by checking the film_recommendation_table

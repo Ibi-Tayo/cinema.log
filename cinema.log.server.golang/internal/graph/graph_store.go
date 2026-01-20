@@ -53,16 +53,44 @@ func (s *Store) NodeExists(ctx context.Context, userID uuid.UUID, externalFilmID
 	return exists, nil
 }
 
+// EdgeExists checks if an edge exists between two films in a user's graph (in either direction)
+func (s *Store) EdgeExists(ctx context.Context, userID uuid.UUID, filmID1 int, filmID2 int) (bool, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT 1 FROM film_graph_edges 
+			WHERE user_id = $1 AND (
+				(from_film_id = $2 AND to_film_id = $3) OR
+				(from_film_id = $3 AND to_film_id = $2)
+			)
+		)
+	`
+	var exists bool
+	err := s.db.QueryRowContext(ctx, query, userID, filmID1, filmID2).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
 // AddEdge adds a bidirectional connection between two films in a user's graph
 func (s *Store) AddEdge(ctx context.Context, edge *domain.FilmGraphEdge) error {
+	// Check if edge already exists to prevent duplicates
+	exists, err := s.EdgeExists(ctx, edge.UserID, edge.FromFilmID, edge.ToFilmID)
+	if err != nil {
+		return err
+	}
+	if exists {
+		// Edge already exists, skip creation
+		return nil
+	}
+
 	query := `
 		INSERT INTO film_graph_edges (user_id, edge_id, from_film_id, to_film_id)
 		VALUES ($1, $2, $3, $4)
-		ON CONFLICT (edge_id) DO NOTHING
 	`
 
 	// Add edge in both directions for bidirectional relationship
-	_, err := s.db.ExecContext(ctx, query, edge.UserID, edge.EdgeId, edge.FromFilmID, edge.ToFilmID)
+	_, err = s.db.ExecContext(ctx, query, edge.UserID, edge.EdgeId, edge.FromFilmID, edge.ToFilmID)
 	if err != nil {
 		return err
 	}

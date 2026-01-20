@@ -29,6 +29,11 @@ func (m *MockGraphStore) AddEdge(ctx context.Context, edge *domain.FilmGraphEdge
 	return args.Error(0)
 }
 
+func (m *MockGraphStore) EdgeExists(ctx context.Context, userID uuid.UUID, filmID1 int, filmID2 int) (bool, error) {
+	args := m.Called(ctx, userID, filmID1, filmID2)
+	return args.Bool(0), args.Error(1)
+}
+
 func (m *MockGraphStore) GetNodesByUser(ctx context.Context, userID uuid.UUID) ([]domain.FilmGraphNode, error) {
 	args := m.Called(ctx, userID)
 	return args.Get(0).([]domain.FilmGraphNode), args.Error(1)

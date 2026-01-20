@@ -238,3 +238,153 @@ func TestService_GetFilmsFromExternal_EmptyQuery(t *testing.T) {
 		t.Errorf("expected error message %q, got %q", expectedErrMsg, err.Error())
 	}
 }
+
+func TestService_GenerateFilmRecommendations_DeduplicatesResults(t *testing.T) {
+	ctx := context.Background()
+	userID := uuid.New()
+
+	// Create test seed films
+	seedFilm1 := domain.Film{
+		ID:          uuid.New(),
+		ExternalID:  100,
+		Title:       "The Matrix",
+		Description: "A hacker discovers reality",
+		PosterUrl:   "/matrix.jpg",
+		ReleaseYear: "1999",
+	}
+
+	seedFilm2 := domain.Film{
+		ID:          uuid.New(),
+		ExternalID:  200,
+		Title:       "Inception",
+		Description: "Dreams within dreams",
+		PosterUrl:   "/inception.jpg",
+		ReleaseYear: "2010",
+	}
+
+	// These films will be recommended by both seed films (duplicates)
+	duplicateFilm1 := domain.Film{
+		ID:          uuid.New(),
+		ExternalID:  300,
+		Title:       "Interstellar",
+		Description: "Space exploration",
+		PosterUrl:   "/interstellar.jpg",
+		ReleaseYear: "2014",
+	}
+
+	duplicateFilm2 := domain.Film{
+		ID:          uuid.New(),
+		ExternalID:  400,
+		Title:       "Tenet",
+		Description: "Time inversion",
+		PosterUrl:   "/tenet.jpg",
+		ReleaseYear: "2020",
+	}
+
+	// Unique recommendations
+	uniqueFilm1 := domain.Film{
+		ID:          uuid.New(),
+		ExternalID:  500,
+		Title:       "Blade Runner",
+		Description: "Replicants and humanity",
+		PosterUrl:   "/bladerunner.jpg",
+		ReleaseYear: "1982",
+	}
+
+	uniqueFilm2 := domain.Film{
+		ID:          uuid.New(),
+		ExternalID:  600,
+		Title:       "The Prestige",
+		Description: "Rival magicians",
+		PosterUrl:   "/prestige.jpg",
+		ReleaseYear: "2006",
+	}
+
+	mockStore := &mockFilmStore{
+		createFilmFunc: func(ctx context.Context, film *domain.Film) (*domain.Film, error) {
+			return film, nil
+		},
+		getFilmRecommendation: func(ctx context.Context, userId uuid.UUID, externalFilmId int) (*domain.FilmRecommendation, error) {
+			// Return not found for all (simulating fresh recommendations)
+			return nil, ErrFilmRecommendationNotFound
+		},
+		createFilmRecommendationFunc: func(ctx context.Context, recommendation *domain.FilmRecommendation) (*domain.FilmRecommendation, error) {
+			return recommendation, nil
+		},
+	}
+
+	mockGraph := &mockGraphService{
+		addFilmToGraphFunc: func(ctx context.Context, userID uuid.UUID, film domain.Film, recommendations []domain.Film) error {
+			return nil
+		},
+	}
+
+	service := NewService(mockStore, mockGraph)
+
+	// Mock the TMDB recommendation function to return predictable duplicates
+	service.tmdbRecommendationFunc = func(film domain.Film) []domain.Film {
+		switch film.ExternalID {
+		case 100: // The Matrix recommends duplicates + unique1
+			return []domain.Film{duplicateFilm1, duplicateFilm2, uniqueFilm1}
+		case 200: // Inception recommends same duplicates + unique2
+			return []domain.Film{duplicateFilm1, duplicateFilm2, uniqueFilm2}
+		default:
+			return []domain.Film{}
+		}
+	}
+
+	// Generate recommendations from both seed films
+	results, err := service.GenerateFilmRecommendations(ctx, userID, []domain.Film{seedFilm1, seedFilm2})
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	// Verify no duplicate external IDs in results
+	seenExternalIDs := make(map[int]bool)
+	for _, film := range results {
+		if seenExternalIDs[film.ExternalID] {
+			t.Errorf("found duplicate film with ExternalID %d (Title: %s)", film.ExternalID, film.Title)
+		}
+		seenExternalIDs[film.ExternalID] = true
+	}
+
+	// Verify we got exactly 4 unique films (2 duplicates + 2 uniques, not 6)
+	expectedCount := 4
+	if len(results) != expectedCount {
+		t.Errorf("expected %d unique recommendations, got %d", expectedCount, len(results))
+	}
+
+	// Verify all expected films are present
+	expectedFilmIDs := map[int]bool{
+		300: true, // Interstellar (duplicate)
+		400: true, // Tenet (duplicate)
+		500: true, // Blade Runner (unique to Matrix)
+		600: true, // The Prestige (unique to Inception)
+	}
+
+	for _, film := range results {
+		if !expectedFilmIDs[film.ExternalID] {
+			t.Errorf("unexpected film in results: %d - %s", film.ExternalID, film.Title)
+		}
+	}
+}
+
+func TestService_GenerateFilmRecommendations_EmptyFilmList(t *testing.T) {
+	ctx := context.Background()
+	userID := uuid.New()
+
+	mockStore := &mockFilmStore{}
+	mockGraph := &mockGraphService{}
+	service := NewService(mockStore, mockGraph)
+
+	_, err := service.GenerateFilmRecommendations(ctx, userID, []domain.Film{})
+
+	if err == nil {
+		t.Fatal("expected error for empty film list, got nil")
+	}
+	expectedErrMsg := "cannot generate recommendations with empty film list"
+	if err.Error() != expectedErrMsg {
+		t.Errorf("expected error message %q, got %q", expectedErrMsg, err.Error())
+	}
+}
