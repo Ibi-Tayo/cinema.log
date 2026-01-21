@@ -123,6 +123,10 @@ func (s Service) GenerateFilmRecommendations(ctx context.Context, userId uuid.UU
 		return []domain.Film{}, errors.New("cannot generate recommendations with empty film list")
 	}
 
+	if len(films) > 10 {
+		return nil, errors.New("cannot generate recommendations with more than 10 films")
+	}
+
 	allRecommendations := make([]domain.Film, 0)
 
 	for _, film := range films {
@@ -245,21 +249,25 @@ func getFilmRecommendationsFromTmdb(film domain.Film) []domain.Film {
 	resp, err := http.Get(reqUrl)
 	if err != nil {
 		log.Println("Error fetching recommendations from TMDB:", err)
+		return []domain.Film{}
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("TMDB API returned status %d for film ID %d\n", resp.StatusCode, film.ExternalID)
+		return []domain.Film{}
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("Error reading TMDB response body:", err)
+		return []domain.Film{}
 	}
 
 	var tmdbResponse TMDBSearchResponse
 	if err := json.Unmarshal(body, &tmdbResponse); err != nil {
 		log.Println("Error parsing TMDB response:", err)
+		return []domain.Film{}
 	}
 
 	// Limit to top 10 recommendations to avoid weak suggestions

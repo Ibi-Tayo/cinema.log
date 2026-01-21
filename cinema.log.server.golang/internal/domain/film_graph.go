@@ -10,7 +10,7 @@ type FilmGraphNode struct {
 
 type FilmGraphEdge struct {
 	UserID     uuid.UUID `json:"userId"`
-	EdgeId	   uuid.UUID `json:"edgeId"`
+	EdgeId     uuid.UUID `json:"edgeId"`
 	FromFilmID int       `json:"fromFilmId"`
 	ToFilmID   int       `json:"toFilmId"`
 }

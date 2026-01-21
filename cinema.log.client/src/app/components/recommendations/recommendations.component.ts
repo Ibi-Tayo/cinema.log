@@ -26,9 +26,11 @@ import { ChipModule } from 'primeng/chip';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
+const MAX_FILMS_PER_ROUND = 10;
+
 enum RecommendationStep {
-  SEED_SELECTION = 'seed',
-  RECOMMENDATIONS = 'recommendations',
+  seedSelection = 'seed',
+  recommendations = 'recommendations',
 }
 
 interface FilmSelection {
@@ -60,7 +62,7 @@ interface FilmSelection {
 })
 export class RecommendationsComponent implements OnInit, OnDestroy {
   userId = signal<string>('');
-  currentStep = signal<RecommendationStep>(RecommendationStep.SEED_SELECTION);
+  currentStep = signal<RecommendationStep>(RecommendationStep.seedSelection);
 
   // Seed selection
   seedFilms = signal<Film[]>([]);
@@ -83,13 +85,13 @@ export class RecommendationsComponent implements OnInit, OnDestroy {
   );
   canProceedToNextRound = computed(() => {
     const count = this.selectedSeenCount();
-    return count > 0 && count <= 10;
+    return count > 0 && count <= MAX_FILMS_PER_ROUND;
   });
   isInSeedStep = computed(
-    () => this.currentStep() === RecommendationStep.SEED_SELECTION,
+    () => this.currentStep() === RecommendationStep.seedSelection,
   );
   isInRecommendationStep = computed(
-    () => this.currentStep() === RecommendationStep.RECOMMENDATIONS,
+    () => this.currentStep() === RecommendationStep.recommendations,
   );
 
   constructor(
@@ -123,6 +125,9 @@ export class RecommendationsComponent implements OnInit, OnDestroy {
   }
 
   // Seed selection methods
+  // Note: While this shares similar search logic with SearchComponent,
+  // it's intentionally kept separate as it serves a different purpose
+  // (seed selection with multi-select capability vs. single film navigation)
   onSearchInput(): void {
     const query = this.searchQuery();
     if (query.trim().length > 0) {
@@ -202,7 +207,7 @@ export class RecommendationsComponent implements OnInit, OnDestroy {
           this.recommendedFilms.set(
             recommendations.map((film) => ({ film, hasSeen: false })),
           );
-          this.currentStep.set(RecommendationStep.RECOMMENDATIONS);
+          this.currentStep.set(RecommendationStep.recommendations);
           this.isLoadingRecommendations.set(false);
           this.messageService.add({
             severity: 'success',
@@ -230,11 +235,11 @@ export class RecommendationsComponent implements OnInit, OnDestroy {
     const count = this.selectedSeenCount();
 
     // If trying to select and already at limit
-    if (!selection.hasSeen && count >= 10) {
+    if (!selection.hasSeen && count >= MAX_FILMS_PER_ROUND) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Maximum Reached',
-        detail: 'You can only select up to 10 films per round',
+        detail: `You can only select up to ${MAX_FILMS_PER_ROUND} films per round`,
       });
       return;
     }

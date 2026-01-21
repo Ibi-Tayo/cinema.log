@@ -169,6 +169,10 @@ func (h *Handler) GenerateFilmRecommendations(w http.ResponseWriter, r *http.Req
 
 	recommendations, err := h.FilmService.GenerateFilmRecommendations(r.Context(), userID, films)
 	if err != nil {
+		if err.Error() == "cannot generate recommendations with more than 10 films" {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
 		return
 	}

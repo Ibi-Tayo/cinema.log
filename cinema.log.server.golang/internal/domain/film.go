@@ -20,5 +20,5 @@ type FilmRecommendation struct {
 	ExternalFilmID         int       `json:"externalFilmId"`
 	HasSeen                bool      `json:"hasSeen"`
 	HasBeenRecommended     bool      `json:"hasBeenRecommended"`
-	RecommendationsGenerated bool     `json:"recommendationGenerated"`
+	RecommendationsGenerated bool     `json:"recommendationsGenerated"`
 }
