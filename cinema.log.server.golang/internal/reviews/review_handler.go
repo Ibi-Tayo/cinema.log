@@ -15,6 +15,8 @@ import (
 type Handler struct {
 	ReviewService ReviewService
 	RatingService RatingService
+	GraphService  GraphService
+	FilmService   FilmService
 }
 
 type ReviewService interface {
@@ -30,10 +32,21 @@ type RatingService interface {
 	CreateRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID, initialRating float32) (*domain.UserFilmRating, error)
 }
 
-func NewHandler(reviewService ReviewService, ratingService RatingService) *Handler {
+type GraphService interface {
+	AddFilmToGraph(ctx context.Context, userID uuid.UUID, film domain.Film, recommendations []domain.Film) error
+}
+
+type FilmService interface {
+	GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, error)
+	GetFilmsFromExternal(ctx context.Context, query string) ([]domain.Film, error)
+}
+
+func NewHandler(reviewService ReviewService, ratingService RatingService, graphService GraphService, filmService FilmService) *Handler {
 	return &Handler{
 		ReviewService: reviewService,
 		RatingService: ratingService,
+		GraphService:  graphService,
+		FilmService:   filmService,
 	}
 }
 
@@ -100,6 +113,23 @@ func (h *Handler) CreateReview(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Get the film details to add to graph
+	film, err := h.FilmService.GetFilmById(r.Context(), req.FilmId)
+	if err != nil {
+		fmt.Printf("Failed to get film for graph: %v\n", err)
+	} else {
+		// Get recommendations for this film from TMDB
+		recommendations, err := h.FilmService.GetFilmsFromExternal(r.Context(), film.Title)
+		if err != nil {
+			fmt.Printf("Failed to get recommendations from TMDB: %v\n", err)
+		} else {
+			// Add film to user's graph with its recommendations
+			if err := h.GraphService.AddFilmToGraph(r.Context(), user.ID, *film, recommendations); err != nil {
+				fmt.Printf("Failed to add film to graph: %v\n", err)
+			}
+		}
+	}
+
 	w.WriteHeader(http.StatusCreated)
 	utils.SendJSON(w, createdReview)
 }
@@ -144,7 +174,7 @@ func (h *Handler) UpdateReview(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Forbidden: cannot update others' reviews", http.StatusForbidden)
 		return
 	}
-	
+
 	review := domain.Review{
 		ID:      reviewId,
 		Content: req.Content,

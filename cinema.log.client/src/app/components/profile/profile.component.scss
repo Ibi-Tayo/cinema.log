@@ -338,9 +338,162 @@
       }
     }
 
+    // Films to Review Section
+    .films-to-review-section {
+      margin-top: 3rem;
+      padding: 2rem;
+      background: linear-gradient(
+        135deg,
+        get-color(secondary, 800) 0%,
+        get-color(secondary, 900) 100%
+      );
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+      h2 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: map.get($font-sizes, "3xl");
+        font-weight: 500;
+        color: get-color(primary, 300);
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
+      .no-films-placeholder {
+        @include flex-center;
+        flex-direction: column;
+        padding: 3rem 2rem;
+        gap: 1rem;
+
+        .placeholder-title {
+          font-size: map.get($font-sizes, "2xl");
+          font-weight: 500;
+          color: get-color(neutral, 400);
+          margin: 0;
+        }
+
+        .placeholder-subtitle {
+          font-size: map.get($font-sizes, "lg");
+          color: get-color(neutral, 600);
+          margin: 0;
+        }
+      }
+
+      .films-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1.5rem;
+        padding: 1rem 0;
+
+        @media (max-width: 768px) {
+          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+          gap: 1rem;
+        }
+
+        .film-card {
+          cursor: pointer;
+          border-radius: 0.75rem;
+          overflow: hidden;
+          background: get-color(backgroundColor);
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+          &:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(129, 103, 151, 0.4);
+
+            .film-overlay {
+              opacity: 1;
+            }
+          }
+
+          .film-poster-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 150%; // 2:3 aspect ratio for movie posters
+            background: get-color(neutral, 800);
+            overflow: hidden;
+
+            .film-poster {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+
+            .poster-placeholder {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              @include flex-center;
+              background: get-color(neutral, 800);
+              color: get-color(neutral, 600);
+            }
+
+            .film-overlay {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(129, 103, 151, 0.95);
+              @include flex-center;
+              flex-direction: column;
+              gap: 0.5rem;
+              opacity: 0;
+              transition: opacity 0.3s ease;
+
+              p {
+                color: white;
+                font-weight: 600;
+                font-size: map.get($font-sizes, "sm");
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                margin: 0;
+              }
+
+              lord-icon {
+                pointer-events: none;
+              }
+            }
+          }
+
+          .film-info {
+            padding: 1rem;
+            background: get-color(secondary, 700);
+
+            h4 {
+              font-size: map.get($font-sizes, "base");
+              font-weight: 600;
+              color: get-color(neutral, 300);
+              margin: 0 0 0.5rem 0;
+              line-height: 1.3;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              min-height: 2.6em; // Ensure consistent height for 2 lines
+            }
+
+            .film-year {
+              font-size: map.get($font-sizes, "sm");
+              color: get-color(neutral, 500);
+              margin: 0;
+            }
+          }
+        }
+      }
+    }
+
     // Film Ratings Table Section
     .ratings-table-section {
-
       .no-ratings-placeholder {
         @include flex-center;
         flex-direction: column;
@@ -506,6 +659,80 @@
                 color: get-color(neutral, 400);
               }
             }
+          }
+        }
+      }
+    }
+
+    // Films Graph Section
+    .films-graph-section {
+      margin-top: 3rem;
+      padding: 2rem;
+      background: linear-gradient(
+        135deg,
+        get-color(secondary, 800) 0%,
+        get-color(secondary, 900) 100%
+      );
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+      h2 {
+        font-size: map.get($font-sizes, "2xl");
+        font-weight: 600;
+        color: get-color(primary, 300);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+      }
+
+      .graph-container {
+        background: get-color(backgroundColor);
+        border-radius: 12px;
+        padding: 1rem;
+        min-height: 400px;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    // Recommendations Section
+    .recommendations-section {
+      margin-top: 3rem;
+      padding: 2rem;
+      text-align: center;
+
+      ::ng-deep {
+        .p-button {
+          background: linear-gradient(
+            135deg,
+            get-color(primary, 600),
+            get-color(primary, 700)
+          );
+          border: none;
+          color: white;
+          padding: 1rem 2rem;
+          font-size: map.get($font-sizes, "lg");
+          font-weight: 600;
+          border-radius: 12px;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(129, 103, 151, 0.3);
+
+          &:hover {
+            background: linear-gradient(
+              135deg,
+              get-color(primary, 500),
+              get-color(primary, 600)
+            );
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(129, 103, 151, 0.4);
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+
+          .pi {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
           }
         }
       }

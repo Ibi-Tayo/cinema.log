@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	ErrFilmNotFound = errors.New("film not found")
-	ErrServer       = errors.New("internal server error")
+	ErrFilmNotFound               = errors.New("film not found")
+	ErrFilmRecommendationNotFound = errors.New("film recommendation not found")
+	ErrServer                     = errors.New("internal server error")
 )
 
 type Handler struct {
@@ -26,6 +27,8 @@ type FilmService interface {
 	GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, error)
 	GetFilmsFromExternal(ctx context.Context, query string) ([]domain.Film, error) // ? pagination?
 	GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error)
+	GenerateFilmRecommendations(ctx context.Context, userId uuid.UUID, films []domain.Film) ([]domain.Film, error)
+	GetSeenUnratedFilms(ctx context.Context, userId uuid.UUID) ([]domain.Film, error)
 }
 
 type RatingService interface {
@@ -143,4 +146,58 @@ func (h *Handler) GetFilmsForComparison(w http.ResponseWriter, r *http.Request) 
 	}
 
 	utils.SendJSON(w, filmsForComparison)
+}
+
+func (h *Handler) GenerateFilmRecommendations(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.URL.Query().Get("userId")
+	if userIDStr == "" {
+		http.Error(w, "userId is required", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := utils.ParseUUID(userIDStr)
+	if err != nil {
+		http.Error(w, "invalid userId", http.StatusBadRequest)
+		return
+	}
+
+	var films []domain.Film
+	if err := utils.DecodeJSON(r, &films); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	recommendations, err := h.FilmService.GenerateFilmRecommendations(r.Context(), userID, films)
+	if err != nil {
+		if errors.Is(err, ErrTooManyFilms) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	utils.SendJSON(w, recommendations)
+}
+
+func (h *Handler) GetSeenUnratedFilms(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.PathValue("userId")
+	if userIDStr == "" {
+		http.Error(w, "userId is required", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := utils.ParseUUID(userIDStr)
+	if err != nil {
+		http.Error(w, "invalid userId", http.StatusBadRequest)
+		return
+	}
+
+	films, err := h.FilmService.GetSeenUnratedFilms(r.Context(), userID)
+	if err != nil {
+		http.Error(w, ErrServer.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	utils.SendJSON(w, films)
 }

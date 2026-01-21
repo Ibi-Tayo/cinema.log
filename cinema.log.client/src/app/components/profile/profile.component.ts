@@ -12,6 +12,7 @@ import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { ButtonModule } from 'primeng/button';
 import { UserService, User } from '../../services/user.service';
 import { ReviewService, Review } from '../../services/review.service';
 import { FilmService, Film } from '../../services/film.service';
@@ -22,6 +23,8 @@ import {
   RatingService,
   UserFilmRatingDetail,
 } from '../../services/rating.service';
+import { FilmsGraphComponent } from '../films-graph/films-graph.component';
+import { GraphService, UserGraph } from '../../services/graph.service';
 
 interface ReviewWithFilm extends Review {
   film?: Film;
@@ -36,6 +39,8 @@ interface ReviewWithFilm extends Review {
     InputTextModule,
     IconFieldModule,
     InputIconModule,
+    ButtonModule,
+    FilmsGraphComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -46,12 +51,19 @@ export class ProfileComponent implements OnInit {
   user = signal<User | null>(null);
   recentReviews = signal<ReviewWithFilm[]>([]);
   userRatings = signal<UserFilmRatingDetail[]>([]);
+  filmsToReview = signal<Film[]>([]);
+  graphData = signal<UserGraph | null>(null);
   isLoading = signal(true);
   errorMessage = signal('');
   currentCarouselIndex = signal(0);
 
   // Computed signals
   hasReviews = computed(() => this.recentReviews().length > 0);
+  hasFilmsToReview = computed(() => this.filmsToReview().length > 0);
+  hasGraphData = computed(() => {
+    const graph = this.graphData();
+    return graph !== null && graph.nodes.length > 0;
+  });
   currentReview = computed(() => {
     const reviews = this.recentReviews();
     const index = this.currentCarouselIndex();
@@ -64,7 +76,8 @@ export class ProfileComponent implements OnInit {
     private userService: UserService,
     private reviewService: ReviewService,
     private filmService: FilmService,
-    private ratingsService: RatingService
+    private ratingsService: RatingService,
+    private graphService: GraphService,
   ) {}
 
   ngOnInit(): void {
@@ -72,6 +85,8 @@ export class ProfileComponent implements OnInit {
     if (userId) {
       this.loadUserProfile(userId);
       this.loadUserRatings(userId);
+      this.loadFilmsToReview(userId);
+      this.loadGraphData();
     } else {
       this.errorMessage.set('User ID is required');
       this.isLoading.set(false);
@@ -98,9 +113,9 @@ export class ProfileComponent implements OnInit {
           // Fetch film details for each review
           const filmRequests = recentReviews.map((review) =>
             this.filmService.getFilmById(review.filmId).pipe(
-              map((film) => ({ ...review, film } as ReviewWithFilm)),
-              catchError(() => of({ ...review } as ReviewWithFilm))
-            )
+              map((film) => ({ ...review, film }) as ReviewWithFilm),
+              catchError(() => of({ ...review } as ReviewWithFilm)),
+            ),
           );
 
           return forkJoin(filmRequests);
@@ -108,7 +123,7 @@ export class ProfileComponent implements OnInit {
         catchError((error) => {
           this.errorMessage.set(error.message || 'Failed to load profile');
           return of([]);
-        })
+        }),
       )
       .subscribe((reviewsWithFilms) => {
         this.recentReviews.set(reviewsWithFilms);
@@ -119,8 +134,10 @@ export class ProfileComponent implements OnInit {
   loadUserRatings(userId: string): void {
     this.ratingsService.getRatingsByUserId(userId).subscribe({
       next: (ratings) => {
-        ratings.forEach(rating => {
-          rating.filmReleaseYear = new Date(rating.filmReleaseYear).getFullYear();
+        ratings.forEach((rating) => {
+          rating.filmReleaseYear = new Date(
+            rating.filmReleaseYear,
+          ).getFullYear();
         });
         this.userRatings.set(ratings);
       },
@@ -129,12 +146,35 @@ export class ProfileComponent implements OnInit {
       },
     });
   }
+  loadFilmsToReview(userId: string): void {
+    this.filmService.getSeenUnratedFilms(userId).subscribe({
+      next: (films) => {
+        this.filmsToReview.set(films);
+      },
+      error: (error) => {
+        console.error('Failed to load films to review:', error);
+        // Don't set error message to avoid blocking UI for this non-critical section
+      },
+    });
+  }
+
+  loadGraphData(): void {
+    this.graphService.getUserGraph().subscribe({
+      next: (graph) => {
+        this.graphData.set(graph);
+      },
+      error: (error) => {
+        console.error('Failed to load graph data:', error);
+        this.graphData.set(null);
+      },
+    });
+  }
 
   nextCarouselSlide(): void {
     const reviews = this.recentReviews();
     if (reviews.length > 0) {
       this.currentCarouselIndex.set(
-        (this.currentCarouselIndex() + 1) % reviews.length
+        (this.currentCarouselIndex() + 1) % reviews.length,
       );
     }
   }
@@ -143,7 +183,7 @@ export class ProfileComponent implements OnInit {
     const reviews = this.recentReviews();
     if (reviews.length > 0) {
       this.currentCarouselIndex.set(
-        (this.currentCarouselIndex() - 1 + reviews.length) % reviews.length
+        (this.currentCarouselIndex() - 1 + reviews.length) % reviews.length,
       );
     }
   }
@@ -163,6 +203,11 @@ export class ProfileComponent implements OnInit {
     this.router.navigate(['/review', filmId]);
   }
 
+  navigateToRecommendations(): void {
+    const userId = this.route.snapshot.paramMap.get('id');
+    this.router.navigate(['/recommendations', userId]);
+  }
+
   /**
    * Gets the TMDB poster URL for a film with specified size
    * @param posterPath - The poster path from the film
@@ -170,7 +215,7 @@ export class ProfileComponent implements OnInit {
    */
   getPosterUrl(
     posterPath: string | null | undefined,
-    size: TMDBPosterSize = 'w342'
+    size: TMDBPosterSize = 'w342',
   ): string {
     return getTMDBPosterUrl(posterPath, size);
   }
