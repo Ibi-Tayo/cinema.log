@@ -341,6 +341,66 @@
         }
       </div>
 
+      <!-- Film Ratings Table of films ordered by number of comparisons (ones at the top should be compared) -->
+      @if (userRatingsLeastComparisons().length > 0) {
+        <div class="ratings-table-section">
+          <h2>
+            Films Needing More Comparisons
+          </h2>
+          <div class="table-container">
+            <p-table
+              [value]="userRatingsLeastComparisons()"
+              [paginator]="true"
+              [rows]="10"
+              [rowsPerPageOptions]="[5, 10, 25, 50]"
+              [tableStyle]="{ 'min-width': '10rem' }"
+              [sortField]="'numberOfComparisons'"
+              [sortOrder]="1"
+              #leastComparisonsTable
+            >
+              <ng-template #header>
+                <tr>
+                  <th pSortableColumn="filmTitle">
+                    Film <p-sortIcon field="filmTitle" />
+                  </th>
+                  <th pSortableColumn="numberOfComparisons">
+                    Number of Comparisons
+                    <p-sortIcon field="numberOfComparisons" />
+                  </th>
+                  <th pSortableColumn="filmReleaseYear" style="width: 150px">
+                    Release Year <p-sortIcon field="filmReleaseYear" />
+                  </th>
+                </tr>
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-ratingDetail>
+                <tr>
+                  <td
+                    (click)="selectFilm(ratingDetail.rating.filmId)"
+                    style="cursor: pointer"
+                  >
+                    {{ ratingDetail.filmTitle }}
+                  </td>
+                  <td>{{ ratingDetail.rating.numberOfComparisons }}</td>
+                  <td>{{ ratingDetail.filmReleaseYear }}</td>
+                </tr>
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr>
+                  <td colspan="3" style="text-align: center">
+                    No films found matching your criteria.
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+      }
+
       <!-- Films You Have Seen Section -->
       @if (hasGraphData()) {
         <div class="films-graph-section">
