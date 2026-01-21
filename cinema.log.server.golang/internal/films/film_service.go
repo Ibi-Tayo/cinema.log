@@ -17,6 +17,12 @@ import (
 
 var (
 	tmdbBaseUrl = "https://api.themoviedb.org/3/"
+
+	ErrEmptyQueryString    = errors.New("cannot obtain films with empty query string")
+	ErrProcessTMDBResponse = errors.New("could not process response from tmdb")
+	ErrParseTMDBResponse   = errors.New("could not parse tmdb response")
+	ErrEmptyFilmList       = errors.New("cannot generate recommendations with empty film list")
+	ErrTooManyFilms        = errors.New("cannot generate recommendations with more than 10 films")
 )
 
 type Service struct {
@@ -72,7 +78,7 @@ func (s Service) GetFilmById(ctx context.Context, id uuid.UUID) (*domain.Film, e
 
 func (s Service) GetFilmsFromExternal(ctx context.Context, query string) ([]domain.Film, error) {
 	if query == "" {
-		return nil, errors.New("cannot obtain films with empty query string")
+		return nil, ErrEmptyQueryString
 	}
 
 	key := os.Getenv("TMDB_API_KEY")
@@ -90,12 +96,12 @@ func (s Service) GetFilmsFromExternal(ctx context.Context, query string) ([]doma
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, errors.New("could not process response from tmdb")
+		return nil, ErrProcessTMDBResponse
 	}
 
 	var tmdbResponse TMDBSearchResponse
 	if err := json.Unmarshal(body, &tmdbResponse); err != nil {
-		return nil, errors.New("could not parse tmdb response")
+		return nil, ErrParseTMDBResponse
 	}
 
 	films := make([]domain.Film, 0, len(tmdbResponse.Results))
@@ -120,7 +126,11 @@ func (s Service) GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId
 // Generates film recommendations using TMDB, assumption when using this is that films in the argument have been seen by the user
 func (s Service) GenerateFilmRecommendations(ctx context.Context, userId uuid.UUID, films []domain.Film) ([]domain.Film, error) {
 	if len(films) == 0 {
-		return []domain.Film{}, errors.New("cannot generate recommendations with empty film list")
+		return []domain.Film{}, ErrEmptyFilmList
+	}
+
+	if len(films) > 10 {
+		return nil, ErrTooManyFilms
 	}
 
 	allRecommendations := make([]domain.Film, 0)
@@ -245,21 +255,25 @@ func getFilmRecommendationsFromTmdb(film domain.Film) []domain.Film {
 	resp, err := http.Get(reqUrl)
 	if err != nil {
 		log.Println("Error fetching recommendations from TMDB:", err)
+		return []domain.Film{}
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("TMDB API returned status %d for film ID %d\n", resp.StatusCode, film.ExternalID)
+		return []domain.Film{}
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("Error reading TMDB response body:", err)
+		return []domain.Film{}
 	}
 
 	var tmdbResponse TMDBSearchResponse
 	if err := json.Unmarshal(body, &tmdbResponse); err != nil {
 		log.Println("Error parsing TMDB response:", err)
+		return []domain.Film{}
 	}
 
 	// Limit to top 10 recommendations to avoid weak suggestions
