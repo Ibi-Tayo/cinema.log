@@ -56,6 +56,7 @@ export class ProfileComponent implements OnInit {
   isLoading = signal(true);
   errorMessage = signal('');
   currentCarouselIndex = signal(0);
+  readonly leastComparedThreshold = 15; // set to this number as < 15 is probably not an accurate enough elo rating.
 
   // Computed signals
   hasReviews = computed(() => this.recentReviews().length > 0);
@@ -69,6 +70,17 @@ export class ProfileComponent implements OnInit {
     const index = this.currentCarouselIndex();
     return reviews[index];
   });
+  userRatingsLeastComparisons = computed(() =>
+    this.userRatings()
+      .filter(
+        (userFilmRatingDetail) =>
+          userFilmRatingDetail.rating.numberOfComparisons <
+          this.leastComparedThreshold,
+      )
+      .sort(
+        (a, b) => a.rating.numberOfComparisons - b.rating.numberOfComparisons,
+      ),
+  );
 
   constructor(
     private route: ActivatedRoute,
