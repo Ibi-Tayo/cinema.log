@@ -1,0 +1,20 @@
+<div class="error-state">
+  <lord-icon
+    src="https://cdn.lordicon.com/tdrtiskw.json"
+    trigger="loop"
+    style="width: 80px; height: 80px"
+  >
+  </lord-icon>
+  <p>{{ message() }}</p>
+  @if (showRetryButton()) {
+    <button class="retry-button" (click)="onRetry()">
+      <lord-icon
+        src="https://cdn.lordicon.com/jarmuava.json"
+        trigger="hover"
+        style="width: 24px; height: 24px; transform: rotate(180deg)"
+      >
+      </lord-icon>
+      {{ retryButtonLabel() }}
+    </button>
+  }
+</div>

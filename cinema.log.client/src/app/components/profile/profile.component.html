@@ -344,9 +344,7 @@
       <!-- Film Ratings Table of films ordered by number of comparisons (ones at the top should be compared) -->
       @if (userRatingsLeastComparisons().length > 0) {
         <div class="ratings-table-section">
-          <h2>
-            Films Needing More Comparisons
-          </h2>
+          <h2>Films Needing More Comparisons</h2>
           <div class="table-container">
             <p-table
               [value]="userRatingsLeastComparisons()"

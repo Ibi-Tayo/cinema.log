@@ -1,0 +1,291 @@
+@use "../../../../../styles/variables" as *;
+@use "../../../../../styles/mixins" as *;
+
+.bulk-comparison-interface {
+  padding: 24px;
+
+  .bulk-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: linear-gradient(
+      135deg,
+      rgba(get-color(primary, 900), 0.3),
+      rgba(get-color(secondary, 900), 0.3)
+    );
+    border-radius: 8px;
+
+    p {
+      margin: 0;
+      font-size: 1.1rem;
+      color: get-color(neutral, 300);
+      font-weight: 500;
+    }
+
+    .films-count {
+      font-size: 0.95rem;
+      color: get-color(neutral, 500);
+      font-weight: 600;
+      padding: 6px 12px;
+      background: rgba(get-color(primary, 700), 0.3);
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 12px;
+      text-align: center;
+    }
+  }
+
+  .target-film-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin-bottom: 24px;
+
+    ::ng-deep .target-film-card {
+      background: linear-gradient(
+        135deg,
+        rgba(get-color(primary, 800), 0.95),
+        rgba(get-color(secondary, 800), 0.95)
+      );
+      backdrop-filter: blur(10px);
+      border: 2px solid get-color(primary, 600);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+      .p-card-body {
+        padding: 0;
+      }
+
+      .p-card-header {
+        padding: 0;
+      }
+
+      .target-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+
+        span {
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: get-color(neutral, 100);
+        }
+      }
+    }
+  }
+
+  .bulk-films-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .bulk-film-item {
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(
+        135deg,
+        rgba(get-color(primary, 900), 0.3),
+        rgba(get-color(secondary, 900), 0.3)
+      );
+      border: 1px solid rgba(get-color(primary, 600), 0.3);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        border-color: get-color(primary, 500);
+      }
+
+      .bulk-film-poster {
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .poster-placeholder-small {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(
+            135deg,
+            get-color(neutral, 800),
+            get-color(neutral, 900)
+          );
+        }
+      }
+
+      .bulk-film-info {
+        padding: 16px;
+
+        h4 {
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin: 0 0 8px 0;
+          color: get-color(neutral, 200);
+        }
+
+        p {
+          font-size: 0.9rem;
+          color: get-color(neutral, 500);
+          margin: 0;
+        }
+      }
+
+      .bulk-film-actions {
+        display: flex;
+        gap: 8px;
+        padding: 0 16px 16px 16px;
+
+        .bulk-button {
+          flex: 1;
+          padding: 10px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          border: 2px solid transparent;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          background: rgba(get-color(neutral, 800), 0.5);
+          color: get-color(neutral, 300);
+
+          &:hover {
+            transform: translateY(-2px);
+          }
+
+          &.better {
+            &:hover {
+              background: rgba(get-color(success), 0.2);
+              border-color: get-color(success);
+              color: get-color(success);
+            }
+
+            &.selected {
+              background: get-color(success);
+              border-color: get-color(success);
+              color: white;
+              font-weight: 700;
+            }
+          }
+
+          &.same {
+            &:hover {
+              background: rgba(get-color(neutral, 600), 0.5);
+              border-color: get-color(neutral, 600);
+              color: get-color(neutral, 200);
+            }
+
+            &.selected {
+              background: get-color(neutral, 600);
+              border-color: get-color(neutral, 600);
+              color: white;
+              font-weight: 700;
+            }
+          }
+
+          &.worse {
+            &:hover {
+              background: rgba(get-color(error), 0.2);
+              border-color: get-color(error);
+              color: get-color(error);
+            }
+
+            &.selected {
+              background: get-color(error);
+              border-color: get-color(error);
+              color: white;
+              font-weight: 700;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .bulk-actions-section {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    padding: 24px;
+    background: linear-gradient(
+      135deg,
+      rgba(get-color(primary, 900), 0.3),
+      rgba(get-color(secondary, 900), 0.3)
+    );
+    border-radius: 8px;
+    border: 1px solid rgba(get-color(primary, 600), 0.3);
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+
+      ::ng-deep .p-button {
+        width: 100%;
+      }
+    }
+
+    ::ng-deep .load-more-button {
+      .p-button {
+        background: linear-gradient(
+          135deg,
+          get-color(neutral, 700),
+          get-color(neutral, 800)
+        );
+        border-color: get-color(neutral, 700);
+
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            get-color(neutral, 600),
+            get-color(neutral, 700)
+          );
+        }
+      }
+    }
+
+    ::ng-deep .submit-batch-button {
+      .p-button {
+        background: linear-gradient(
+          135deg,
+          get-color(primary, 600),
+          get-color(secondary, 600)
+        );
+        border-color: get-color(primary, 600);
+        font-size: 1.1rem;
+        font-weight: 700;
+        padding: 12px 32px;
+
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            get-color(primary, 500),
+            get-color(secondary, 500)
+          );
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}

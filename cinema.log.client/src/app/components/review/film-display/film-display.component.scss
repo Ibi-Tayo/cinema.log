@@ -1,0 +1,149 @@
+@use "../../../../styles/variables" as *;
+@use "../../../../styles/mixins" as *;
+
+.film-section {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 48px;
+  padding: 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(get-color(primary, 800), 0.3),
+    rgba(get-color(secondary, 800), 0.3)
+  );
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .film-poster {
+    flex-shrink: 0;
+    width: 200px;
+    height: 300px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+
+    @media (max-width: 768px) {
+      width: 100%;
+      height: auto;
+      max-width: 200px;
+      margin: 0 auto;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .poster-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(
+        135deg,
+        get-color(neutral, 800),
+        get-color(neutral, 900)
+      );
+    }
+  }
+
+  .film-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(
+        135deg,
+        get-color(primary, 300),
+        get-color(secondary, 300)
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+
+      @media (max-width: 768px) {
+        font-size: 1.5rem;
+      }
+    }
+
+    .film-year {
+      font-size: 1.1rem;
+      color: get-color(neutral, 400);
+      margin: 0;
+    }
+
+    .elo-rating-section {
+      margin: 12px 0;
+      padding: 16px;
+      background: rgba(get-color(primary, 900), 0.3);
+      border-radius: 12px;
+      border: 1px solid rgba(get-color(primary, 500), 0.3);
+
+      .elo-rating-badge {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+
+        .elo-info {
+          display: flex;
+          flex-direction: column;
+
+          .elo-label {
+            font-size: 0.9rem;
+            color: get-color(neutral, 500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .elo-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          }
+        }
+      }
+
+      .elo-hint {
+        margin: 0;
+        font-size: 0.9rem;
+        color: get-color(neutral, 600);
+        font-style: italic;
+      }
+    }
+
+    .film-description-section {
+      h3 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0 0 12px 0;
+        color: get-color(neutral, 300);
+      }
+
+      .film-description {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: get-color(neutral, 400);
+        margin: 0;
+      }
+    }
+  }
+}
