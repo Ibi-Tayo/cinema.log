@@ -749,6 +749,216 @@
     }
   }
 
+  // Bulk Comparison Mode Styles
+  .mode-toggle {
+    margin-top: 1rem;
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      font-size: map.get($font-sizes, "sm");
+      color: get-color(neutral, 600);
+
+      .toggle-checkbox {
+        width: 48px;
+        height: 24px;
+        appearance: none;
+        background: get-color(neutral, 800);
+        border-radius: 12px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.3s ease;
+
+        &::before {
+          content: "";
+          position: absolute;
+          width: 20px;
+          height: 20px;
+          background: white;
+          border-radius: 50%;
+          top: 2px;
+          left: 2px;
+          transition: transform 0.3s ease;
+        }
+
+        &:checked {
+          background: get-color(primary, 600);
+
+          &::before {
+            transform: translateX(24px);
+          }
+        }
+      }
+
+      .toggle-text {
+        font-weight: 500;
+      }
+    }
+  }
+
+  .bulk-comparison-interface {
+    .bulk-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: rgba(get-color(primary, 700), 0.1);
+      border-radius: 0.5rem;
+
+      p {
+        margin: 0;
+        font-size: map.get($font-sizes, "base");
+        color: get-color(neutral, 600);
+      }
+
+      .films-count {
+        font-size: map.get($font-sizes, "sm");
+        color: get-color(neutral, 700);
+        font-weight: 600;
+      }
+    }
+
+    .target-film-sticky {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 1rem 0;
+      margin-bottom: 1.5rem;
+
+      .target-film-card {
+        background: linear-gradient(
+          135deg,
+          get-color(primary, 800) 0%,
+          get-color(secondary, 800) 100%
+        );
+        border: 2px solid get-color(primary, 600);
+
+        .target-header {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 1rem;
+          font-size: map.get($font-sizes, "lg");
+          font-weight: 600;
+          color: get-color(neutral, 400);
+        }
+      }
+    }
+
+    .bulk-films-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+
+      .bulk-film-item {
+        background: rgba(get-color(primary, 700), 0.05);
+        border: 1px solid get-color(neutral, 850);
+        border-radius: 0.75rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+
+        &:hover {
+          border-color: get-color(primary, 600);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .bulk-film-poster {
+          width: 100%;
+          height: 180px;
+          overflow: hidden;
+          background: get-color(neutral, 900);
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .poster-placeholder-small {
+            @include flex-center;
+            width: 100%;
+            height: 100%;
+            background: get-color(neutral, 900);
+          }
+        }
+
+        .bulk-film-info {
+          padding: 1rem;
+
+          h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: map.get($font-sizes, "base");
+            color: get-color(neutral, 400);
+            font-weight: 600;
+          }
+
+          p {
+            margin: 0;
+            font-size: map.get($font-sizes, "sm");
+            color: get-color(neutral, 700);
+          }
+        }
+
+        .bulk-film-actions {
+          display: flex;
+          gap: 0.5rem;
+          padding: 0 1rem 1rem 1rem;
+
+          .bulk-button {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid get-color(neutral, 700);
+            background: get-color(secondary, 800);
+            color: get-color(neutral, 300);
+            border-radius: 0.5rem;
+            font-size: map.get($font-sizes, "xs");
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:hover {
+              border-color: get-color(primary, 600);
+              background: rgba(get-color(primary, 700), 0.1);
+              color: get-color(neutral, 200);
+            }
+
+            &.selected.better {
+              background: rgba(get-color(success), 0.2);
+              border-color: get-color(success);
+              color: get-color(success);
+            }
+
+            &.selected.same {
+              background: rgba(get-color(warning), 0.2);
+              border-color: get-color(warning);
+              color: get-color(warning);
+            }
+
+            &.selected.worse {
+              background: rgba(get-color(error), 0.2);
+              border-color: get-color(error);
+              color: get-color(error);
+            }
+          }
+        }
+      }
+    }
+
+    .bulk-actions-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      padding: 2rem 0;
+      border-top: 1px solid get-color(neutral, 850);
+    }
+  }
+
   // Mobile Responsive
   @media (max-width: 768px) {
     padding: 1rem;
@@ -781,6 +991,10 @@
             justify-content: center;
           }
         }
+      }
+
+      .bulk-films-grid {
+        grid-template-columns: 1fr !important;
       }
     }
   }

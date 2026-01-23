@@ -75,10 +75,16 @@ export class ReviewComponent implements OnInit {
   isSubmittingComparison = signal(false);
   showComparisons = signal(false);
 
+  // Bulk comparison mode signals
+  isBulkMode = signal(false);
+  bulkSelections = signal<Map<string, 'better' | 'worse' | 'same'>>(new Map());
+  loadedFilmsCount = signal(0);
+  maxBulkFilms = signal(50);
+
   // Computed signals
   hasRating = computed(() => this.filmRating() !== null);
   canSubmit = computed(
-    () => this.selectedRating() > 0 && this.reviewText().trim().length > 0
+    () => this.selectedRating() > 0 && this.reviewText().trim().length > 0,
   );
   currentComparisonFilm = computed(() => {
     const index = this.currentComparisonIndex();
@@ -91,13 +97,23 @@ export class ReviewComponent implements OnInit {
     return `${index + 1} / ${total}`;
   });
 
+  canLoadMore = computed(() => {
+    const loaded = this.loadedFilmsCount();
+    const max = this.maxBulkFilms();
+    return loaded < max && !this.isLoadingComparisons();
+  });
+
+  selectedComparisonsCount = computed(() => {
+    return this.bulkSelections().size;
+  });
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private filmService: FilmService,
     private reviewService: ReviewService,
     private authService: AuthService,
-    private ratingService: RatingService
+    private ratingService: RatingService,
   ) {
     const navigation = this.router.currentNavigation?.();
     const filmFromState = navigation?.extras.state?.['film'];
@@ -114,6 +130,10 @@ export class ReviewComponent implements OnInit {
       this.errorMessage.set('Film ID is required');
       this.isLoading.set(false);
     }
+
+    // Load bulk mode preference from localStorage
+    const savedMode = localStorage.getItem('comparisonMode');
+    this.isBulkMode.set(savedMode === 'bulk');
   }
 
   loadFilm(filmId: string): void {
@@ -151,7 +171,7 @@ export class ReviewComponent implements OnInit {
     this.reviewService.getAllReviewsByUserId(userId).subscribe({
       next: (reviews) => {
         const existingReview = reviews.find(
-          (review) => review.filmId === this.film()?.id
+          (review) => review.filmId === this.film()?.id,
         );
         if (existingReview) {
           this.reviewText.set(existingReview.title);
@@ -245,7 +265,7 @@ export class ReviewComponent implements OnInit {
       error: (error) => {
         console.error('Error submitting review update:', error);
         this.submitError.set(
-          'Failed to submit review update. Please try again.'
+          'Failed to submit review update. Please try again.',
         );
         this.isSubmitting.set(false);
       },
@@ -272,7 +292,9 @@ export class ReviewComponent implements OnInit {
     this.filmService.getFilmsForComparison(userId, film.id).subscribe({
       next: (films) => {
         console.log('Loaded films for comparison:', films);
-        this.filmsForComparison.set(films ?? []); // This is because the server might return null
+        const filmList = films ?? [];
+        this.filmsForComparison.set(filmList);
+        this.loadedFilmsCount.set(filmList.length);
         this.isLoadingComparisons.set(false);
         this.currentComparisonIndex.set(0);
         console.log('Reset comparison index to 0, total films:', films?.length);
@@ -348,7 +370,7 @@ export class ReviewComponent implements OnInit {
       error: (error) => {
         console.error('Error submitting comparison:', error);
         this.comparisonError.set(
-          'Failed to submit comparison. Please try again.'
+          'Failed to submit comparison. Please try again.',
         );
         this.isSubmittingComparison.set(false);
       },
@@ -364,6 +386,109 @@ export class ReviewComponent implements OnInit {
     }
   }
 
+  toggleComparisonMode(): void {
+    const newMode = !this.isBulkMode();
+    this.isBulkMode.set(newMode);
+    localStorage.setItem('comparisonMode', newMode ? 'bulk' : 'sequential');
+
+    // Reset and reload comparisons when switching modes
+    this.filmsForComparison.set([]);
+    this.bulkSelections.set(new Map());
+    this.currentComparisonIndex.set(0);
+    this.loadedFilmsCount.set(0);
+
+    if (this.film()) {
+      this.loadFilmsForComparison();
+    }
+  }
+
+  setBulkSelection(filmId: string, result: 'better' | 'worse' | 'same'): void {
+    const selections = new Map(this.bulkSelections());
+    selections.set(filmId, result);
+    this.bulkSelections.set(selections);
+  }
+
+  loadMoreFilms(): void {
+    const userId = this.authService.currentUser()?.id;
+    const film = this.film();
+    if (!userId || !film || this.isLoadingComparisons()) return;
+
+    const currentCount = this.loadedFilmsCount();
+    if (currentCount >= this.maxBulkFilms()) return;
+
+    this.isLoadingComparisons.set(true);
+    this.comparisonError.set('');
+
+    this.filmService.getFilmsForComparison(userId, film.id).subscribe({
+      next: (newFilms) => {
+        if (newFilms && newFilms.length > 0) {
+          const currentFilms = this.filmsForComparison();
+          const allFilms = [...currentFilms, ...newFilms];
+          this.filmsForComparison.set(allFilms);
+          this.loadedFilmsCount.set(allFilms.length);
+        }
+        this.isLoadingComparisons.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading more films:', error);
+        this.comparisonError.set('Failed to load more films.');
+        this.isLoadingComparisons.set(false);
+      },
+    });
+  }
+
+  submitBatchComparisons(): void {
+    const userId = this.authService.currentUser()?.id;
+    const film = this.film();
+    if (!userId || !film) return;
+
+    const selections = this.bulkSelections();
+    if (selections.size === 0) {
+      this.comparisonError.set('Please select at least one comparison.');
+      return;
+    }
+
+    this.isSubmittingComparison.set(true);
+    this.comparisonError.set('');
+
+    // Convert selections to comparison items
+    const comparisons: {
+      challengerFilmId: string;
+      result: 'better' | 'worse' | 'same';
+    }[] = [];
+    selections.forEach((result, filmId) => {
+      comparisons.push({ challengerFilmId: filmId, result });
+    });
+
+    const request = {
+      userId,
+      targetFilmId: film.id,
+      comparisons,
+    };
+
+    this.ratingService.compareBatch(request).subscribe({
+      next: () => {
+        this.isSubmittingComparison.set(false);
+        // Clear selections
+        this.bulkSelections.set(new Map());
+        // Refresh the rating
+        this.ratingService.getRating(userId, film.id).subscribe({
+          next: (rating) => this.filmRating.set(rating),
+          error: () => this.filmRating.set(null),
+        });
+        // Redirect to profile
+        this.finishComparisons();
+      },
+      error: (error) => {
+        console.error('Error submitting batch comparisons:', error);
+        this.comparisonError.set(
+          'Failed to submit comparisons. Please try again.',
+        );
+        this.isSubmittingComparison.set(false);
+      },
+    });
+  }
+
   /**
    * Gets the TMDB poster URL for a film with specified size
    * @param posterPath
@@ -371,7 +496,7 @@ export class ReviewComponent implements OnInit {
    */
   getPosterUrl(
     posterPath: string | null | undefined,
-    size: TMDBPosterSize = 'original'
+    size: TMDBPosterSize = 'original',
   ): string {
     return getTMDBPosterUrl(posterPath, size);
   }

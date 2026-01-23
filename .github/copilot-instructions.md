@@ -80,11 +80,16 @@ filmHandler := films.NewHandler(filmService, ratingService)
    mux.HandleFunc("GET /new-route", s.newHandler.NewMethod)
    ```
 3. Add to `isAuthExempt()` if no auth required
+4. **Batch endpoints**: Use descriptive names like `/ratings/compare-films-batch` for bulk operations
 
 ### Testing Strategy
 
 - **Unit tests**: Use hand-written mock structs (e.g., `mockFilmService` in [film_handler_test.go](cinema.log.server.golang/internal/films/film_handler_test.go)) with function fields for custom behavior
 - **Integration tests**: Use testcontainers ([utils/test_utils.go](cinema.log.server.golang/internal/utils/test_utils.go)) - see `StartTestPostgres()` for real DB setup
+- **Mock Updates**: When adding new interface methods, ensure mocks in test files implement them:
+  - Handler tests: Update `mock*Service` structs
+  - Service tests: Update `mock*Store` structs with function fields and corresponding methods
+- **Frontend tests**: Karma + Jasmine with ChromeHeadless (73 tests), all service/component specs passing
 
 ### Database Migrations
 
@@ -174,8 +179,22 @@ Frontend: Uses [environment.ts](cinema.log.client/src/environments/environment.t
 ### Film Rating System
 
 - **Initial rating**: Created when user submits review via `POST /reviews` (triggers graph update)
-- **Comparisons**: `POST /ratings/compare-films` - pairwise comparisons update ratings using algorithm in [ratings/rating_service.go](cinema.log.server.golang/internal/ratings/rating_service.go)
+- **Bulk Comparisons**: `POST /ratings/compare-films-batch` - batch processing of film comparisons with:
+  - Strict sequential ELO calculation (preserves K-factor progression)
+  - All-or-nothing transaction semantics
+  - Automatic duplicate filtering
+  - 50-film cap per batch
 - **Graph**: Film relationships stored in `film_graph` table, visualized with vis-network
+
+#### Bulk Review Feature (Review Component)
+
+- **Default Mode**: Bulk comparison mode with toggle to sequential
+- **UI Components**: Sticky target film at top, progress counter (e.g., "3 / 50 films loaded"), comparison cards with Better/Same/Worse buttons
+- **Progressive Loading**: Initial 10 films, expandable to 50 via "Load More" button
+- **State Management**: Uses Angular signals (`isBulkMode`, `bulkSelections`)
+- **Persistence**: Mode preference stored in localStorage (`comparisonMode`)
+- **Partial Submissions**: Users can submit any number of completed comparisons (validation allows partial selections)
+- **Empty State**: Auto-redirects to profile when 0 films available for comparison
 
 ### External API (TMDB)
 
@@ -189,6 +208,7 @@ Film search via `GET /films/search?f=query` proxied through backend [films/film_
 - **Context propagation**: Always pass `ctx context.Context` as first param
 - **SQL queries**: Use `pgx` driver with prepared statements (`$1`, `$2` placeholders)
 - **HTTP responses**: Use utility from [utils/json.go](cinema.log.server.golang/internal/utils/json.go)
+- **Transactions**: Use `BeginTx()` for multi-step database operations (e.g., batch updates)
 
 ### Frontend
 
@@ -196,6 +216,7 @@ Film search via `GET /films/search?f=query` proxied through backend [films/film_
 - **Loading states**: Use signals for `isLoading`, `errorMessage`
 - **Router navigation**: Inject `Router` for programmatic nav (e.g., after login success)
 - **Form handling**: Angular signals for reactive form state (no template-driven forms)
+- **Batch Operations**: Submit via dedicated bulk endpoints for better performance and transaction integrity
 
 ## Migration/Deployment Notes
 

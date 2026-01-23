@@ -24,6 +24,7 @@ type RatingService interface {
 	CreateComparison(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error)
 	HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error)
 	GetComparisonHistory(ctx context.Context, userId uuid.UUID) ([]domain.ComparisonHistory, error)
+	ProcessBatchComparisons(ctx context.Context, userId, targetFilmId uuid.UUID, comparisons []ComparisonItem) error
 }
 
 func NewHandler(ratingService RatingService) *Handler {
@@ -95,6 +96,17 @@ type CompareFilmsRequest struct {
 	FilmBId       uuid.UUID `json:"filmBId"`
 	WinningFilmId uuid.UUID `json:"winningFilmId"`
 	WasEqual      bool      `json:"wasEqual"`
+}
+
+type ComparisonItem struct {
+	ChallengerFilmId uuid.UUID `json:"challengerFilmId"`
+	Result           string    `json:"result"` // "better", "worse", "same"
+}
+
+type CompareBatchRequest struct {
+	UserId       uuid.UUID        `json:"userId"`
+	TargetFilmId uuid.UUID        `json:"targetFilmId"`
+	Comparisons  []ComparisonItem `json:"comparisons"`
 }
 
 func (h *Handler) CompareFilms(w http.ResponseWriter, r *http.Request) {
@@ -172,4 +184,53 @@ func (h *Handler) CompareFilms(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SendJSON(w, updatedPair)
+}
+
+func (h *Handler) CompareBatch(w http.ResponseWriter, r *http.Request) {
+	// Get authenticated user from context
+	user, ok := r.Context().Value(middleware.KeyUser).(*domain.User)
+	if !ok || user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var req CompareBatchRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	// Ensure the userId in the request matches the authenticated user
+	if req.UserId != user.ID {
+		http.Error(w, "Unauthorized: user ID mismatch", http.StatusUnauthorized)
+		return
+	}
+
+	// Validate comparisons array
+	if len(req.Comparisons) == 0 {
+		http.Error(w, "Comparisons array cannot be empty", http.StatusBadRequest)
+		return
+	}
+
+	// Validate result values
+	for _, comp := range req.Comparisons {
+		if comp.Result != "better" && comp.Result != "worse" && comp.Result != "same" {
+			http.Error(w, "Invalid result value. Must be 'better', 'worse', or 'same'", http.StatusBadRequest)
+			return
+		}
+	}
+
+	// Process batch comparisons
+	err := h.RatingService.ProcessBatchComparisons(r.Context(), req.UserId, req.TargetFilmId, req.Comparisons)
+	if err != nil {
+		http.Error(w, "Failed to process batch comparisons: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return success
+	utils.SendJSON(w, map[string]interface{}{
+		"success": true,
+		"message": "Batch comparisons processed successfully",
+	})
 }

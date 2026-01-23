@@ -125,7 +125,7 @@ func (s *store) GetRatingsByUserId(ctx context.Context, userId uuid.UUID) ([]dom
 			&rating.FilmReleaseYear,
 			&rating.FilmPosterURL,
 		)
-		
+
 		if err != nil {
 			return nil, err
 		}
@@ -393,4 +393,178 @@ func (s *store) GetComparisonHistory(ctx context.Context, userId uuid.UUID) ([]d
 	}
 
 	return comparisons, nil
+}
+
+// BulkGetRatings fetches multiple ratings for given film IDs in a single query
+func (s *store) BulkGetRatings(ctx context.Context, userId uuid.UUID, filmIds []uuid.UUID) (map[uuid.UUID]*domain.UserFilmRating, error) {
+	if len(filmIds) == 0 {
+		return make(map[uuid.UUID]*domain.UserFilmRating), nil
+	}
+
+	// Build query with placeholders
+	query := /* sql */ `
+		SELECT user_film_rating_id, user_id, film_id, elo_rating, number_of_comparisons, last_updated, initial_rating, k_constant_value
+		FROM user_film_ratings
+		WHERE user_id = $1 AND film_id = ANY($2)
+	`
+
+	rows, err := s.db.QueryContext(ctx, query, userId, filmIds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	ratings := make(map[uuid.UUID]*domain.UserFilmRating)
+	for rows.Next() {
+		rating := &domain.UserFilmRating{}
+		err := rows.Scan(
+			&rating.ID,
+			&rating.UserId,
+			&rating.FilmId,
+			&rating.EloRating,
+			&rating.NumberOfComparisons,
+			&rating.LastUpdated,
+			&rating.InitialRating,
+			&rating.KConstantValue,
+		)
+		if err != nil {
+			return nil, err
+		}
+		ratings[rating.FilmId] = rating
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return ratings, nil
+}
+
+// BulkHasBeenCompared checks if multiple film pairs have been compared
+func (s *store) BulkHasBeenCompared(ctx context.Context, userId uuid.UUID, pairs []domain.ComparisonPair) (map[string]bool, error) {
+	if len(pairs) == 0 {
+		return make(map[string]bool), nil
+	}
+
+	// Build query to check all pairs at once
+	query := /* sql */ `
+		SELECT film_a_film_id, film_b_film_id 
+		FROM comparison_histories 
+		WHERE user_id = $1
+	`
+
+	rows, err := s.db.QueryContext(ctx, query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Build a set of existing comparisons
+	existingComparisons := make(map[string]bool)
+	for rows.Next() {
+		var filmAId, filmBId uuid.UUID
+		if err := rows.Scan(&filmAId, &filmBId); err != nil {
+			return nil, err
+		}
+		// Store both directions
+		key1 := filmAId.String() + "-" + filmBId.String()
+		key2 := filmBId.String() + "-" + filmAId.String()
+		existingComparisons[key1] = true
+		existingComparisons[key2] = true
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Check each requested pair
+	result := make(map[string]bool)
+	for _, pair := range pairs {
+		key := pair.FilmA.FilmId.String() + "-" + pair.FilmB.FilmId.String()
+		result[key] = existingComparisons[key]
+	}
+
+	return result, nil
+}
+
+// BulkInsertComparisons inserts multiple comparison records in one query
+func (s *store) BulkInsertComparisons(ctx context.Context, comparisons []domain.ComparisonHistory) error {
+	if len(comparisons) == 0 {
+		return nil
+	}
+
+	query := /* sql */ `
+		INSERT INTO comparison_histories (comparison_history_id, user_id, film_a_film_id, film_b_film_id, winning_film_film_id, comparison_date, was_equal)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+	`
+
+	// Use a prepared statement for batch inserts
+	stmt, err := s.db.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, comparison := range comparisons {
+		if comparison.ID == uuid.Nil {
+			comparison.ID = uuid.New()
+		}
+		_, err := stmt.ExecContext(ctx,
+			comparison.ID,
+			comparison.UserId,
+			comparison.FilmAId,
+			comparison.FilmBId,
+			comparison.WinningFilmId,
+			comparison.ComparisonDate,
+			comparison.WasEqual,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// BulkUpdateRatings updates multiple ratings using a CASE statement
+func (s *store) BulkUpdateRatings(ctx context.Context, tx *sql.Tx, ratings []domain.UserFilmRating) error {
+	if len(ratings) == 0 {
+		return nil
+	}
+
+	// Use prepared statement for each update within the transaction
+	query := /* sql */ `
+		UPDATE user_film_ratings
+		SET elo_rating = $1,
+		    number_of_comparisons = $2,
+		    last_updated = $3,
+		    k_constant_value = $4
+		WHERE user_film_rating_id = $5
+	`
+
+	stmt, err := tx.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, rating := range ratings {
+		_, err := stmt.ExecContext(ctx,
+			rating.EloRating,
+			rating.NumberOfComparisons,
+			rating.LastUpdated,
+			rating.KConstantValue,
+			rating.ID,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// BeginTx starts a new transaction
+func (s *store) BeginTx(ctx context.Context) (*sql.Tx, error) {
+	return s.db.BeginTx(ctx, nil)
 }
