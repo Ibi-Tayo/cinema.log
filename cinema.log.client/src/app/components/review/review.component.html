@@ -51,6 +51,24 @@
               Compare this film with others you've rated to build your personal
               ranking
             </p>
+            <!-- Mode Toggle -->
+            <div class="mode-toggle">
+              <label class="toggle-label">
+                <input
+                  type="checkbox"
+                  [checked]="comparisonState.mode() === 'bulk'"
+                  (change)="onToggleMode()"
+                  class="toggle-checkbox"
+                />
+                <span class="toggle-text">
+                  {{
+                    comparisonState.mode() === "bulk"
+                      ? "Bulk Mode"
+                      : "Sequential Mode"
+                  }}
+                </span>
+              </label>
+            </div>
           </div>
 
           <!-- Comparison Loading -->
@@ -118,7 +136,6 @@
               [isSubmitting]="isSubmittingComparison()"
               (batchSubmit)="onBatchSubmit()"
               (loadMore)="onLoadMore()"
-              (toggleMode)="onToggleMode()"
             />
           }
         </div>

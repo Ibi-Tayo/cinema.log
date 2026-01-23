@@ -10,7 +10,7 @@
     gap: 12px;
     font-size: 1.5rem;
     font-weight: 700;
-    margin: 0 0 24px 0;
+    margin: 24px 0 24px 0;
     background: linear-gradient(
       135deg,
       get-color(primary, 400),
@@ -154,7 +154,7 @@
 
     .submit-section {
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
 
       .submit-button {
         display: flex;

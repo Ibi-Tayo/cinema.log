@@ -407,7 +407,7 @@
         // Submit Section
         .submit-section {
           display: flex;
-          justify-content: flex-end;
+          justify-content: center;
 
           .submit-button {
             display: inline-flex;
@@ -449,6 +449,101 @@
     .comparison-section {
       margin-top: 3rem;
       @include card-container;
+
+      .comparison-header {
+        text-align: center;
+        margin-bottom: 2rem;
+
+        h2 {
+          @include section-title;
+          justify-content: center;
+          margin-bottom: 0.75rem;
+        }
+
+        .comparison-description {
+          font-size: map.get($font-sizes, "base");
+          color: get-color(neutral, 600);
+          margin: 0 0 1.5rem 0;
+          line-height: 1.6;
+        }
+
+        .mode-toggle {
+          display: flex;
+          justify-content: center;
+          margin-top: 1.5rem;
+
+          .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            font-size: map.get($font-sizes, "base");
+            color: get-color(neutral, 400);
+            font-weight: 500;
+
+            .toggle-checkbox {
+              width: 52px;
+              height: 28px;
+              appearance: none;
+              background: get-color(neutral, 800);
+              border-radius: 14px;
+              position: relative;
+              cursor: pointer;
+              transition: background 0.3s ease;
+              border: 2px solid get-color(neutral, 700);
+
+              &::before {
+                content: "";
+                position: absolute;
+                width: 22px;
+                height: 22px;
+                background: white;
+                border-radius: 50%;
+                top: 1px;
+                left: 2px;
+                transition: transform 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+              }
+
+              &:checked {
+                background: linear-gradient(
+                  135deg,
+                  get-color(primary, 600),
+                  get-color(secondary, 600)
+                );
+                border-color: get-color(primary, 500);
+
+                &::before {
+                  transform: translateX(24px);
+                }
+              }
+            }
+
+            .toggle-text {
+              font-weight: 600;
+            }
+          }
+        }
+      }
+
+      .no-comparisons {
+        @include flex-center;
+        flex-direction: column;
+        padding: 3rem 2rem;
+        gap: 1.5rem;
+        text-align: center;
+
+        p {
+          font-size: map.get($font-sizes, "lg");
+          color: get-color(neutral, 500);
+          margin: 0;
+
+          &.hint {
+            font-size: map.get($font-sizes, "base");
+            color: get-color(neutral, 600);
+          }
+        }
+      }
 
       // PrimeNG overrides
       ::ng-deep {
