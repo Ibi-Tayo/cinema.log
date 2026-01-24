@@ -158,6 +158,7 @@ export class ProfileComponent implements OnInit {
       },
     });
   }
+  
   loadFilmsToReview(userId: string): void {
     this.filmService.getSeenUnratedFilms(userId).subscribe({
       next: (films) => {

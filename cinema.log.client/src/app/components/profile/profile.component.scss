@@ -120,6 +120,7 @@
         font-size: map.get($font-sizes, "3xl");
         font-weight: 500;
         color: get-color(neutral, 400);
+        margin-top: 2rem;
         margin-bottom: 2rem;
         text-align: center;
         justify-content: center;
@@ -494,6 +495,14 @@
 
     // Film Ratings Table Section
     .ratings-table-section {
+      .table-title {
+        font-size: map.get($font-sizes, "3xl");
+        font-weight: 400;
+        color: get-color(neutral, 400);
+        margin-top: 3rem;
+        margin-bottom: 3rem;
+        text-align: center;
+      }
       .no-ratings-placeholder {
         @include flex-center;
         flex-direction: column;
@@ -535,6 +544,10 @@
 
         // PrimeNG Table Overrides
         ::ng-deep {
+          .p-select {
+            margin-top: 1rem;
+            border: none;
+          }
           .p-datatable {
             background: transparent;
             color: get-color(secondary, 200);
