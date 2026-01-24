@@ -25,16 +25,12 @@
       flex: 1;
       min-width: 250px;
       max-width: 300px;
-      background: linear-gradient(
-        135deg,
-        rgba(get-color(primary, 900), 0.3),
-        rgba(get-color(secondary, 900), 0.3)
-      );
+      @include gradient-background("card-dark", 0.3, 0.3);
       border: 1px solid rgba(get-color(primary, 600), 0.3);
-      border-radius: 12px;
+      @include rounded(xl);
 
       .p-card-header {
-        padding: 0;
+        padding: 1rem;
       }
 
       .p-card-body {
@@ -50,11 +46,7 @@
         align-items: center;
         gap: 8px;
         padding: 12px 16px;
-        background: linear-gradient(
-          135deg,
-          rgba(get-color(primary, 800), 0.5),
-          rgba(get-color(secondary, 800), 0.5)
-        );
+        @include gradient-background("dark", 0.5, 0.5);
         border-bottom: 1px solid rgba(get-color(primary, 600), 0.3);
 
         span {
@@ -66,7 +58,6 @@
 
       .card-poster {
         width: 100%;
-        height: 350px;
         overflow: hidden;
 
         img {
@@ -76,16 +67,7 @@
         }
 
         .poster-placeholder {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: linear-gradient(
-            135deg,
-            get-color(neutral, 800),
-            get-color(neutral, 900)
-          );
+          @include poster-placeholder;
         }
       }
 
@@ -193,7 +175,7 @@
     }
   }
 
-  @media (max-width: 768px) {
+  @include breakpoint-max(md) {
     .comparison-cards {
       flex-direction: column;
 
@@ -210,6 +192,7 @@
 
     .comparison-actions {
       flex-direction: column;
+      text-align: center;
 
       ::ng-deep .comparison-button {
         max-width: 100%;

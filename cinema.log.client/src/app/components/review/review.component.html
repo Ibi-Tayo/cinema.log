@@ -55,6 +55,8 @@
             <div class="mode-toggle">
               <label class="toggle-label">
                 <input
+                  id="comparisonModeToggle"
+                  name="comparisonMode"
                   type="checkbox"
                   [checked]="comparisonState.mode() === 'bulk'"
                   (change)="onToggleMode()"

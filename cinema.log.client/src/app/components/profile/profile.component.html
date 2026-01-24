@@ -127,7 +127,7 @@
                         {{ review.date | date: "MMM d, yyyy" }}
                       </p>
                       <div class="rating">
-                        @for (star of getStars(review.rating); track star) {
+                        @for (star of getStars(review.rating); track $index) {
                           <span class="star" [class.filled]="star === 'full'">
                             ★
                           </span>
@@ -288,6 +288,8 @@
                   <th>
                     <p-iconfield iconPosition="right">
                       <input
+                        id="filmSearchFilter"
+                        name="filmSearch"
                         pInputText
                         type="text"
                         (input)="
@@ -319,7 +321,7 @@
                     <div class="rating-stars">
                       @for (
                         star of getStars(ratingDetail.rating.initialRating);
-                        track star
+                        track $index
                       ) {
                         <span class="star" [class.filled]="star === 'full'">
                           ★

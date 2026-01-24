@@ -10,12 +10,8 @@
     align-items: center;
     margin-bottom: 24px;
     padding: 16px;
-    background: linear-gradient(
-      135deg,
-      rgba(get-color(primary, 900), 0.3),
-      rgba(get-color(secondary, 900), 0.3)
-    );
-    border-radius: 8px;
+    @include gradient-background("card-dark", 0.3, 0.3);
+    @include rounded(lg);
 
     p {
       margin: 0;
@@ -33,7 +29,7 @@
       border-radius: 4px;
     }
 
-    @media (max-width: 768px) {
+    @include breakpoint-max(md) {
       flex-direction: column;
       gap: 12px;
       text-align: center;
@@ -47,15 +43,11 @@
     margin-bottom: 24px;
 
     ::ng-deep .target-film-card {
-      background: linear-gradient(
-        135deg,
-        rgba(get-color(primary, 800), 0.95),
-        rgba(get-color(secondary, 800), 0.95)
-      );
+      @include gradient-background("dark", 0.95, 0.95);
       backdrop-filter: blur(10px);
       border: 2px solid get-color(primary, 600);
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      @include rounded(lg);
+      @include shadow(md);
 
       .p-card-body {
         padding: 0;
@@ -86,22 +78,19 @@
     gap: 24px;
     margin-bottom: 32px;
 
-    @media (max-width: 768px) {
+    @include breakpoint-max(md) {
       grid-template-columns: 1fr;
     }
 
     .bulk-film-item {
       display: flex;
       flex-direction: column;
-      background: linear-gradient(
-        135deg,
-        rgba(get-color(primary, 900), 0.3),
-        rgba(get-color(secondary, 900), 0.3)
-      );
+      align-items: center;
+      @include gradient-background("card-dark", 0.3, 0.3);
       border: 1px solid rgba(get-color(primary, 600), 0.3);
-      border-radius: 12px;
+      @include rounded(xl);
       overflow: hidden;
-      transition: all 0.3s ease;
+      @include transition;
 
       &:hover {
         transform: translateY(-4px);
@@ -110,9 +99,21 @@
       }
 
       .bulk-film-poster {
-        width: 100%;
-        height: 200px;
+        flex-shrink: 0;
+        width: 200px;
+        height: 300px;
+        margin: 1rem;
+        @include rounded("2xl");
         overflow: hidden;
+        @include shadow(sm);
+
+        @include breakpoint-max(md) {
+          width: 100%;
+          height: auto;
+          max-width: 200px;
+          margin: 1rem;
+
+        }
 
         img {
           width: 100%;
@@ -121,16 +122,7 @@
         }
 
         .poster-placeholder-small {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: linear-gradient(
-            135deg,
-            get-color(neutral, 800),
-            get-color(neutral, 900)
-          );
+          @include poster-placeholder;
         }
       }
 
@@ -226,15 +218,11 @@
     gap: 16px;
     justify-content: center;
     padding: 24px;
-    background: linear-gradient(
-      135deg,
-      rgba(get-color(primary, 900), 0.3),
-      rgba(get-color(secondary, 900), 0.3)
-    );
-    border-radius: 8px;
+    @include gradient-background("card-dark", 0.3, 0.3);
+    @include rounded(lg);
     border: 1px solid rgba(get-color(primary, 600), 0.3);
 
-    @media (max-width: 768px) {
+    @include breakpoint-max(md) {
       flex-direction: column;
 
       ::ng-deep .p-button {
