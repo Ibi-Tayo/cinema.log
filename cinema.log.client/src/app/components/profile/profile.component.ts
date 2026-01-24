@@ -146,12 +146,12 @@ export class ProfileComponent implements OnInit {
   loadUserRatings(userId: string): void {
     this.ratingsService.getRatingsByUserId(userId).subscribe({
       next: (ratings) => {
-        ratings.forEach((rating) => {
-          rating.filmReleaseYear = new Date(
-            rating.filmReleaseYear,
-          ).getFullYear();
-        });
-        this.userRatings.set(ratings);
+        const ratingsWithRank = ratings.map((rating, index) => ({
+          ...rating,
+          eloRank: index + 1,
+          filmReleaseYear: new Date(rating.filmReleaseYear).getFullYear(),
+        }));
+        this.userRatings.set(ratingsWithRank);
       },
       error: (error) => {
         this.errorMessage.set(error.message || 'Failed to load user ratings');

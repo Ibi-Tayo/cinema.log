@@ -23,6 +23,7 @@ export interface UserFilmRatingDetail {
   filmTitle: string;
   filmReleaseYear: number;
   filmPosterURL: string;
+  eloRank?: number;
 }
 
 export interface ComparisonPair {

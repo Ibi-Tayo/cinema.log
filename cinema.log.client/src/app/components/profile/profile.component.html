@@ -271,11 +271,11 @@
                   <th pSortableColumn="filmTitle">
                     Film <p-sortIcon field="filmTitle" />
                   </th>
-                  <th pSortableColumn="filmReleaseYear" style="width: 150px">
-                    Release Year <p-sortIcon field="filmReleaseYear" />
-                  </th>
                   <th pSortableColumn="rating.eloRating" style="width: 150px">
                     Elo Rating <p-sortIcon field="rating.eloRating" />
+                  </th>
+                  <th pSortableColumn="filmReleaseYear" style="width: 150px">
+                    Release Year <p-sortIcon field="filmReleaseYear" />
                   </th>
                   <th
                     pSortableColumn="rating.initialRating"
@@ -313,10 +313,10 @@
                     (click)="selectFilm(ratingDetail.rating.filmId)"
                     style="cursor: pointer"
                   >
-                    {{ ratingDetail.filmTitle }}
+                    {{ ratingDetail.eloRank }}. {{ ratingDetail.filmTitle }}
                   </td>
-                  <td>{{ ratingDetail.filmReleaseYear }}</td>
                   <td>{{ ratingDetail.rating.eloRating | number: "1.0-0" }}</td>
+                  <td>{{ ratingDetail.filmReleaseYear }}</td>
                   <td>
                     <div class="rating-stars">
                       @for (

@@ -40,7 +40,7 @@
       <!-- Rating Section (only for new reviews) -->
       @if (!hasRating()) {
         <div class="rating-section">
-          <label>Rating (out of 5)</label>
+          <p class="rating-label">Rating (out of 5)</p>
           <div class="star-rating">
             @for (star of getStars(); track star) {
               <span
@@ -48,6 +48,9 @@
                 [class.selected]="star <= selectedRating()"
                 [class.hover]="star <= selectedRating()"
                 (click)="selectRating(star)"
+                role="button"
+                tabindex="0"
+                [attr.aria-label]="'Rate ' + star + ' out of 5 stars'"
               >
                 ★
               </span>
