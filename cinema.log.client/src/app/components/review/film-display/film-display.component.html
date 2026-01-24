@@ -1,0 +1,55 @@
+<div class="film-section">
+  <div class="film-poster">
+    @if (film().posterUrl) {
+      <img [src]="getPosterUrl(film().posterUrl)" [alt]="film().title" />
+    }
+    @if (!film().posterUrl) {
+      <div class="poster-placeholder">
+        <lord-icon
+          src="https://cdn.lordicon.com/ugllxeyl.json"
+          trigger="hover"
+          style="width: 100px; height: 100px"
+        >
+        </lord-icon>
+      </div>
+    }
+  </div>
+  <div class="film-details">
+    <h2>{{ film().title }}</h2>
+    <p class="film-year">{{ film().releaseYear }}</p>
+    <!-- ELO Rating Display (only shown if user has rated) -->
+    @if (filmRating()) {
+      <div class="elo-rating-section">
+        <div class="elo-rating-badge">
+          <lord-icon
+            src="https://cdn.lordicon.com/lrzdmsmx.json"
+            trigger="hover"
+            style="width: 32px; height: 32px"
+          >
+          </lord-icon>
+          <div class="elo-info">
+            <span class="elo-label">ELO Rating</span>
+            <span class="elo-value">{{
+              filmRating()!.eloRating | number: "1.0-0"
+            }}</span>
+          </div>
+        </div>
+        <p class="elo-hint">
+          Based on {{ filmRating()!.numberOfComparisons }} comparisons
+        </p>
+      </div>
+    }
+    <div class="film-description-section">
+      <h3>
+        <lord-icon
+          src="https://cdn.lordicon.com/cfkiwvcc.json"
+          trigger="hover"
+          style="width: 24px; height: 24px"
+        >
+        </lord-icon>
+        Description
+      </h3>
+      <p class="film-description">{{ film().description }}</p>
+    </div>
+  </div>
+</div>

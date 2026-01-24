@@ -7,7 +7,6 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FilmService, Film } from '../../services/film.service';
 import {
@@ -22,26 +21,37 @@ import {
   UserFilmRating,
   ComparisonRequest,
 } from '../../services/rating.service';
-import { getTMDBPosterUrl, TMDBPosterSize } from '../../utils/tmdb-image.util';
+import { ComparisonStateService } from '../../services/comparison-state.service';
+
+// Child components
+import { LoadingStateComponent } from '../shared/loading-state/loading-state.component';
+import { ErrorStateComponent } from '../shared/error-state/error-state.component';
+import { FilmDisplayComponent } from './film-display/film-display.component';
+import { ReviewFormComponent } from './review-form/review-form.component';
+import { SequentialComparisonComponent } from './film-comparison/sequential-comparison/sequential-comparison.component';
+import { BulkComparisonComponent } from './film-comparison/bulk-comparison/bulk-comparison.component';
 
 // PrimeNG imports
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageModule } from 'primeng/message';
-import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'app-review',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    LoadingStateComponent,
+    ErrorStateComponent,
+    FilmDisplayComponent,
+    ReviewFormComponent,
+    SequentialComparisonComponent,
+    BulkComparisonComponent,
     CardModule,
     ButtonModule,
     ProgressSpinnerModule,
     MessageModule,
-    DividerModule,
   ],
   templateUrl: './review.component.html',
   styleUrl: './review.component.scss',
@@ -58,8 +68,6 @@ export class ReviewComponent implements OnInit {
   errorMessage = signal('');
 
   // Review form data signals
-  selectedRating = signal(0);
-  reviewText = signal('');
   isSubmitting = signal(false);
   submitSuccess = signal(false);
   submitError = signal('');
@@ -74,12 +82,11 @@ export class ReviewComponent implements OnInit {
   currentComparisonIndex = signal(0);
   isSubmittingComparison = signal(false);
   showComparisons = signal(false);
+  loadedFilmsCount = signal(0);
+  maxBulkFilms = signal(50);
 
   // Computed signals
   hasRating = computed(() => this.filmRating() !== null);
-  canSubmit = computed(
-    () => this.selectedRating() > 0 && this.reviewText().trim().length > 0
-  );
   currentComparisonFilm = computed(() => {
     const index = this.currentComparisonIndex();
     const films = this.filmsForComparison();
@@ -90,6 +97,11 @@ export class ReviewComponent implements OnInit {
     const total = this.filmsForComparison().length;
     return `${index + 1} / ${total}`;
   });
+  canLoadMore = computed(() => {
+    const loaded = this.loadedFilmsCount();
+    const max = this.maxBulkFilms();
+    return loaded < max && !this.isLoadingComparisons();
+  });
 
   constructor(
     private route: ActivatedRoute,
@@ -97,7 +109,8 @@ export class ReviewComponent implements OnInit {
     private filmService: FilmService,
     private reviewService: ReviewService,
     private authService: AuthService,
-    private ratingService: RatingService
+    private ratingService: RatingService,
+    public comparisonState: ComparisonStateService,
   ) {
     const navigation = this.router.currentNavigation?.();
     const filmFromState = navigation?.extras.state?.['film'];
@@ -114,6 +127,9 @@ export class ReviewComponent implements OnInit {
       this.errorMessage.set('Film ID is required');
       this.isLoading.set(false);
     }
+
+    // Load comparison mode preference
+    this.comparisonState.loadModePreference();
   }
 
   loadFilm(filmId: string): void {
@@ -151,10 +167,9 @@ export class ReviewComponent implements OnInit {
     this.reviewService.getAllReviewsByUserId(userId).subscribe({
       next: (reviews) => {
         const existingReview = reviews.find(
-          (review) => review.filmId === this.film()?.id
+          (review) => review.filmId === this.film()?.id,
         );
         if (existingReview) {
-          this.reviewText.set(existingReview.title);
           this.review.set(existingReview);
         }
       },
@@ -164,17 +179,10 @@ export class ReviewComponent implements OnInit {
     });
   }
 
-  selectRating(rating: number): void {
-    this.selectedRating.set(rating);
-  }
-
-  submitReview(): void {
-    if (
-      !this.film() ||
-      this.selectedRating() === 0 ||
-      !this.reviewText().trim()
-    ) {
-      this.submitError.set('Please provide both a rating and a review.');
+  // Handler for review form submission (new review)
+  onReviewSubmit(data: { rating: number; content: string }): void {
+    if (!this.film()) {
+      this.submitError.set('Film information is missing.');
       return;
     }
 
@@ -184,17 +192,14 @@ export class ReviewComponent implements OnInit {
 
     const reviewRequest: CreateReviewRequest = {
       filmId: this.film()!.id,
-      rating: this.selectedRating(),
-      content: this.reviewText().trim(),
+      rating: data.rating,
+      content: data.content,
     };
 
     this.reviewService.createReview(reviewRequest).subscribe({
       next: () => {
         this.submitSuccess.set(true);
         this.isSubmitting.set(false);
-        // Reset form
-        this.selectedRating.set(0);
-        this.reviewText.set('');
         // Load the rating and comparisons
         const film = this.film();
         if (film) {
@@ -210,8 +215,9 @@ export class ReviewComponent implements OnInit {
     });
   }
 
-  updateReview(): void {
-    if (!this.film() || !this.reviewText().trim()) {
+  // Handler for review form update (existing review)
+  onReviewUpdate(content: string): void {
+    if (!this.film() || !content.trim()) {
       this.submitError.set('Please provide a review.');
       return;
     }
@@ -222,15 +228,13 @@ export class ReviewComponent implements OnInit {
 
     const updateReviewRequest: UpdateReviewRequest = {
       reviewId: this.review()?.id || '',
-      content: this.reviewText().trim(),
+      content: content.trim(),
     };
 
     this.reviewService.updateReview(updateReviewRequest).subscribe({
       next: () => {
         this.submitSuccess.set(true);
         this.isSubmitting.set(false);
-        // Reset form
-        this.reviewText.set('');
         // Load the rating and comparisons
         const film = this.film();
         if (film) {
@@ -245,15 +249,11 @@ export class ReviewComponent implements OnInit {
       error: (error) => {
         console.error('Error submitting review update:', error);
         this.submitError.set(
-          'Failed to submit review update. Please try again.'
+          'Failed to submit review update. Please try again.',
         );
         this.isSubmitting.set(false);
       },
     });
-  }
-
-  getStars(): number[] {
-    return [1, 2, 3, 4, 5];
   }
 
   goBackToSearch(): void {
@@ -272,7 +272,9 @@ export class ReviewComponent implements OnInit {
     this.filmService.getFilmsForComparison(userId, film.id).subscribe({
       next: (films) => {
         console.log('Loaded films for comparison:', films);
-        this.filmsForComparison.set(films ?? []); // This is because the server might return null
+        const filmList = films ?? [];
+        this.filmsForComparison.set(filmList);
+        this.loadedFilmsCount.set(filmList.length);
         this.isLoadingComparisons.set(false);
         this.currentComparisonIndex.set(0);
         console.log('Reset comparison index to 0, total films:', films?.length);
@@ -285,7 +287,8 @@ export class ReviewComponent implements OnInit {
     });
   }
 
-  submitComparison(result: 'better' | 'worse' | 'same'): void {
+  // Handler for sequential comparison result
+  onComparisonResult(result: 'better' | 'worse' | 'same'): void {
     const userId = this.authService.currentUser()?.id;
     const film = this.film();
     if (!userId || !film) return;
@@ -348,7 +351,7 @@ export class ReviewComponent implements OnInit {
       error: (error) => {
         console.error('Error submitting comparison:', error);
         this.comparisonError.set(
-          'Failed to submit comparison. Please try again.'
+          'Failed to submit comparison. Please try again.',
         );
         this.isSubmittingComparison.set(false);
       },
@@ -364,16 +367,99 @@ export class ReviewComponent implements OnInit {
     }
   }
 
-  /**
-   * Gets the TMDB poster URL for a film with specified size
-   * @param posterPath
-   * @param size
-   */
-  getPosterUrl(
-    posterPath: string | null | undefined,
-    size: TMDBPosterSize = 'original'
-  ): string {
-    return getTMDBPosterUrl(posterPath, size);
+  // Handler for mode toggle from bulk comparison component
+  onToggleMode(): void {
+    this.comparisonState.toggleMode();
+
+    // Reset and reload comparisons when switching modes
+    this.filmsForComparison.set([]);
+    this.comparisonState.resetSelections();
+    this.currentComparisonIndex.set(0);
+    this.loadedFilmsCount.set(0);
+
+    if (this.film()) {
+      this.loadFilmsForComparison();
+    }
+  }
+
+  // Handler for load more from bulk comparison component
+  onLoadMore(): void {
+    const userId = this.authService.currentUser()?.id;
+    const film = this.film();
+    if (!userId || !film || this.isLoadingComparisons()) return;
+
+    const currentCount = this.loadedFilmsCount();
+    if (currentCount >= this.maxBulkFilms()) return;
+
+    this.isLoadingComparisons.set(true);
+    this.comparisonError.set('');
+
+    this.filmService.getFilmsForComparison(userId, film.id).subscribe({
+      next: (newFilms) => {
+        if (newFilms && newFilms.length > 0) {
+          const currentFilms = this.filmsForComparison();
+          const allFilms = [...currentFilms, ...newFilms];
+          this.filmsForComparison.set(allFilms);
+          this.loadedFilmsCount.set(allFilms.length);
+        }
+        this.isLoadingComparisons.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading more films:', error);
+        this.comparisonError.set('Failed to load more films.');
+        this.isLoadingComparisons.set(false);
+      },
+    });
+  }
+
+  // Handler for batch submit from bulk comparison component
+  onBatchSubmit(): void {
+    const userId = this.authService.currentUser()?.id;
+    const film = this.film();
+    if (!userId || !film) return;
+
+    const selections = this.comparisonState.getAllSelections();
+    if (selections.length === 0) {
+      this.comparisonError.set('Please select at least one comparison.');
+      return;
+    }
+
+    this.isSubmittingComparison.set(true);
+    this.comparisonError.set('');
+
+    // Convert selections to comparison items
+    const comparisons = selections.map((selection) => ({
+      challengerFilmId: selection.filmId,
+      result: selection.result,
+    }));
+
+    const request = {
+      userId,
+      targetFilmId: film.id,
+      comparisons,
+    };
+
+    this.ratingService.compareBatch(request).subscribe({
+      next: () => {
+        this.isSubmittingComparison.set(false);
+        // Clear selections
+        this.comparisonState.resetSelections();
+        // Refresh the rating
+        this.ratingService.getRating(userId, film.id).subscribe({
+          next: (rating) => this.filmRating.set(rating),
+          error: () => this.filmRating.set(null),
+        });
+        // Redirect to profile
+        this.finishComparisons();
+      },
+      error: (error) => {
+        console.error('Error submitting batch comparisons:', error);
+        this.comparisonError.set(
+          'Failed to submit comparisons. Please try again.',
+        );
+        this.isSubmittingComparison.set(false);
+      },
+    });
   }
 
   private loadFilmFromId(filmId: string) {

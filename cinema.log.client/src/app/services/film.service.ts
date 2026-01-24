@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
-import { Observable, catchError, throwError, tap, of } from 'rxjs';
+import { Observable, catchError, throwError, tap, of, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { handleHttpError } from '../utils/error-handler.util';
 
@@ -136,10 +136,11 @@ export class FilmService {
 
   getSeenUnratedFilms(userId: string): Observable<Film[]> {
     return this.http
-      .get<Film[]>(`${environment.apiUrl}/films/seen-unrated/${userId}`, {
+      .get<Film[] | null>(`${environment.apiUrl}/films/seen-unrated/${userId}`, {
         withCredentials: true,
       })
       .pipe(
+        map((films) => films || []), // Handle null response from API
         tap((films) => {
           // Cache films
           const filmCache = new Map(this.filmCache());

@@ -2,6 +2,7 @@ package ratings
 
 import (
 	"context"
+	"database/sql"
 	"math"
 	"time"
 
@@ -23,6 +24,11 @@ type RatingStore interface {
 	CreateComparison(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error)
 	HasBeenCompared(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error)
 	GetComparisonHistory(ctx context.Context, userId uuid.UUID) ([]domain.ComparisonHistory, error)
+	BulkGetRatings(ctx context.Context, userId uuid.UUID, filmIds []uuid.UUID) (map[uuid.UUID]*domain.UserFilmRating, error)
+	BulkHasBeenCompared(ctx context.Context, userId uuid.UUID, pairs []domain.ComparisonPair) (map[string]bool, error)
+	BulkInsertComparisons(ctx context.Context, comparisons []domain.ComparisonHistory) error
+	BulkUpdateRatings(ctx context.Context, tx *sql.Tx, ratings []domain.UserFilmRating) error
+	BeginTx(ctx context.Context) (*sql.Tx, error)
 }
 
 func NewService(r RatingStore) *Service {
@@ -201,4 +207,151 @@ func (s Service) getInitialEloRating(rating float32) float32 {
 	default:
 		return 1000
 	}
+}
+
+// ProcessBatchComparisons processes multiple film comparisons in a single transaction
+func (s Service) ProcessBatchComparisons(ctx context.Context, userId, targetFilmId uuid.UUID, comparisons []ComparisonItem) error {
+	if len(comparisons) == 0 {
+		return nil
+	}
+
+	// Cap at 50 comparisons
+	if len(comparisons) > 50 {
+		comparisons = comparisons[:50]
+	}
+
+	// Collect all film IDs (target + all challengers)
+	filmIds := []uuid.UUID{targetFilmId}
+	for _, comp := range comparisons {
+		filmIds = append(filmIds, comp.ChallengerFilmId)
+	}
+
+	// Fetch all ratings in bulk
+	ratingsMap, err := s.RatingStore.BulkGetRatings(ctx, userId, filmIds)
+	if err != nil {
+		return err
+	}
+
+	// Validate target film exists
+	targetRating, ok := ratingsMap[targetFilmId]
+	if !ok {
+		return ErrRatingNotFound
+	}
+
+	// Filter out duplicates and validate all films exist
+	var validComparisons []ComparisonItem
+	for _, comp := range comparisons {
+		challengerRating, ok := ratingsMap[comp.ChallengerFilmId]
+		if !ok {
+			continue // Skip missing films
+		}
+
+		// Check if already compared
+		hasBeenCompared, err := s.RatingStore.HasBeenCompared(ctx, userId, targetFilmId, comp.ChallengerFilmId)
+		if err != nil {
+			return err
+		}
+		if hasBeenCompared {
+			continue // Skip duplicates
+		}
+
+		validComparisons = append(validComparisons, comp)
+		ratingsMap[comp.ChallengerFilmId] = challengerRating
+	}
+
+	if len(validComparisons) == 0 {
+		return nil // Nothing to process
+	}
+
+	// Begin transaction
+	tx, err := s.RatingStore.BeginTx(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Process comparisons sequentially to maintain K-factor progression
+	var updatedRatings []domain.UserFilmRating
+	var comparisonHistory []domain.ComparisonHistory
+	currentTargetRating := *targetRating
+
+	for _, comp := range validComparisons {
+		challengerRating := ratingsMap[comp.ChallengerFilmId]
+
+		// Determine winner
+		var winningFilmId uuid.UUID
+		var wasEqual bool
+		var targetResult, challengerResult float64
+
+		switch comp.Result {
+		case "better":
+			winningFilmId = targetFilmId
+			targetResult = 1.0
+			challengerResult = 0.0
+		case "worse":
+			winningFilmId = comp.ChallengerFilmId
+			targetResult = 0.0
+			challengerResult = 1.0
+		case "same":
+			winningFilmId = targetFilmId // Use target as placeholder
+			wasEqual = true
+			targetResult = 0.5
+			challengerResult = 0.5
+		}
+
+		// Calculate expected results
+		targetExpected := s.calculateExpectedResult(currentTargetRating.EloRating, challengerRating.EloRating)
+		challengerExpected := s.calculateExpectedResult(challengerRating.EloRating, currentTargetRating.EloRating)
+
+		// Update K constants
+		currentTargetRating.KConstantValue = s.updateKConstantValue(currentTargetRating)
+		challengerRating.KConstantValue = s.updateKConstantValue(*challengerRating)
+
+		// Recalculate ratings
+		targetNewRating := s.recalculateFilmRating(targetExpected, targetResult, currentTargetRating.EloRating, currentTargetRating.KConstantValue)
+		challengerNewRating := s.recalculateFilmRating(challengerExpected, challengerResult, challengerRating.EloRating, challengerRating.KConstantValue)
+
+		// Update ratings
+		currentTargetRating.EloRating = targetNewRating
+		currentTargetRating.LastUpdated = time.Now()
+		currentTargetRating.NumberOfComparisons += 1
+
+		challengerRating.EloRating = challengerNewRating
+		challengerRating.LastUpdated = time.Now()
+		challengerRating.NumberOfComparisons += 1
+
+		// Add to update list
+		updatedRatings = append(updatedRatings, currentTargetRating, *challengerRating)
+
+		// Create comparison history
+		comparisonHistory = append(comparisonHistory, domain.ComparisonHistory{
+			ID:             uuid.New(),
+			UserId:         userId,
+			FilmAId:        targetFilmId,
+			FilmBId:        comp.ChallengerFilmId,
+			WinningFilmId:  winningFilmId,
+			ComparisonDate: time.Now(),
+			WasEqual:       wasEqual,
+		})
+
+		// Update ratingsMap for next iteration
+		ratingsMap[comp.ChallengerFilmId] = challengerRating
+	}
+
+	// Bulk update all ratings
+	if err := s.RatingStore.BulkUpdateRatings(ctx, tx, updatedRatings); err != nil {
+		return err
+	}
+
+	// Bulk insert comparison history
+	if err := s.RatingStore.BulkInsertComparisons(ctx, comparisonHistory); err != nil {
+		return err
+	}
+
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
 }

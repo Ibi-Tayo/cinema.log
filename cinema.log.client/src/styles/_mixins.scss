@@ -42,6 +42,229 @@
   justify-content: space-between;
 }
 
+@mixin flex-center-column($gap: 0) {
+  @include flex-center;
+  flex-direction: column;
+  @if $gap > 0 {
+    gap: $gap;
+  }
+}
+
+// Utility mixins
+@mixin transition($type: "standard") {
+  transition: map.get($transitions, $type);
+}
+
+@mixin shadow($size: "base") {
+  box-shadow: map.get($shadows, $size);
+}
+
+@mixin rounded($size: "base") {
+  border-radius: map.get($border-radius, $size);
+}
+
+@mixin icon-shrink {
+  lord-icon {
+    flex-shrink: 0;
+  }
+}
+
+@mixin poster-placeholder($include-gradient: true) {
+  @include flex-center;
+  width: 100%;
+  height: 100%;
+  color: get-color(neutral, 700);
+
+  @if $include-gradient {
+    background: linear-gradient(
+      135deg,
+      get-color(neutral, 800),
+      get-color(neutral, 900)
+    );
+  }
+}
+
+@mixin form-label {
+  display: block;
+  font-size: map.get($font-sizes, "lg");
+  font-weight: 500;
+  color: get-color(neutral, 400);
+  margin-bottom: 1rem;
+}
+
+// Gradient variants
+@mixin gradient-background($variant: "default", $opacity1: 1, $opacity2: 1) {
+  @if $variant == "default" {
+    background: linear-gradient(
+      135deg,
+      rgba(get-color(primary, 700), $opacity1) 0%,
+      rgba(get-color(secondary, 700), $opacity2) 100%
+    );
+  } @else if $variant == "dark" {
+    background: linear-gradient(
+      135deg,
+      rgba(get-color(primary, 800), $opacity1) 0%,
+      rgba(get-color(secondary, 800), $opacity2) 100%
+    );
+  } @else if $variant == "light" {
+    background: linear-gradient(
+      135deg,
+      rgba(get-color(primary, 600), $opacity1) 0%,
+      rgba(get-color(secondary, 600), $opacity2) 100%
+    );
+  } @else if $variant == "accent" {
+    background: linear-gradient(
+      135deg,
+      rgba(get-color(primary, 500), $opacity1) 0%,
+      rgba(get-color(secondary, 500), $opacity2) 100%
+    );
+  } @else if $variant == "card-dark" {
+    background: linear-gradient(
+      135deg,
+      rgba(get-color(primary, 900), $opacity1) 0%,
+      rgba(get-color(secondary, 900), $opacity2) 100%
+    );
+  }
+}
+
+// Card container
+@mixin card-container {
+  padding: 2rem;
+  @include gradient-background;
+  @include rounded("2xl");
+  @include shadow(base);
+}
+
+// Section title with icon support
+@mixin section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: map.get($font-sizes, "2xl");
+  font-weight: 500;
+  color: get-color(neutral, 400);
+  margin: 0 0 2rem 0;
+
+  @include icon-shrink;
+}
+
+// PrimeNG button base styles
+@mixin primeng-button-base {
+  padding: 1rem 1.5rem;
+  @include rounded("3xl");
+  font-size: map.get($font-sizes, "base");
+  font-weight: 600;
+  font-family: $font-family-primary;
+  @include shadow(base);
+  @include transition;
+  border: none;
+
+  &:not(:disabled):hover {
+    transform: translateY(-2px);
+    @include shadow(md);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Button with variants
+@mixin button-base($variant: "primary") {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  @include primeng-button-base;
+  cursor: pointer;
+  @include icon-shrink;
+
+  @if $variant == "primary" {
+    background: get-color(primary, 500);
+    color: white;
+    &:hover:not(:disabled) {
+      background: get-color(primary, 400);
+      @include shadow(lg);
+    }
+  } @else if $variant == "secondary" {
+    background: get-color(secondary, 700);
+    color: get-color(neutral, 300);
+    &:hover {
+      background: get-color(secondary, 600);
+    }
+  }
+}
+
+@mixin toggle-switch($size: "medium") {
+  appearance: none;
+  background: get-color(neutral, 800);
+  border-radius: if($size == "large", 14px, 12px);
+  position: relative;
+  cursor: pointer;
+  @include transition(background);
+  border: 2px solid get-color(neutral, 700);
+
+  @if $size == "large" {
+    width: 52px;
+    height: 28px;
+  } @else {
+    width: 48px;
+    height: 24px;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    @if $size == "large" {
+      width: 22px;
+      height: 22px;
+      top: 1px;
+      left: 2px;
+    } @else {
+      width: 20px;
+      height: 20px;
+      top: 2px;
+      left: 2px;
+    }
+    background: white;
+    border-radius: 50%;
+    @include transition(transform);
+    @include shadow(sm);
+  }
+
+  &:checked {
+    @include gradient-background("light");
+    border-color: get-color(primary, 500);
+
+    &::before {
+      transform: translateX(24px);
+    }
+  }
+}
+
+@mixin status-indicator($status) {
+  @if $status == "better" {
+    background: rgba(get-color(success), 0.2);
+    border-color: get-color(success);
+    color: get-color(success);
+  } @else if $status == "same" {
+    background: rgba(get-color(warning), 0.2);
+    border-color: get-color(warning);
+    color: get-color(warning);
+  } @else if $status == "worse" {
+    background: rgba(get-color(error), 0.2);
+    border-color: get-color(error);
+    color: get-color(error);
+  }
+}
+
+@mixin breakpoint-max($breakpoint) {
+  $size: map.get($breakpoints, $breakpoint);
+  @media screen and (max-width: calc(#{$size} - 1px)) {
+    @content;
+  }
+}
+
 // Container
 @mixin container {
   width: 100%;

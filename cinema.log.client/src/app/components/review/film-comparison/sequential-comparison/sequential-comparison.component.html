@@ -1,0 +1,120 @@
+<div class="comparison-interface">
+  <div class="comparison-progress">
+    <span>Comparison {{ progressText() }}</span>
+  </div>
+  <div class="comparison-cards">
+    <!-- Current Film Card -->
+    <p-card styleClass="comparison-card current-film">
+      <ng-template pTemplate="header">
+        <div class="card-header">
+          <lord-icon
+            src="https://cdn.lordicon.com/zczzhvwa.json"
+            trigger="hover"
+            style="width: 24px; height: 24px"
+          >
+          </lord-icon>
+          <span>This Film</span>
+        </div>
+        <div class="card-poster">
+          @if (targetFilm().posterUrl) {
+            <img
+              [src]="getPosterUrl(targetFilm().posterUrl, 'w780')"
+              [alt]="targetFilm().title"
+            />
+          }
+          @if (!targetFilm().posterUrl) {
+            <div class="poster-placeholder">
+              <lord-icon
+                src="https://cdn.lordicon.com/ugllxeyl.json"
+                trigger="hover"
+                style="width: 60px; height: 60px"
+              >
+              </lord-icon>
+            </div>
+          }
+        </div>
+      </ng-template>
+      <ng-template pTemplate="content">
+        <div class="card-info">
+          <h4>{{ targetFilm().title }}</h4>
+          <p class="card-year">{{ targetFilm().releaseYear }}</p>
+        </div>
+      </ng-template>
+    </p-card>
+
+    <p-divider layout="vertical" styleClass="vs-divider">
+      <span>VS</span>
+    </p-divider>
+
+    <!-- Comparison Film Card -->
+    <p-card styleClass="comparison-card challenger-film">
+      <ng-template pTemplate="header">
+        <div class="card-header">
+          <lord-icon
+            src="https://cdn.lordicon.com/uwnsxkfm.json"
+            trigger="hover"
+            style="width: 24px; height: 24px"
+          >
+          </lord-icon>
+          <span>Challenger</span>
+        </div>
+        <div class="card-poster">
+          @if (challengerFilm().posterUrl) {
+            <img
+              [src]="getPosterUrl(challengerFilm().posterUrl, 'w780')"
+              [alt]="challengerFilm().title"
+            />
+          }
+          @if (!challengerFilm().posterUrl) {
+            <div class="poster-placeholder">
+              <lord-icon
+                src="https://cdn.lordicon.com/ugllxeyl.json"
+                trigger="hover"
+                style="width: 60px; height: 60px"
+              >
+              </lord-icon>
+            </div>
+          }
+        </div>
+      </ng-template>
+      <ng-template pTemplate="content">
+        <div class="card-info">
+          <h4>{{ challengerFilm().title }}</h4>
+          <p class="card-year">{{ challengerFilm().releaseYear }}</p>
+        </div>
+      </ng-template>
+    </p-card>
+  </div>
+  <div class="comparison-question">
+    <p>Which film do you prefer?</p>
+  </div>
+  <div class="comparison-actions">
+    <p-button
+      [label]="targetFilm().title"
+      icon="pi pi-thumbs-up"
+      (onClick)="onSelectBetter()"
+      [disabled]="isSubmitting()"
+      styleClass="comparison-button better"
+      [loading]="isSubmitting()"
+    ></p-button>
+
+    <p-button
+      [label]="challengerFilm().title"
+      icon="pi pi-thumbs-down"
+      (onClick)="onSelectWorse()"
+      [disabled]="isSubmitting()"
+      styleClass="comparison-button worse"
+      [loading]="isSubmitting()"
+    ></p-button>
+  </div>
+  <div class="same-section">
+    <p-button
+      label="About the Same"
+      icon="pi pi-equals"
+      (onClick)="onSelectSame()"
+      [disabled]="isSubmitting()"
+      styleClass="comparison-button same"
+      [loading]="isSubmitting()"
+    ></p-button>
+  </div>
+</div>

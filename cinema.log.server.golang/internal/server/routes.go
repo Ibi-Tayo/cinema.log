@@ -62,6 +62,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("GET /ratings/{userId}", s.ratingHandler.GetRatingsByUserId)
 	mux.HandleFunc("GET /ratings", s.ratingHandler.GetRating) // query params: userId, filmId
 	mux.HandleFunc("POST /ratings/compare-films", s.ratingHandler.CompareFilms)
+	mux.HandleFunc("POST /ratings/compare-films-batch", s.ratingHandler.CompareBatch)
 
 	// Graph routes
 	mux.HandleFunc("GET /graph", s.graphHandler.GetUserGraph)

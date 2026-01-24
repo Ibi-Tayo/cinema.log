@@ -2,7 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { handleHttpError, handleExpectedError } from '../utils/error-handler.util';
+import {
+  handleHttpError,
+  handleExpectedError,
+} from '../utils/error-handler.util';
 
 export interface UserFilmRating {
   id: string;
@@ -20,6 +23,7 @@ export interface UserFilmRatingDetail {
   filmTitle: string;
   filmReleaseYear: number;
   filmPosterURL: string;
+  eloRank?: number;
 }
 
 export interface ComparisonPair {
@@ -35,6 +39,22 @@ export interface ComparisonRequest {
   wasEqual: boolean;
 }
 
+export interface ComparisonItem {
+  challengerFilmId: string;
+  result: 'better' | 'worse' | 'same';
+}
+
+export interface BatchComparisonRequest {
+  userId: string;
+  targetFilmId: string;
+  comparisons: ComparisonItem[];
+}
+
+export interface BatchComparisonResponse {
+  success: boolean;
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -45,11 +65,15 @@ export class RatingService {
     return this.http
       .get<UserFilmRating>(
         `${environment.apiUrl}/ratings?userId=${userId}&filmId=${filmId}`,
-        { withCredentials: true }
+        { withCredentials: true },
       )
       .pipe(
         // Use handleExpectedError because 404 is expected when rating doesn't exist yet
-        catchError(handleExpectedError('Failed to fetch rating. Please try again later.'))
+        catchError(
+          handleExpectedError(
+            'Failed to fetch rating. Please try again later.',
+          ),
+        ),
       );
   }
 
@@ -62,24 +86,49 @@ export class RatingService {
         catchError(
           handleHttpError(
             'fetching ratings by user ID',
-            'Failed to fetch ratings. Please try again later.'
-          )
-        )
+            'Failed to fetch ratings. Please try again later.',
+          ),
+        ),
       );
   }
 
   compareFilms(comparison: ComparisonRequest): Observable<ComparisonPair> {
     return this.http
-      .post<ComparisonPair>(`${environment.apiUrl}/ratings/compare-films`, comparison, {
-        withCredentials: true,
-      })
+      .post<ComparisonPair>(
+        `${environment.apiUrl}/ratings/compare-films`,
+        comparison,
+        {
+          withCredentials: true,
+        },
+      )
       .pipe(
         catchError(
           handleHttpError(
             'comparing films',
-            'Failed to compare films. Please try again later.'
-          )
-        )
+            'Failed to compare films. Please try again later.',
+          ),
+        ),
+      );
+  }
+
+  compareBatch(
+    request: BatchComparisonRequest,
+  ): Observable<BatchComparisonResponse> {
+    return this.http
+      .post<BatchComparisonResponse>(
+        `${environment.apiUrl}/ratings/compare-films-batch`,
+        request,
+        {
+          withCredentials: true,
+        },
+      )
+      .pipe(
+        catchError(
+          handleHttpError(
+            'comparing films in batch',
+            'Failed to compare films. Please try again later.',
+          ),
+        ),
       );
   }
 }

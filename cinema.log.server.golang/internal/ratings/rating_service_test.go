@@ -2,6 +2,7 @@ package ratings
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 	"time"
 
@@ -11,15 +12,20 @@ import (
 
 // Add mock store for service testing
 type mockRatingStore struct {
-	getRatingFunc            func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
-	getAllRatingsFunc        func(ctx context.Context) ([]domain.UserFilmRating, error)
-	getRatingsByUserIdFunc   func(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error)
-	createRatingFunc         func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
-	updateRatingFunc         func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
-	updateRatingsFunc        func(ctx context.Context, ratings domain.ComparisonPair) (*domain.ComparisonPair, error)
-	createComparisonFunc     func(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error)
-	hasBeenComparedFunc      func(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error)
-	getComparisonHistoryFunc func(ctx context.Context, userId uuid.UUID) ([]domain.ComparisonHistory, error)
+	getRatingFunc             func(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error)
+	getAllRatingsFunc         func(ctx context.Context) ([]domain.UserFilmRating, error)
+	getRatingsByUserIdFunc    func(ctx context.Context, userId uuid.UUID) ([]domain.UserFilmRatingDetail, error)
+	createRatingFunc          func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
+	updateRatingFunc          func(ctx context.Context, rating domain.UserFilmRating) (*domain.UserFilmRating, error)
+	updateRatingsFunc         func(ctx context.Context, ratings domain.ComparisonPair) (*domain.ComparisonPair, error)
+	createComparisonFunc      func(ctx context.Context, comparison domain.ComparisonHistory) (*domain.ComparisonHistory, error)
+	hasBeenComparedFunc       func(ctx context.Context, userId, filmAId, filmBId uuid.UUID) (bool, error)
+	getComparisonHistoryFunc  func(ctx context.Context, userId uuid.UUID) ([]domain.ComparisonHistory, error)
+	bulkGetRatingsFunc        func(ctx context.Context, userId uuid.UUID, filmIds []uuid.UUID) (map[uuid.UUID]*domain.UserFilmRating, error)
+	bulkHasBeenComparedFunc   func(ctx context.Context, userId uuid.UUID, pairs []domain.ComparisonPair) (map[string]bool, error)
+	bulkInsertComparisonsFunc func(ctx context.Context, comparisons []domain.ComparisonHistory) error
+	bulkUpdateRatingsFunc     func(ctx context.Context, tx *sql.Tx, ratings []domain.UserFilmRating) error
+	beginTxFunc               func(ctx context.Context) (*sql.Tx, error)
 }
 
 func (m *mockRatingStore) GetRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) (*domain.UserFilmRating, error) {
@@ -81,6 +87,41 @@ func (m *mockRatingStore) HasBeenCompared(ctx context.Context, userId, filmAId, 
 func (m *mockRatingStore) GetComparisonHistory(ctx context.Context, userId uuid.UUID) ([]domain.ComparisonHistory, error) {
 	if m.getComparisonHistoryFunc != nil {
 		return m.getComparisonHistoryFunc(ctx, userId)
+	}
+	return nil, nil
+}
+
+func (m *mockRatingStore) BulkGetRatings(ctx context.Context, userId uuid.UUID, filmIds []uuid.UUID) (map[uuid.UUID]*domain.UserFilmRating, error) {
+	if m.bulkGetRatingsFunc != nil {
+		return m.bulkGetRatingsFunc(ctx, userId, filmIds)
+	}
+	return nil, nil
+}
+
+func (m *mockRatingStore) BulkHasBeenCompared(ctx context.Context, userId uuid.UUID, pairs []domain.ComparisonPair) (map[string]bool, error) {
+	if m.bulkHasBeenComparedFunc != nil {
+		return m.bulkHasBeenComparedFunc(ctx, userId, pairs)
+	}
+	return nil, nil
+}
+
+func (m *mockRatingStore) BulkInsertComparisons(ctx context.Context, comparisons []domain.ComparisonHistory) error {
+	if m.bulkInsertComparisonsFunc != nil {
+		return m.bulkInsertComparisonsFunc(ctx, comparisons)
+	}
+	return nil
+}
+
+func (m *mockRatingStore) BulkUpdateRatings(ctx context.Context, tx *sql.Tx, ratings []domain.UserFilmRating) error {
+	if m.bulkUpdateRatingsFunc != nil {
+		return m.bulkUpdateRatingsFunc(ctx, tx, ratings)
+	}
+	return nil
+}
+
+func (m *mockRatingStore) BeginTx(ctx context.Context) (*sql.Tx, error) {
+	if m.beginTxFunc != nil {
+		return m.beginTxFunc(ctx)
 	}
 	return nil, nil
 }

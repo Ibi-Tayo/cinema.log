@@ -1,0 +1,112 @@
+<div class="bulk-comparison-interface">
+  <div class="bulk-header">
+    <p>Select your preference for each film below</p>
+    <span class="films-count"
+      >{{ loadedFilmsCount() }} / {{ maxFilms() }} films loaded</span
+    >
+  </div>
+
+  <!-- Target Film (Sticky) -->
+  <div class="target-film-sticky">
+    <p-card styleClass="target-film-card">
+      <ng-template pTemplate="header">
+        <div class="target-header">
+          <lord-icon
+            src="https://cdn.lordicon.com/zczzhvwa.json"
+            trigger="hover"
+            style="width: 24px; height: 24px"
+          >
+          </lord-icon>
+          <span
+            >Comparing: {{ targetFilm().title }} ({{
+              targetFilm().releaseYear
+            }})</span
+          >
+        </div>
+      </ng-template>
+    </p-card>
+  </div>
+
+  <!-- Challenger Films Grid -->
+  <div class="bulk-films-grid">
+    @for (challengerFilm of challengerFilms(); track challengerFilm.id) {
+      <div class="bulk-film-item">
+        <div class="bulk-film-poster">
+          @if (challengerFilm.posterUrl) {
+            <img
+              [src]="getPosterUrl(challengerFilm.posterUrl, 'w780')"
+              [alt]="challengerFilm.title"
+            />
+          } @else {
+            <div class="poster-placeholder-small">
+              <lord-icon
+                src="https://cdn.lordicon.com/ugllxeyl.json"
+                trigger="hover"
+                style="width: 40px; height: 40px"
+              >
+              </lord-icon>
+            </div>
+          }
+        </div>
+        <div class="bulk-film-info">
+          <h4>{{ challengerFilm.title }}</h4>
+          <p>{{ challengerFilm.releaseYear }}</p>
+        </div>
+        <div class="bulk-film-actions">
+          <button
+            class="bulk-button better"
+            [class.selected]="
+              comparisonState.selections().get(challengerFilm.id) === 'better'
+            "
+            (click)="setSelection(challengerFilm.id, 'better')"
+            title="This film is better"
+          >
+            Better
+          </button>
+          <button
+            class="bulk-button same"
+            [class.selected]="
+              comparisonState.selections().get(challengerFilm.id) === 'same'
+            "
+            (click)="setSelection(challengerFilm.id, 'same')"
+            title="About the same"
+          >
+            Same
+          </button>
+          <button
+            class="bulk-button worse"
+            [class.selected]="
+              comparisonState.selections().get(challengerFilm.id) === 'worse'
+            "
+            (click)="setSelection(challengerFilm.id, 'worse')"
+            title="Challenger is better"
+          >
+            Worse
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Load More / Submit Actions -->
+  <div class="bulk-actions-section">
+    @if (canLoadMore() && challengerFilms().length >= 10) {
+      <p-button
+        label="Load More Films"
+        icon="pi pi-plus"
+        (onClick)="onLoadMore()"
+        [disabled]="isSubmitting()"
+        styleClass="load-more-button"
+      ></p-button>
+    }
+
+    <p-button
+      [label]="'Submit ' + selectedCount() + ' Comparisons'"
+      icon="pi pi-check"
+      (onClick)="onSubmitBatch()"
+      [disabled]="isSubmitting() || selectedCount() === 0"
+      [loading]="isSubmitting()"
+      styleClass="submit-batch-button"
+    ></p-button>
+  </div>
+</div>

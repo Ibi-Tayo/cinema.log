@@ -127,7 +127,7 @@
                         {{ review.date | date: "MMM d, yyyy" }}
                       </p>
                       <div class="rating">
-                        @for (star of getStars(review.rating); track star) {
+                        @for (star of getStars(review.rating); track $index) {
                           <span class="star" [class.filled]="star === 'full'">
                             ★
                           </span>
@@ -238,7 +238,7 @@
 
       <!-- Film Ratings Table Section -->
       <div class="ratings-table-section">
-        <h2>Film Rankings</h2>
+        <h2 class="table-title">Film Rankings</h2>
 
         @if (userRatings().length === 0) {
           <div class="no-ratings-placeholder">
@@ -271,23 +271,25 @@
                   <th pSortableColumn="filmTitle">
                     Film <p-sortIcon field="filmTitle" />
                   </th>
-                  <th pSortableColumn="filmReleaseYear" style="width: 150px">
-                    Release Year <p-sortIcon field="filmReleaseYear" />
-                  </th>
                   <th pSortableColumn="rating.eloRating" style="width: 150px">
                     Elo Rating <p-sortIcon field="rating.eloRating" />
+                  </th>
+                  <!-- <th pSortableColumn="filmReleaseYear" style="width: 150px">
+                    Release Year <p-sortIcon field="filmReleaseYear" />
                   </th>
                   <th
                     pSortableColumn="rating.initialRating"
                     style="width: 150px"
                   >
                     Review <p-sortIcon field="rating.initialRating" />
-                  </th>
+                  </th> -->
                 </tr>
                 <tr>
                   <th>
                     <p-iconfield iconPosition="right">
                       <input
+                        id="filmSearchFilter"
+                        name="filmSearch"
                         pInputText
                         type="text"
                         (input)="
@@ -301,8 +303,8 @@
                     </p-iconfield>
                   </th>
                   <th></th>
-                  <th></th>
-                  <th></th>
+                  <!-- <th></th>
+                  <th></th> -->
                 </tr>
               </ng-template>
               <ng-template #body let-ratingDetail>
@@ -311,22 +313,22 @@
                     (click)="selectFilm(ratingDetail.rating.filmId)"
                     style="cursor: pointer"
                   >
-                    {{ ratingDetail.filmTitle }}
+                    {{ ratingDetail.eloRank }}. {{ ratingDetail.filmTitle }}
                   </td>
-                  <td>{{ ratingDetail.filmReleaseYear }}</td>
                   <td>{{ ratingDetail.rating.eloRating | number: "1.0-0" }}</td>
+                  <!-- <td>{{ ratingDetail.filmReleaseYear }}</td>
                   <td>
                     <div class="rating-stars">
                       @for (
                         star of getStars(ratingDetail.rating.initialRating);
-                        track star
+                        track $index
                       ) {
                         <span class="star" [class.filled]="star === 'full'">
                           ★
                         </span>
                       }
                     </div>
-                  </td>
+                  </td> -->
                 </tr>
               </ng-template>
               <ng-template #emptymessage>
@@ -344,9 +346,7 @@
       <!-- Film Ratings Table of films ordered by number of comparisons (ones at the top should be compared) -->
       @if (userRatingsLeastComparisons().length > 0) {
         <div class="ratings-table-section">
-          <h2>
-            Films Needing More Comparisons
-          </h2>
+          <h2 class="table-title">Films Needing More Comparisons</h2>
           <div class="table-container">
             <p-table
               [value]="userRatingsLeastComparisons()"

@@ -49,6 +49,10 @@ func (m *mockRatingService) GetComparisonHistory(ctx context.Context, userId uui
 	return nil, errors.New("not implemented")
 }
 
+func (m *mockRatingService) ProcessBatchComparisons(ctx context.Context, userId, targetFilmId uuid.UUID, comparisons []ComparisonItem) error {
+	return nil
+}
+
 func TestHandler_GetRating_MissingUserId(t *testing.T) {
 	handler := NewHandler(&mockRatingService{})
 	req := httptest.NewRequest(http.MethodGet, "/ratings?filmId="+uuid.New().String(), nil)

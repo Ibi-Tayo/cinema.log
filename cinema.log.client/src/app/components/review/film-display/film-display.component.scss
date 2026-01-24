@@ -1,0 +1,135 @@
+@use "../../../../styles/variables" as *;
+@use "../../../../styles/mixins" as *;
+
+.film-section {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 48px;
+  padding: 24px;
+  @include gradient-background("dark", 0.3, 0.3);
+  @include rounded("2xl");
+  @include shadow(md);
+
+  @include breakpoint-max(md) {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .film-poster {
+    flex-shrink: 0;
+    width: 200px;
+    height: 300px;
+    @include rounded(xl);
+    overflow: hidden;
+    @include shadow(sm);
+
+    @include breakpoint-max(md) {
+      width: 100%;
+      max-width: 200px;
+      margin: 0 auto;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .poster-placeholder {
+      @include poster-placeholder;
+    }
+  }
+
+  .film-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 500;
+      margin: 0;
+      background: linear-gradient(
+        135deg,
+        get-color(primary, 300),
+        get-color(secondary, 300)
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+
+      @include breakpoint-max(md) {
+        font-size: 1.5rem;
+      }
+    }
+
+    .film-year {
+      font-size: 1.1rem;
+      color: get-color(neutral, 400);
+      margin: 0;
+    }
+
+    .elo-rating-section {
+      margin: 12px 0;
+      padding: 16px;
+      @include gradient-background("card-dark", 0.3, 0.3);
+      @include rounded(xl);
+      border: 1px solid rgba(get-color(primary, 500), 0.3);
+
+      .elo-rating-badge {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+
+        .elo-info {
+          display: flex;
+          flex-direction: column;
+
+          .elo-label {
+            font-size: 0.9rem;
+            color: get-color(neutral, 500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .elo-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          }
+        }
+      }
+
+      .elo-hint {
+        margin: 0;
+        font-size: 0.9rem;
+        color: get-color(neutral, 600);
+        font-style: italic;
+      }
+    }
+
+    .film-description-section {
+      h3 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0 0 12px 0;
+        color: get-color(neutral, 300);
+      }
+
+      .film-description {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: get-color(neutral, 400);
+        margin: 0;
+      }
+    }
+  }
+}
