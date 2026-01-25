@@ -9,6 +9,7 @@
 
 a {
   text-decoration: none;
+  cursor: pointer;
 }
 
 .nav-wrapper {
@@ -116,32 +117,30 @@ a {
   .p-menu-list {
     padding: 0.5rem;
 
-    .p-menuitem {
-      .p-menuitem-content {
+    .p-menu-item {
+      .p-menu-item-content {
         border-radius: 4px;
         transition: background 0.2s;
 
-        .p-menuitem-link {
+        .p-menu-item-link {
           padding: 0.75rem 1rem;
           color: get-color(neutral, 300);
           gap: 0.75rem;
 
-          .p-menuitem-icon {
-            color: get-color(neutral, 300);
+          .p-menu-item-icon {
+            color: get-color(secondary, 300);
             font-size: 1.1rem;
           }
 
-          .p-menuitem-text {
+          .p-menu-item-text {
             color: get-color(neutral, 300);
             font-size: map.get($font-sizes, "base");
             font-family: $font-family-primary;
           }
 
           &:hover {
-            background: get-color(secondary, 600);
-
-            .p-menuitem-icon,
-            .p-menuitem-text {
+            .p-menu-item-icon,
+            .p-menu-item-text {
               color: get-color(neutral, 100);
             }
           }

@@ -4,21 +4,33 @@ import {
   ElementRef,
   OnDestroy,
   ViewChild,
+  signal,
+  CUSTOM_ELEMENTS_SCHEMA,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { DataSet } from 'vis-data';
 import { Data, Edge, Network, Options } from 'vis-network';
 import { GraphService } from '../../services/graph.service';
+import { LoadingStateComponent } from '../shared/loading-state/loading-state.component';
+import { ErrorStateComponent } from '../shared/error-state/error-state.component';
 
 @Component({
   selector: 'app-films-graph',
-  imports: [],
+  standalone: true,
+  imports: [LoadingStateComponent, ErrorStateComponent],
   templateUrl: './films-graph.component.html',
   styleUrl: './films-graph.component.scss',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilmsGraphComponent implements AfterViewInit, OnDestroy {
   @ViewChild('networkContainer') networkContainer!: ElementRef;
 
   private network: Network | undefined;
+
+  isLoading = signal(true);
+  errorMessage = signal('');
+  isEmpty = signal(false);
 
   constructor(private graphService: GraphService) {}
 
@@ -27,14 +39,23 @@ export class FilmsGraphComponent implements AfterViewInit, OnDestroy {
   }
 
   private loadGraphData(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.isEmpty.set(false);
+
     this.graphService.getUserGraph().subscribe({
       next: (graphData) => {
-        this.renderGraph(graphData);
+        this.isLoading.set(false);
+        if (!graphData.nodes || graphData.nodes.length === 0) {
+          this.isEmpty.set(true);
+        } else {
+          this.renderGraph(graphData);
+        }
       },
       error: (error) => {
         console.error('Error loading graph data:', error);
-        // Optionally show empty graph or error message
-        this.renderGraph({ nodes: [], edges: [] });
+        this.isLoading.set(false);
+        this.errorMessage.set('Failed to load graph data. Please try again.');
       },
     });
   }
@@ -48,7 +69,7 @@ export class FilmsGraphComponent implements AfterViewInit, OnDestroy {
       graphData.nodes.map((node) => ({
         id: node.externalFilmId,
         label: node.title,
-      }))
+      })),
     );
 
     // 2. Transform edges to vis-network format
@@ -57,7 +78,7 @@ export class FilmsGraphComponent implements AfterViewInit, OnDestroy {
         id: index + 1,
         from: edge.fromFilmId,
         to: edge.toFilmId,
-      }))
+      })),
     );
 
     // 3. Config
@@ -86,7 +107,7 @@ export class FilmsGraphComponent implements AfterViewInit, OnDestroy {
     this.network = new Network(
       this.networkContainer.nativeElement,
       data,
-      options
+      options,
     );
   }
 

@@ -38,7 +38,7 @@
 
     h1 {
       font-size: map.get($font-sizes, "3xl");
-      font-weight: 700;
+      font-weight: 500;
       color: get-color(primary, 300);
       display: flex;
       align-items: center;
@@ -78,10 +78,10 @@
 
     .seed-films-list {
       background: linear-gradient(
-      135deg,
-      get-color(primary, 800),
-      get-color(primary, 900)
-    );
+        135deg,
+        get-color(primary, 800),
+        get-color(primary, 900)
+      );
       padding: 2rem;
       border-radius: 12px;
       margin-bottom: 2rem;
@@ -133,6 +133,19 @@
             height: 120px;
             object-fit: cover;
             border-radius: 8px;
+          }
+
+          .poster-placeholder {
+            @include flex-center;
+            width: 80px;
+            height: 120px;
+            background: get-color(backgroundColor);
+            border-radius: 8px;
+            color: get-color(neutral, 700);
+
+            i {
+              font-size: 2rem;
+            }
           }
 
           .film-info {
@@ -279,8 +292,19 @@
 
           img {
             width: 100%;
-            height: 280px;
             object-fit: cover;
+          }
+
+          .poster-placeholder-large {
+            @include flex-center;
+            width: 100%;
+            height: 300px;
+            background: get-color(backgroundColor);
+            color: get-color(neutral, 700);
+
+            i {
+              font-size: 3rem;
+            }
           }
 
           .film-details {
@@ -426,6 +450,18 @@
           width: 100%;
           height: 330px;
           object-fit: cover;
+        }
+
+        .poster-placeholder-card {
+          @include flex-center;
+          width: 100%;
+          height: 330px;
+          background: get-color(backgroundColor);
+          color: get-color(neutral, 700);
+
+          i {
+            font-size: 4rem;
+          }
         }
 
         .card-overlay {

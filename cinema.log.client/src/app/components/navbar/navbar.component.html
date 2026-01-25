@@ -17,12 +17,10 @@
         </a>
         @if (auth.currentUser()) {
           <a
-            [routerLink]="['/profile', auth.currentUser()!.id]"
-            routerLinkActive="active"
-            ariaCurrentWhenActive="page"
+            [class.active]="isProfileAreaActive()"
             (click)="toggleProfileMenu($event); $event.preventDefault()"
             class="profile-link"
-            >Profile
+            >{{ auth.currentUser()?.name }}
           </a>
         } @else {
           <a
@@ -73,20 +71,16 @@
   </div>
   @if (auth.currentUser()) {
     <div class="icon">
-      <a
-        [routerLink]="['/profile', auth.currentUser()!.id]"
-        ariaCurrentWhenActive="page"
-        (click)="toggleProfileMenu($event); $event.preventDefault()"
-      >
+      <a (click)="toggleProfileMenu($event); $event.preventDefault()">
         <lord-icon
-          routerLinkActive="active"
+          [class.active]="isProfileAreaActive()"
           src="https://cdn.lordicon.com/bushiqea.json"
           trigger="click"
           stroke="bold"
           style="width: 30px; height: 30px"
         >
         </lord-icon>
-        <p>Profile</p>
+        <p>{{ auth.currentUser()?.name }}</p>
       </a>
     </div>
   } @else {

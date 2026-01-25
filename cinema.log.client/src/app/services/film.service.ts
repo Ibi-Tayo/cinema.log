@@ -136,9 +136,12 @@ export class FilmService {
 
   getSeenUnratedFilms(userId: string): Observable<Film[]> {
     return this.http
-      .get<Film[] | null>(`${environment.apiUrl}/films/seen-unrated/${userId}`, {
-        withCredentials: true,
-      })
+      .get<Film[] | null>(
+        `${environment.apiUrl}/films/seen-unrated/${userId}`,
+        {
+          withCredentials: true,
+        },
+      )
       .pipe(
         map((films) => films || []), // Handle null response from API
         tap((films) => {
