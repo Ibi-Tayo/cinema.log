@@ -80,7 +80,7 @@
           style="width: 30px; height: 30px"
         >
         </lord-icon>
-        <p>Profile</p>
+        <p>{{ auth.currentUser()?.name }}</p>
       </a>
     </div>
   } @else {
