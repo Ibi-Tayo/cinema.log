@@ -16,6 +16,10 @@ func (m *mockUserService) GetOrCreateUserByGithubId(ctx context.Context, githubI
 	return &domain.User{ID: uuid.New(), Name: name, Username: username}, nil
 }
 
+func (m *mockUserService) GetOrCreateUserByGoogleId(ctx context.Context, googleId string, name, username, profilePicURL string) (*domain.User, error) {
+	return &domain.User{ID: uuid.New(), Name: name, Username: username}, nil
+}
+
 func (m *mockUserService) GetUserById(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	return &domain.User{ID: id, Name: "Test", Username: "test"}, nil
 }

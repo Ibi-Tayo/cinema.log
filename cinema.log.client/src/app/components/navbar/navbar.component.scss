@@ -1,5 +1,7 @@
 @use "variables" as *;
 @use "mixins" as *;
+@use "sass:map";
+
 .active {
   --lord-icon-primary: #{get-color(primary, 400)};
   --lord-icon-secondary: #{get-color(secondary, 400)};
@@ -100,6 +102,51 @@ a {
       font-size: small;
       margin: 0;
       color: get-color(neutral, 700);
+    }
+  }
+}
+
+// Profile dropdown menu styles
+::ng-deep .p-menu.p-menu-overlay {
+  background: get-color(secondary, 700);
+  border: 1px solid get-color(neutral, 600);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+  .p-menu-list {
+    padding: 0.5rem;
+
+    .p-menuitem {
+      .p-menuitem-content {
+        border-radius: 4px;
+        transition: background 0.2s;
+
+        .p-menuitem-link {
+          padding: 0.75rem 1rem;
+          color: get-color(neutral, 300);
+          gap: 0.75rem;
+
+          .p-menuitem-icon {
+            color: get-color(neutral, 300);
+            font-size: 1.1rem;
+          }
+
+          .p-menuitem-text {
+            color: get-color(neutral, 300);
+            font-size: map.get($font-sizes, "base");
+            font-family: $font-family-primary;
+          }
+
+          &:hover {
+            background: get-color(secondary, 600);
+
+            .p-menuitem-icon,
+            .p-menuitem-text {
+              color: get-color(neutral, 100);
+            }
+          }
+        }
+      }
     }
   }
 }
