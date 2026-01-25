@@ -51,10 +51,11 @@ func TestMain(m *testing.M) {
 
 func TestCreateUserIntegration(t *testing.T) {
 	// Create test user
+	githubId := int64(12345)
 	testUser := &domain.User{
 		Name:          "Test User",
 		Username:      "testuser",
-		GithubId:      12345,
+		GithubId:      &githubId,
 		ProfilePicURL: "https://example.com/avatar.jpg",
 	}
 
@@ -100,10 +101,11 @@ func TestCreateUserIntegration(t *testing.T) {
 
 func TestGetUserByIdIntegration(t *testing.T) {
 	// First create a user
+	githubId := int64(54321)
 	testUser := &domain.User{
 		Name:          "Get Test User",
 		Username:      "gettestuser",
-		GithubId:      54321,
+		GithubId:      &githubId,
 		ProfilePicURL: "https://example.com/avatar2.jpg",
 	}
 
@@ -145,13 +147,15 @@ func TestGetUserByIdIntegration(t *testing.T) {
 
 func TestGetAllUsersIntegration(t *testing.T) {
 	// Create multiple test users
-	users := []*domain.User{
-		{Name: "User One", Username: "userone", GithubId: 111},
-		{Name: "User Two", Username: "usertwo", GithubId: 222},
+	githubId1 := int64(111)
+	githubId2 := int64(222)
+	testUsers := []*domain.User{
+		{Name: "User One", Username: "userone", GithubId: &githubId1},
+		{Name: "User Two", Username: "usertwo", GithubId: &githubId2},
 	}
 
 	// Create users in database
-	for _, user := range users {
+	for _, user := range testUsers {
 		_, err := testService.CreateUser(context.Background(), user)
 		if err != nil {
 			t.Fatalf("failed to create test user: %v", err)
@@ -184,10 +188,11 @@ func TestGetAllUsersIntegration(t *testing.T) {
 
 func TestUpdateUserIntegration(t *testing.T) {
 	// Create initial user
+	githubId := int64(99999)
 	testUser := &domain.User{
 		Name:          "Original Name",
 		Username:      "originaluser",
-		GithubId:      99999,
+		GithubId:      &githubId,
 		ProfilePicURL: "https://example.com/original.jpg",
 	}
 
@@ -235,10 +240,11 @@ func TestUpdateUserIntegration(t *testing.T) {
 
 func TestDeleteUserIntegration(t *testing.T) {
 	// Create user to delete
+	githubId := int64(77777)
 	testUser := &domain.User{
 		Name:          "Delete Me",
 		Username:      "deleteme",
-		GithubId:      77777,
+		GithubId:      &githubId,
 		ProfilePicURL: "https://example.com/delete.jpg",
 	}
 
@@ -271,10 +277,11 @@ func TestDeleteUserIntegration(t *testing.T) {
 // Test validation errors
 func TestCreateUserValidationIntegration(t *testing.T) {
 	// Test with invalid name (too short)
+	githubId := int64(88888)
 	testUser := &domain.User{
 		Name:          "Bad", // Too short
 		Username:      "baduser",
-		GithubId:      88888,
+		GithubId:      &githubId,
 		ProfilePicURL: "https://example.com/bad.jpg",
 	}
 

@@ -148,14 +148,14 @@ func TestAuthMiddleware_NoCookie(t *testing.T) {
 func TestAuthMiddleware_InvalidToken(t *testing.T) {
 	// Create a mock user service
 	mockUserService := &mockUserServiceForAuth{}
-	
+
 	// Set up the test environment with a token secret
 	oldSecret := os.Getenv("TOKEN_SECRET")
 	os.Setenv("TOKEN_SECRET", "test-secret")
 	defer os.Setenv("TOKEN_SECRET", oldSecret)
-	
+
 	authService := auth.NewService(mockUserService)
-	
+
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("authenticated"))
@@ -182,6 +182,10 @@ func TestAuthMiddleware_InvalidToken(t *testing.T) {
 type mockUserServiceForAuth struct{}
 
 func (m *mockUserServiceForAuth) GetOrCreateUserByGithubId(ctx context.Context, githubId int64, name, username, profilePicURL string) (*domain.User, error) {
+	return &domain.User{ID: uuid.New(), Name: name, Username: username}, nil
+}
+
+func (m *mockUserServiceForAuth) GetOrCreateUserByGoogleId(ctx context.Context, googleId string, name, username, profilePicURL string) (*domain.User, error) {
 	return &domain.User{ID: uuid.New(), Name: name, Username: username}, nil
 }
 

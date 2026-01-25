@@ -11,6 +11,7 @@ import (
 	"cinema.log.server.golang/internal/utils"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-github/v52/github"
+	google2 "google.golang.org/api/oauth2/v2"
 )
 
 var tokenSecret = os.Getenv("TOKEN_SECRET")
@@ -34,6 +35,26 @@ func NewService(userService users.UserService) *AuthService {
 func (s *AuthService) HandleGithubCallback(ctx context.Context, githubUser *github.User) (*JwtResponse, error) {
 	user, err := s.userService.GetOrCreateUserByGithubId(ctx, githubUser.GetID(),
 		githubUser.GetName(), githubUser.GetLogin(), githubUser.GetAvatarURL())
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get or create user: %w", err)
+	}
+
+	jwt, refreshToken, err := s.GenerateJWT(user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate JWT: %w", err)
+	}
+
+	return &JwtResponse{
+		User:         user,
+		Jwt:          jwt,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func (s *AuthService) HandleGoogleCallback(ctx context.Context, googleUser *google2.Userinfo) (*JwtResponse, error) {
+	user, err := s.userService.GetOrCreateUserByGoogleId(ctx, googleUser.Id,
+		googleUser.Name, googleUser.Email, googleUser.Picture)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get or create user: %w", err)
@@ -150,6 +171,24 @@ func (s *AuthService) HandleDevLogin(ctx context.Context) (*JwtResponse, error) 
 	user, err := s.userService.GetOrCreateUserByGithubId(ctx, 0, "Dev User", "devuser", "")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get first user: %w", err)
+	}
+
+	jwt, refreshToken, err := s.GenerateJWT(user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate JWT: %w", err)
+	}
+
+	return &JwtResponse{
+		User:         user,
+		Jwt:          jwt,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func (s *AuthService) HandleDevGoogleLogin(ctx context.Context) (*JwtResponse, error) {
+	user, err := s.userService.GetOrCreateUserByGoogleId(ctx, "dev-google-user", "Dev Google User", "devgoogleuser", "")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get or create dev google user: %w", err)
 	}
 
 	jwt, refreshToken, err := s.GenerateJWT(user)

@@ -19,6 +19,8 @@ type UserService interface {
 	GetUserById(ctx context.Context, id uuid.UUID) (*domain.User, error)
 	GetOrCreateUserByGithubId(ctx context.Context, githubId int64, name string,
 		username string, avatarUrl string) (*domain.User, error)
+	GetOrCreateUserByGoogleId(ctx context.Context, googleId string, name string,
+		username string, avatarUrl string) (*domain.User, error)
 	CreateUser(ctx context.Context, user *domain.User) (*domain.User, error)
 	UpdateUser(ctx context.Context, user *domain.User) (*domain.User, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) error

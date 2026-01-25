@@ -8,13 +8,17 @@ import (
 
 	"github.com/dghubble/gologin/v2"
 	"github.com/dghubble/gologin/v2/github"
+	"github.com/dghubble/gologin/v2/google"
 	"golang.org/x/oauth2"
 
 	oauth2github "golang.org/x/oauth2/github"
+	oauth2google "golang.org/x/oauth2/google"
 )
 
 var GithubClientID = os.Getenv("GITHUB_CLIENT_ID")
 var GithubClientSecret = os.Getenv("GITHUB_CLIENT_SECRET")
+var GoogleClientID = os.Getenv("GOOGLE_CLIENT_ID")
+var GoogleClientSecret = os.Getenv("GOOGLE_CLIENT_SECRET")
 var BackendURL = os.Getenv("BACKEND_URL")
 
 func isProduction() bool {
@@ -38,6 +42,14 @@ var conf *oauth2.Config = &oauth2.Config{
 	RedirectURL:  BackendURL + "/auth/github-callback",
 	Scopes:       []string{"user:email", "read:user"},
 	Endpoint:     oauth2github.Endpoint,
+}
+
+var googleConf *oauth2.Config = &oauth2.Config{
+	ClientID:     GoogleClientID,
+	ClientSecret: GoogleClientSecret,
+	RedirectURL:  BackendURL + "/auth/google-callback",
+	Scopes:       []string{"profile", "email"},
+	Endpoint:     oauth2google.Endpoint,
 }
 
 // Cookie configuration for OAuth state parameter
@@ -67,6 +79,14 @@ func (h *Handler) Login() http.Handler {
 
 func (h *Handler) Callback() http.Handler {
 	return github.StateHandler(cookieConf, github.CallbackHandler(conf, http.HandlerFunc(h.githubCallbackHandler), nil))
+}
+
+func (h *Handler) GoogleLogin() http.Handler {
+	return google.StateHandler(cookieConf, google.LoginHandler(googleConf, nil))
+}
+
+func (h *Handler) GoogleCallback() http.Handler {
+	return google.StateHandler(cookieConf, google.CallbackHandler(googleConf, http.HandlerFunc(h.googleCallbackHandler), nil))
 }
 
 func (h *Handler) Logout() http.Handler {
@@ -125,13 +145,39 @@ func (h *Handler) githubCallbackHandler(w http.ResponseWriter, r *http.Request) 
 	ctx := r.Context()
 	githubUser, err := github.UserFromContext(ctx)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		frontendURL := os.Getenv("FRONTEND_URL")
+		http.Redirect(w, r, fmt.Sprintf("%s/login?error=github_auth_failed", frontendURL), http.StatusTemporaryRedirect)
 		return
 	}
 
 	jwtResponse, err := h.authService.HandleGithubCallback(ctx, githubUser)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		frontendURL := os.Getenv("FRONTEND_URL")
+		http.Redirect(w, r, fmt.Sprintf("%s/login?error=github_auth_failed", frontendURL), http.StatusTemporaryRedirect)
+		return
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	h.setCookies(w, jwtResponse.Jwt, jwtResponse.RefreshToken)
+
+	// Redirect to user profile: http://localhost:4200/profile/{userId}
+	frontendURL := os.Getenv("FRONTEND_URL")
+	http.Redirect(w, r, fmt.Sprintf("%s/profile/%s", frontendURL, jwtResponse.User.ID), http.StatusTemporaryRedirect)
+}
+
+func (h *Handler) googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	googleUser, err := google.UserFromContext(ctx)
+	if err != nil {
+		frontendURL := os.Getenv("FRONTEND_URL")
+		http.Redirect(w, r, fmt.Sprintf("%s/login?error=google_auth_failed", frontendURL), http.StatusTemporaryRedirect)
+		return
+	}
+
+	jwtResponse, err := h.authService.HandleGoogleCallback(ctx, googleUser)
+	if err != nil {
+		frontendURL := os.Getenv("FRONTEND_URL")
+		http.Redirect(w, r, fmt.Sprintf("%s/login?error=google_auth_failed", frontendURL), http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -202,7 +248,27 @@ func (h *Handler) DevLogin() http.Handler {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		
+
+		w.Header().Set("Content-type", "application/json")
+		h.setCookies(w, jwtResponse.Jwt, jwtResponse.RefreshToken)
+		w.WriteHeader(http.StatusOK)
+	})
+}
+
+func (h *Handler) DevGoogleLogin() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Only allow in non-production environments
+		if isProduction() {
+			http.Error(w, "not found", http.StatusNotFound)
+			return
+		}
+
+		jwtResponse, err := h.authService.HandleDevGoogleLogin(r.Context())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		w.Header().Set("Content-type", "application/json")
 		h.setCookies(w, jwtResponse.Jwt, jwtResponse.RefreshToken)
 		w.WriteHeader(http.StatusOK)

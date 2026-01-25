@@ -25,8 +25,8 @@ export class AuthService {
         tap((user) => this.currentUser.set(user)),
         // Use handleExpectedError because 401/403 is expected when user is not logged in
         catchError(
-          handleExpectedError('Failed to authenticate. Please log in.')
-        )
+          handleExpectedError('Failed to authenticate. Please log in.'),
+        ),
       );
   }
 
@@ -44,9 +44,33 @@ export class AuthService {
         catchError(
           handleHttpError(
             'during dev login',
-            'Dev login failed. Please try again.'
-          )
-        )
+            'Dev login failed. Please try again.',
+          ),
+        ),
+      );
+  }
+
+  googleLogin(): void {
+    // Redirect directly to the Google login endpoint
+    window.location.href = `${environment.apiUrl}/auth/google-login`;
+  }
+
+  devGoogleLogin(): Observable<void> {
+    return this.http
+      .post<void>(
+        `${environment.apiUrl}/auth/dev/google-login`,
+        {},
+        {
+          withCredentials: true,
+        },
+      )
+      .pipe(
+        catchError(
+          handleHttpError(
+            'during dev Google login',
+            'Dev Google login failed. Please try again.',
+          ),
+        ),
       );
   }
 
@@ -56,8 +80,8 @@ export class AuthService {
       .pipe(
         tap(() => this.currentUser.set(null)),
         catchError(
-          handleHttpError('during logout', 'Logout failed. Please try again.')
-        )
+          handleHttpError('during logout', 'Logout failed. Please try again.'),
+        ),
       );
   }
 
@@ -70,9 +94,9 @@ export class AuthService {
         catchError(
           handleHttpError(
             'during token refresh',
-            'Authentication session expired. Please log in again.'
-          )
-        )
+            'Authentication session expired. Please log in again.',
+          ),
+        ),
       );
   }
 
@@ -94,7 +118,8 @@ export class AuthService {
 
 export interface User {
   id: string;
-  githubId: number;
+  githubId?: number;
+  googleId?: string;
   name: string;
   username: string;
   profilePicUrl: string;

@@ -9,22 +9,54 @@
 
 <div class="community-banner">
   <div class="banner-content">
-    <div class="github-tag"><i class="pi pi-github"></i>POWERED BY GITHUB</div>
+    <div class="secure-tag">
+      <lord-icon
+        src="https://cdn.lordicon.com/bushiqea.json"
+        trigger="loop"
+        delay="2000"
+        style="width: 32px; height: 32px"
+      >
+      </lord-icon>
+      SECURE LOGIN
+    </div>
     <div class="title">Join Our Film Community</div>
     <div class="subtitle">
-      We don't want any of your details, just sign in with a GitHub account
+      Sign in with your preferred account to get started
     </div>
-    @if (auth.env == 'development') {
-      <button class="join-button dev" (click)="devLogin()">
-      <i class="pi pi-github"></i>
-      Join Now / Sign In
-    </button>
-    } @else {
-      <button class="join-button" (click)="login()">
-      <i class="pi pi-github"></i>
-      Join Now / Sign In
-    </button>
+
+    @if (errorMessage()) {
+      <div class="error-banner">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span>{{ errorMessage() }}</span>
+      </div>
     }
 
+    <div class="auth-buttons">
+      @if (auth.env == "development") {
+        <button class="join-button github dev" (click)="devLogin()">
+          <i class="pi pi-github"></i>
+          Sign in with GitHub (Dev)
+        </button>
+        <button class="join-button google dev" (click)="devGoogleLogin()">
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="Google logo"
+          />
+          Sign in with Google (Dev)
+        </button>
+      } @else {
+        <button class="join-button github" (click)="login()">
+          <i class="pi pi-github"></i>
+          Sign in with GitHub
+        </button>
+        <button class="join-button google" (click)="googleLogin()">
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="Google logo"
+          />
+          Sign in with Google
+        </button>
+      }
+    </div>
   </div>
 </div>
