@@ -17,12 +17,12 @@
         </a>
         @if (auth.currentUser()) {
           <a
-            [routerLink]="['/profile', auth.currentUser()!.id]"
+            [routerLink]="['/profile', auth.currentUser()?.id]"
             routerLinkActive="active"
             ariaCurrentWhenActive="page"
             (click)="toggleProfileMenu($event); $event.preventDefault()"
             class="profile-link"
-            >Profile
+            >{{ auth.currentUser()?.name }}
           </a>
         } @else {
           <a

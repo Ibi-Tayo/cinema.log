@@ -39,6 +39,17 @@ export class NavbarComponent implements OnInit {
   ngOnInit() {
     this.menuItems = [
       {
+        label: 'Profile',
+        icon: 'pi pi-user',
+        command: () =>
+          this.router.navigate(['/profile', this.auth.currentUser()?.id]),
+      },
+      {
+        label: 'Film Graph',
+        icon: 'pi pi-chart-bar',
+        command: () => this.router.navigate(['/film-graph']),
+      },
+      {
         label: 'Sign Out',
         icon: 'pi pi-sign-out',
         command: () => this.onSignOut(),
