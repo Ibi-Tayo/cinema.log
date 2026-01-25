@@ -48,6 +48,14 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'film-graph',
+    loadComponent: () =>
+      import('./components/films-graph/films-graph.component').then(
+        (m) => m.FilmsGraphComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./components/login/login.component').then(

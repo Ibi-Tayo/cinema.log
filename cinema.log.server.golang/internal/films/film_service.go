@@ -52,7 +52,7 @@ type TMDBSearchResponse struct {
 
 type FilmSearchResult struct {
 	ID          int    `json:"id"`
-	Title       string `json:"original_title"`
+	Title       string `json:"title"`
 	Overview    string `json:"overview"`
 	ReleaseDate string `json:"release_date"`
 	PosterPath  string `json:"poster_path"`

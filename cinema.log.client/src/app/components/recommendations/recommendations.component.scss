@@ -38,7 +38,7 @@
 
     h1 {
       font-size: map.get($font-sizes, "3xl");
-      font-weight: 700;
+      font-weight: 500;
       color: get-color(primary, 300);
       display: flex;
       align-items: center;
@@ -78,10 +78,10 @@
 
     .seed-films-list {
       background: linear-gradient(
-      135deg,
-      get-color(primary, 800),
-      get-color(primary, 900)
-    );
+        135deg,
+        get-color(primary, 800),
+        get-color(primary, 900)
+      );
       padding: 2rem;
       border-radius: 12px;
       margin-bottom: 2rem;

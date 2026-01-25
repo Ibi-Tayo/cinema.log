@@ -1,1 +1,40 @@
-<div #networkContainer class="network-canvas"></div>
+<div class="films-graph-page">
+  <div class="page-container">
+    <h1 class="page-title">
+      <lord-icon
+        src="https://cdn.lordicon.com/nocovwne.json"
+        trigger="hover"
+        style="width: 40px; height: 40px; margin-right: 12px"
+        colors="primary:#D3D3D3"
+      >
+      </lord-icon>
+      Films You Have Seen
+    </h1>
+
+    @if (isLoading()) {
+      <app-loading-state message="Loading your film graph..." />
+    } @else if (errorMessage()) {
+      <app-error-state [message]="errorMessage()" />
+    } @else if (isEmpty()) {
+      <div class="no-graph-placeholder">
+        <lord-icon
+          src="https://cdn.lordicon.com/tdrtiskw.json"
+          trigger="loop"
+          style="width: 120px; height: 120px"
+          colors="primary:#D3D3D3"
+        >
+        </lord-icon>
+        <p class="placeholder-title">No Film Graph Yet</p>
+        <p class="placeholder-subtitle">
+          Review films or get recommendations to build your graph
+        </p>
+      </div>
+    } @else {
+      <div class="graph-section">
+        <div class="graph-container">
+          <div #networkContainer class="network-canvas"></div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

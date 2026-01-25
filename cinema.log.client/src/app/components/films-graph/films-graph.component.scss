@@ -1,6 +1,75 @@
-/* graph.component.css */
-.network-canvas {
-  width: 100%;
-  height: 600px; /* Reminder to not delete this */
-  //border: 1px solid #ddd;
+@use "sass:map";
+@use "variables" as *;
+@use "mixins" as *;
+
+.films-graph-page {
+  min-height: calc(100vh - 60px);
+  padding: 2rem 1rem;
+
+  .page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .page-title {
+    font-size: map.get($font-sizes, "3xl");
+    font-weight: 500;
+    color: get-color(primary, 300);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .graph-section {
+    padding: 2rem;
+    background: linear-gradient(
+      135deg,
+      get-color(secondary, 800) 0%,
+      get-color(secondary, 900) 100%
+    );
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+    .graph-container {
+      background: get-color(backgroundColor);
+      border-radius: 12px;
+      padding: 1rem;
+      min-height: 400px;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+
+      .network-canvas {
+        width: 100%;
+        height: 600px;
+      }
+    }
+  }
+
+  .no-graph-placeholder {
+    @include flex-center;
+    flex-direction: column;
+    padding: 4rem 2rem;
+    background: linear-gradient(
+      135deg,
+      get-color(primary, 800) 0%,
+      get-color(secondary, 800) 100%
+    );
+    border-radius: 1rem;
+    text-align: center;
+    gap: 1rem;
+
+    .placeholder-title {
+      font-size: map.get($font-sizes, "2xl");
+      font-weight: 500;
+      color: get-color(neutral, 400);
+      margin: 0;
+    }
+
+    .placeholder-subtitle {
+      font-size: map.get($font-sizes, "lg");
+      color: get-color(neutral, 600);
+      margin: 0;
+    }
+  }
 }

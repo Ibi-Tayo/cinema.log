@@ -400,34 +400,6 @@
           </div>
         </div>
       }
-
-      <!-- Films You Have Seen Section -->
-      @if (hasGraphData()) {
-        <div class="films-graph-section">
-          <h2>
-            <lord-icon
-              src="https://cdn.lordicon.com/nocovwne.json"
-              trigger="hover"
-              style="width: 32px; height: 32px; margin-right: 8px"
-            >
-            </lord-icon>
-            Films You Have Seen
-          </h2>
-          <div class="graph-container">
-            <app-films-graph />
-          </div>
-        </div>
-      }
-
-      <!-- Find Films to Review Button -->
-      <div class="recommendations-section">
-        <p-button
-          label="Find films to review"
-          icon="pi pi-search"
-          (onClick)="navigateToRecommendations()"
-          styleClass="p-button-lg"
-        />
-      </div>
     </div>
   }
 </div>

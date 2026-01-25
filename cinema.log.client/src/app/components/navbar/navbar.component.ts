@@ -45,6 +45,15 @@ export class NavbarComponent implements OnInit {
           this.router.navigate(['/profile', this.auth.currentUser()?.id]),
       },
       {
+        label: 'Find Films To Review',
+        icon: 'pi pi-search',
+        command: () =>
+          this.router.navigate([
+            '/recommendations',
+            this.auth.currentUser()?.id,
+          ]),
+      },
+      {
         label: 'Film Graph',
         icon: 'pi pi-chart-bar',
         command: () => this.router.navigate(['/film-graph']),
@@ -59,6 +68,14 @@ export class NavbarComponent implements OnInit {
 
   toggleProfileMenu(event: Event) {
     this.profileMenu.toggle(event);
+  }
+
+  isProfileAreaActive(): boolean {
+    return (
+      this.router.url.includes('/profile') ||
+      this.router.url.includes('/recommendations') ||
+      this.router.url.includes('/film-graph')
+    );
   }
 
   onSignOut() {
