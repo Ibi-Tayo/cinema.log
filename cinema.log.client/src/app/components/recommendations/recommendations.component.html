@@ -26,7 +26,7 @@
   @if (isInSeedStep()) {
     <div class="seed-selection-section">
       <div class="instructions">
-        <h2>Step 1: Select 3 Films You've Seen</h2>
+        <h2>Select 3 Films You've Seen</h2>
         <p>
           These films will help us understand your taste and generate
           personalised recommendations so we can build up a network of films
@@ -51,10 +51,16 @@
         <div class="seed-films-grid">
           @for (film of seedFilms(); track film.id) {
             <div class="seed-film-card">
-              <img
-                [src]="getPosterUrl(film.posterUrl, 'w185')"
-                [alt]="film.title"
-              />
+              @if (film.posterUrl) {
+                <img
+                  [src]="getPosterUrl(film.posterUrl, 'w185')"
+                  [alt]="film.title"
+                />
+              } @else {
+                <div class="poster-placeholder">
+                  <i class="pi pi-image"></i>
+                </div>
+              }
               <div class="film-info">
                 <h4>{{ film.title }}</h4>
                 <p>{{ film.releaseYear }}</p>
@@ -101,10 +107,16 @@
           <div class="search-results">
             @for (film of searchResults(); track film.id) {
               <div class="search-result-card" (click)="addSeedFilm(film)">
-                <img
-                  [src]="getPosterUrl(film.posterUrl, 'w780')"
-                  [alt]="film.title"
-                />
+                @if (film.posterUrl) {
+                  <img
+                    [src]="getPosterUrl(film.posterUrl, 'w780')"
+                    [alt]="film.title"
+                  />
+                } @else {
+                  <div class="poster-placeholder-large">
+                    <i class="pi pi-image"></i>
+                  </div>
+                }
                 <div class="film-details">
                   <h4>{{ film.title }}</h4>
                   <p>{{ film.releaseYear }}</p>
@@ -177,10 +189,16 @@
               [class.selected]="selection.hasSeen"
               (click)="toggleFilmSeen(selection)"
             >
-              <img
-                [src]="getPosterUrl(selection.film.posterUrl, 'w342')"
-                [alt]="selection.film.title"
-              />
+              @if (selection.film.posterUrl) {
+                <img
+                  [src]="getPosterUrl(selection.film.posterUrl, 'w342')"
+                  [alt]="selection.film.title"
+                />
+              } @else {
+                <div class="poster-placeholder-card">
+                  <i class="pi pi-image"></i>
+                </div>
+              }
               <div class="card-overlay">
                 @if (selection.hasSeen) {
                   <div class="check-icon">
