@@ -40,7 +40,9 @@
       <!-- Rating Section (only for new reviews) -->
       @if (!hasRating()) {
         <div class="rating-section" data-testid="review-form-rating-section">
-          <p class="rating-label" data-testid="review-form-rating-label">Rating (out of 5)</p>
+          <p class="rating-label" data-testid="review-form-rating-label">
+            Rating (out of 5)
+          </p>
           <div class="star-rating" data-testid="review-form-star-rating">
             @for (star of getStars(); track star) {
               <span
@@ -65,7 +67,9 @@
 
       <!-- Review Text Section -->
       <div class="review-text-section" data-testid="review-form-text-section">
-        <label for="reviewText" data-testid="review-form-text-label">Your Thoughts</label>
+        <label for="reviewText" data-testid="review-form-text-label"
+          >Your Thoughts</label
+        >
         <textarea
           id="reviewText"
           [value]="reviewText()"

@@ -35,7 +35,9 @@
         </div>
         <div class="profile-info" data-testid="profile-info">
           <h1 data-testid="profile-name">{{ user()!.name }}</h1>
-          <p class="username" data-testid="profile-username">{{ "@" + user()!.username }}</p>
+          <p class="username" data-testid="profile-username">
+            {{ "@" + user()!.username }}
+          </p>
           <div class="profile-meta">
             <div class="meta-item">
               <lord-icon
@@ -80,7 +82,10 @@
         }
         <!-- Reviews Carousel -->
         @if (recentReviews().length > 0) {
-          <div class="carousel-container" data-testid="profile-reviews-carousel">
+          <div
+            class="carousel-container"
+            data-testid="profile-reviews-carousel"
+          >
             <button
               class="carousel-button prev"
               (click)="previousCarouselSlide()"
@@ -167,7 +172,10 @@
       </div>
 
       <!-- Films to Review Section -->
-      <div class="films-to-review-section" data-testid="profile-films-to-review">
+      <div
+        class="films-to-review-section"
+        data-testid="profile-films-to-review"
+      >
         <h2 data-testid="profile-films-to-review-title">
           <lord-icon
             src="https://cdn.lordicon.com/lecprnjb.json"
@@ -178,7 +186,10 @@
           Films to Review
         </h2>
         @if (filmsToReview().length === 0) {
-          <div class="no-films-placeholder" data-testid="profile-no-films-to-review">
+          <div
+            class="no-films-placeholder"
+            data-testid="profile-no-films-to-review"
+          >
             <lord-icon
               src="https://cdn.lordicon.com/egiwmiit.json"
               trigger="loop"
@@ -195,7 +206,11 @@
         @if (filmsToReview().length > 0) {
           <div class="films-grid" data-testid="profile-films-to-review-grid">
             @for (film of filmsToReview(); track film.id) {
-              <div class="film-card" (click)="selectFilm(film.id)" [attr.data-testid]="'profile-film-card-' + film.id">
+              <div
+                class="film-card"
+                (click)="selectFilm(film.id)"
+                [attr.data-testid]="'profile-film-card-' + film.id"
+              >
                 <div class="film-poster-container">
                   @if (film.posterUrl) {
                     <img
@@ -239,7 +254,9 @@
 
       <!-- Film Ratings Table Section -->
       <div class="ratings-table-section" data-testid="profile-ratings-table">
-        <h2 class="table-title" data-testid="profile-ratings-title">Film Rankings</h2>
+        <h2 class="table-title" data-testid="profile-ratings-title">
+          Film Rankings
+        </h2>
 
         @if (userRatings().length === 0) {
           <div class="no-ratings-placeholder" data-testid="profile-no-ratings">
@@ -346,8 +363,13 @@
 
       <!-- Film Ratings Table of films ordered by number of comparisons (ones at the top should be compared) -->
       @if (userRatingsLeastComparisons().length > 0) {
-        <div class="ratings-table-section" data-testid="profile-least-comparisons-table">
-          <h2 class="table-title" data-testid="profile-least-comparisons-title">Films Needing More Comparisons</h2>
+        <div
+          class="ratings-table-section"
+          data-testid="profile-least-comparisons-table"
+        >
+          <h2 class="table-title" data-testid="profile-least-comparisons-title">
+            Films Needing More Comparisons
+          </h2>
           <div class="table-container">
             <p-table
               [value]="userRatingsLeastComparisons()"

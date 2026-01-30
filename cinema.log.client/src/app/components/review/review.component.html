@@ -1,7 +1,10 @@
 <div class="review-container" data-testid="review-container">
   <!-- Loading State -->
   @if (isLoading()) {
-    <app-loading-state message="Loading film details..." data-testid="review-loading-state" />
+    <app-loading-state
+      message="Loading film details..."
+      data-testid="review-loading-state"
+    />
   }
 
   <!-- Error State -->
@@ -20,7 +23,11 @@
     <div class="review-content" data-testid="review-content">
       <!-- Header -->
       <div class="review-header" data-testid="review-header">
-        <button class="back-button" (click)="goBackToSearch()" data-testid="review-back-button">
+        <button
+          class="back-button"
+          (click)="goBackToSearch()"
+          data-testid="review-back-button"
+        >
           <lord-icon
             src="https://cdn.lordicon.com/jarmuava.json"
             trigger="hover"
@@ -48,7 +55,10 @@
               </lord-icon>
               Rate Your Films
             </h2>
-            <p class="comparison-description" data-testid="review-comparison-description">
+            <p
+              class="comparison-description"
+              data-testid="review-comparison-description"
+            >
               Compare this film with others you've rated to build your personal
               ranking
             </p>
@@ -103,8 +113,12 @@
                 style="width: 64px; height: 64px"
               >
               </lord-icon>
-              <p data-testid="review-no-comparisons-message">No more films available for comparison.</p>
-              <p class="hint" data-testid="review-no-comparisons-hint">Rate more films to build your ranking!</p>
+              <p data-testid="review-no-comparisons-message">
+                No more films available for comparison.
+              </p>
+              <p class="hint" data-testid="review-no-comparisons-hint">
+                Rate more films to build your ranking!
+              </p>
             </div>
           }
 

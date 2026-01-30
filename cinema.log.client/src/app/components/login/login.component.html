@@ -33,11 +33,19 @@
 
     <div class="auth-buttons" data-testid="login-auth-buttons">
       @if (auth.env == "development") {
-        <button class="join-button github dev" (click)="devLogin()" data-testid="login-github-dev-button">
+        <button
+          class="join-button github dev"
+          (click)="devLogin()"
+          data-testid="login-github-dev-button"
+        >
           <i class="pi pi-github"></i>
           Sign in with GitHub (Dev)
         </button>
-        <button class="join-button google dev" (click)="devGoogleLogin()" data-testid="login-google-dev-button">
+        <button
+          class="join-button google dev"
+          (click)="devGoogleLogin()"
+          data-testid="login-google-dev-button"
+        >
           <img
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
             alt="Google logo"
@@ -45,11 +53,19 @@
           Sign in with Google (Dev)
         </button>
       } @else {
-        <button class="join-button github" (click)="login()" data-testid="login-github-button">
+        <button
+          class="join-button github"
+          (click)="login()"
+          data-testid="login-github-button"
+        >
           <i class="pi pi-github"></i>
           Sign in with GitHub
         </button>
-        <button class="join-button google" (click)="googleLogin()" data-testid="login-google-button">
+        <button
+          class="join-button google"
+          (click)="googleLogin()"
+          data-testid="login-google-button"
+        >
           <img
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
             alt="Google logo"

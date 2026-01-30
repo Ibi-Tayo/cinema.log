@@ -3,7 +3,11 @@
 
   <!-- Header -->
   <div class="recommendations-header" data-testid="recommendations-header">
-    <button class="back-button" (click)="goBack()" data-testid="recommendations-back-button">
+    <button
+      class="back-button"
+      (click)="goBack()"
+      data-testid="recommendations-back-button"
+    >
       <lord-icon
         src="https://cdn.lordicon.com/zmkotitn.json"
         trigger="hover"
@@ -24,9 +28,14 @@
 
   <!-- Seed Selection Step -->
   @if (isInSeedStep()) {
-    <div class="seed-selection-section" data-testid="recommendations-seed-section">
+    <div
+      class="seed-selection-section"
+      data-testid="recommendations-seed-section"
+    >
       <div class="instructions" data-testid="recommendations-seed-instructions">
-        <h2 data-testid="recommendations-seed-title">Select 3 Films You've Seen</h2>
+        <h2 data-testid="recommendations-seed-title">
+          Select 3 Films You've Seen
+        </h2>
         <p data-testid="recommendations-seed-description">
           These films will help us understand your taste and generate
           personalised recommendations so we can build up a network of films
@@ -35,10 +44,18 @@
       </div>
 
       <!-- Selected Seed Films -->
-      <div class="seed-films-list" data-testid="recommendations-seed-films-list">
-        <h3 data-testid="recommendations-seed-films-count">Selected Films ({{ seedFilms().length }}/3)</h3>
+      <div
+        class="seed-films-list"
+        data-testid="recommendations-seed-films-list"
+      >
+        <h3 data-testid="recommendations-seed-films-count">
+          Selected Films ({{ seedFilms().length }}/3)
+        </h3>
         @if (seedFilms().length === 0) {
-          <div class="empty-state" data-testid="recommendations-seed-empty-state">
+          <div
+            class="empty-state"
+            data-testid="recommendations-seed-empty-state"
+          >
             <lord-icon
               src="https://cdn.lordicon.com/fpmskzsv.json"
               trigger="loop"
@@ -48,9 +65,15 @@
             <p>Search and add 3 films below to get started</p>
           </div>
         }
-        <div class="seed-films-grid" data-testid="recommendations-seed-films-grid">
+        <div
+          class="seed-films-grid"
+          data-testid="recommendations-seed-films-grid"
+        >
           @for (film of seedFilms(); track film.id) {
-            <div class="seed-film-card" [attr.data-testid]="'recommendations-seed-film-' + film.id">
+            <div
+              class="seed-film-card"
+              [attr.data-testid]="'recommendations-seed-film-' + film.id"
+            >
               @if (film.posterUrl) {
                 <img
                   [src]="getPosterUrl(film.posterUrl, 'w185')"
@@ -92,7 +115,10 @@
 
         <!-- Loading State -->
         @if (isSearching()) {
-          <div class="search-results" data-testid="recommendations-search-loading">
+          <div
+            class="search-results"
+            data-testid="recommendations-search-loading"
+          >
             @for (i of [1, 2, 3]; track i) {
               <div class="skeleton-card">
                 <p-skeleton width="100%" height="200px" />
@@ -105,9 +131,16 @@
 
         <!-- Search Results -->
         @if (searchResults().length > 0 && !isSearching()) {
-          <div class="search-results" data-testid="recommendations-search-results">
+          <div
+            class="search-results"
+            data-testid="recommendations-search-results"
+          >
             @for (film of searchResults(); track film.id) {
-              <div class="search-result-card" (click)="addSeedFilm(film)" [attr.data-testid]="'recommendations-search-result-' + film.id">
+              <div
+                class="search-result-card"
+                (click)="addSeedFilm(film)"
+                [attr.data-testid]="'recommendations-search-result-' + film.id"
+              >
                 @if (film.posterUrl) {
                   <img
                     [src]="getPosterUrl(film.posterUrl, 'w780')"
@@ -156,8 +189,13 @@
   @if (isInRecommendationStep()) {
     <div class="recommendations-section" data-testid="recommendations-section">
       <div class="round-info" data-testid="recommendations-round-info">
-        <h2 data-testid="recommendations-round-number">Round {{ currentRound() }}</h2>
-        <div class="selection-counter" data-testid="recommendations-selection-counter">
+        <h2 data-testid="recommendations-round-number">
+          Round {{ currentRound() }}
+        </h2>
+        <div
+          class="selection-counter"
+          data-testid="recommendations-selection-counter"
+        >
           <p-chip
             [label]="'Selected: ' + selectedSeenCount() + '/10'"
             [styleClass]="selectedSeenCount() >= 10 ? 'limit-reached' : ''"

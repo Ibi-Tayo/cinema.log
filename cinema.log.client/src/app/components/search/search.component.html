@@ -10,7 +10,9 @@
       >
       </lord-icon>
       <h1 data-testid="search-title">Search for Films</h1>
-      <p class="subtitle" data-testid="search-subtitle">Find films to review and rate</p>
+      <p class="subtitle" data-testid="search-subtitle">
+        Find films to review and rate
+      </p>
     </div>
 
     <!-- Search Input -->
@@ -69,7 +71,9 @@
         <p-dataview #dv [value]="searchResults()" layout="list">
           <ng-template #header>
             <div class="results-header">
-              <h2 data-testid="search-results-count">Search Results ({{ searchResults().length }})</h2>
+              <h2 data-testid="search-results-count">
+                Search Results ({{ searchResults().length }})
+              </h2>
             </div>
           </ng-template>
 
@@ -121,8 +125,12 @@
           colors="primary:#D3D3D3"
         >
         </lord-icon>
-        <p class="empty-title" data-testid="search-empty-title">Start Your Search</p>
-        <p class="empty-subtitle" data-testid="search-empty-subtitle">Type in the search box above to find films</p>
+        <p class="empty-title" data-testid="search-empty-title">
+          Start Your Search
+        </p>
+        <p class="empty-subtitle" data-testid="search-empty-subtitle">
+          Type in the search box above to find films
+        </p>
       </div>
     }
   </div>

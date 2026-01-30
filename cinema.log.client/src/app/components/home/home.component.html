@@ -10,7 +10,9 @@
       >
       </lord-icon>
       <h1 data-testid="home-title">Your personal hub for film review</h1>
-      <p class="subtitle" data-testid="home-subtitle">A smarter way to track and rate the films you love</p>
+      <p class="subtitle" data-testid="home-subtitle">
+        A smarter way to track and rate the films you love
+      </p>
     </div>
 
     <!-- Rating System Section -->
@@ -121,15 +123,15 @@
         today.
       </p>
       @if (!isLoggedIn()) {
-      <a href="/login" class="cta-button" data-testid="home-cta-button">
-        Get Started
-        <lord-icon
-          src="https://cdn.lordicon.com/zmkotitn.json"
-          trigger="hover"
-          style="width: 24px; height: 24px; transform: rotate(180deg)"
-        >
-        </lord-icon>
-      </a>
+        <a href="/login" class="cta-button" data-testid="home-cta-button">
+          Get Started
+          <lord-icon
+            src="https://cdn.lordicon.com/zmkotitn.json"
+            trigger="hover"
+            style="width: 24px; height: 24px; transform: rotate(180deg)"
+          >
+          </lord-icon>
+        </a>
       }
     </div>
   </div>
