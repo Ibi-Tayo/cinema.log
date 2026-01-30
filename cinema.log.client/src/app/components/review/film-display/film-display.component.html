@@ -1,10 +1,10 @@
-<div class="film-section">
-  <div class="film-poster">
+<div class="film-section" data-testid="film-display-section">
+  <div class="film-poster" data-testid="film-display-poster">
     @if (film().posterUrl) {
-      <img [src]="getPosterUrl(film().posterUrl)" [alt]="film().title" />
+      <img [src]="getPosterUrl(film().posterUrl)" [alt]="film().title" data-testid="film-display-poster-image" />
     }
     @if (!film().posterUrl) {
-      <div class="poster-placeholder">
+      <div class="poster-placeholder" data-testid="film-display-poster-placeholder">
         <lord-icon
           src="https://cdn.lordicon.com/ugllxeyl.json"
           trigger="hover"
@@ -14,12 +14,12 @@
       </div>
     }
   </div>
-  <div class="film-details">
-    <h2>{{ film().title }}</h2>
-    <p class="film-year">{{ film().releaseYear }}</p>
+  <div class="film-details" data-testid="film-display-details">
+    <h2 data-testid="film-display-title">{{ film().title }}</h2>
+    <p class="film-year" data-testid="film-display-year">{{ film().releaseYear }}</p>
     <!-- ELO Rating Display (only shown if user has rated) -->
     @if (filmRating()) {
-      <div class="elo-rating-section">
+      <div class="elo-rating-section" data-testid="film-display-elo-rating">
         <div class="elo-rating-badge">
           <lord-icon
             src="https://cdn.lordicon.com/lrzdmsmx.json"
@@ -39,8 +39,8 @@
         </p>
       </div>
     }
-    <div class="film-description-section">
-      <h3>
+    <div class="film-description-section" data-testid="film-display-description-section">
+      <h3 data-testid="film-display-description-title">
         <lord-icon
           src="https://cdn.lordicon.com/cfkiwvcc.json"
           trigger="hover"
@@ -49,7 +49,7 @@
         </lord-icon>
         Description
       </h3>
-      <p class="film-description">{{ film().description }}</p>
+      <p class="film-description" data-testid="film-display-description-text">{{ film().description }}</p>
     </div>
   </div>
 </div>

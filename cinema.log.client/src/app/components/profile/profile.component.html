@@ -1,7 +1,7 @@
-<div class="profile-container">
+<div class="profile-container" data-testid="profile-container">
   <!-- Loading State -->
   @if (isLoading()) {
-    <div class="loading-state">
+    <div class="loading-state" data-testid="profile-loading-state">
       <lord-icon
         src="https://cdn.lordicon.com/xjovhxra.json"
         trigger="loop"
@@ -14,28 +14,28 @@
 
   <!-- Error State -->
   @if (errorMessage() && !isLoading()) {
-    <div class="error-state">
+    <div class="error-state" data-testid="profile-error-state">
       <lord-icon
         src="https://cdn.lordicon.com/tdrtiskw.json"
         trigger="loop"
         style="width: 80px; height: 80px"
       >
       </lord-icon>
-      <p>{{ errorMessage() }}</p>
+      <p data-testid="profile-error-message">{{ errorMessage() }}</p>
     </div>
   }
 
   <!-- Profile Content -->
   @if (user() && !isLoading()) {
-    <div class="profile-content">
+    <div class="profile-content" data-testid="profile-content">
       <!-- User Header -->
-      <div class="profile-header">
-        <div class="profile-avatar">
+      <div class="profile-header" data-testid="profile-header">
+        <div class="profile-avatar" data-testid="profile-avatar">
           <img [src]="user()!.profilePicUrl" [alt]="user()!.name" />
         </div>
-        <div class="profile-info">
-          <h1>{{ user()!.name }}</h1>
-          <p class="username">{{ "@" + user()!.username }}</p>
+        <div class="profile-info" data-testid="profile-info">
+          <h1 data-testid="profile-name">{{ user()!.name }}</h1>
+          <p class="username" data-testid="profile-username">{{ "@" + user()!.username }}</p>
           <div class="profile-meta">
             <div class="meta-item">
               <lord-icon
@@ -52,8 +52,8 @@
         </div>
       </div>
       <!-- Recent Reviews Section -->
-      <div class="recent-reviews-section">
-        <h2>
+      <div class="recent-reviews-section" data-testid="profile-recent-reviews">
+        <h2 data-testid="profile-recent-reviews-title">
           <lord-icon
             src="https://cdn.lordicon.com/ugllxeyl.json"
             trigger="hover"
@@ -64,7 +64,7 @@
         </h2>
         <!-- No Reviews Placeholder -->
         @if (recentReviews().length === 0) {
-          <div class="no-reviews-placeholder">
+          <div class="no-reviews-placeholder" data-testid="profile-no-reviews">
             <lord-icon
               src="https://cdn.lordicon.com/fpmskzsv.json"
               trigger="loop"
@@ -80,11 +80,12 @@
         }
         <!-- Reviews Carousel -->
         @if (recentReviews().length > 0) {
-          <div class="carousel-container">
+          <div class="carousel-container" data-testid="profile-reviews-carousel">
             <button
               class="carousel-button prev"
               (click)="previousCarouselSlide()"
               [disabled]="recentReviews().length <= 1"
+              data-testid="profile-carousel-prev"
             >
               <lord-icon
                 src="https://cdn.lordicon.com/zmkotitn.json"
@@ -166,8 +167,8 @@
       </div>
 
       <!-- Films to Review Section -->
-      <div class="films-to-review-section">
-        <h2>
+      <div class="films-to-review-section" data-testid="profile-films-to-review">
+        <h2 data-testid="profile-films-to-review-title">
           <lord-icon
             src="https://cdn.lordicon.com/lecprnjb.json"
             trigger="hover"
@@ -177,7 +178,7 @@
           Films to Review
         </h2>
         @if (filmsToReview().length === 0) {
-          <div class="no-films-placeholder">
+          <div class="no-films-placeholder" data-testid="profile-no-films-to-review">
             <lord-icon
               src="https://cdn.lordicon.com/egiwmiit.json"
               trigger="loop"
@@ -192,9 +193,9 @@
           </div>
         }
         @if (filmsToReview().length > 0) {
-          <div class="films-grid">
+          <div class="films-grid" data-testid="profile-films-to-review-grid">
             @for (film of filmsToReview(); track film.id) {
-              <div class="film-card" (click)="selectFilm(film.id)">
+              <div class="film-card" (click)="selectFilm(film.id)" [attr.data-testid]="'profile-film-card-' + film.id">
                 <div class="film-poster-container">
                   @if (film.posterUrl) {
                     <img
@@ -237,11 +238,11 @@
       </div>
 
       <!-- Film Ratings Table Section -->
-      <div class="ratings-table-section">
-        <h2 class="table-title">Film Rankings</h2>
+      <div class="ratings-table-section" data-testid="profile-ratings-table">
+        <h2 class="table-title" data-testid="profile-ratings-title">Film Rankings</h2>
 
         @if (userRatings().length === 0) {
-          <div class="no-ratings-placeholder">
+          <div class="no-ratings-placeholder" data-testid="profile-no-ratings">
             <lord-icon
               src="https://cdn.lordicon.com/nocovwne.json"
               trigger="loop"
@@ -345,8 +346,8 @@
 
       <!-- Film Ratings Table of films ordered by number of comparisons (ones at the top should be compared) -->
       @if (userRatingsLeastComparisons().length > 0) {
-        <div class="ratings-table-section">
-          <h2 class="table-title">Films Needing More Comparisons</h2>
+        <div class="ratings-table-section" data-testid="profile-least-comparisons-table">
+          <h2 class="table-title" data-testid="profile-least-comparisons-title">Films Needing More Comparisons</h2>
           <div class="table-container">
             <p-table
               [value]="userRatingsLeastComparisons()"

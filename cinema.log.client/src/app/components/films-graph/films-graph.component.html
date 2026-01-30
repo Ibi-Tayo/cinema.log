@@ -1,6 +1,6 @@
-<div class="films-graph-page">
-  <div class="page-container">
-    <h1 class="page-title">
+<div class="films-graph-page" data-testid="films-graph-page">
+  <div class="page-container" data-testid="films-graph-container">
+    <h1 class="page-title" data-testid="films-graph-title">
       <lord-icon
         src="https://cdn.lordicon.com/nocovwne.json"
         trigger="hover"
@@ -12,11 +12,11 @@
     </h1>
 
     @if (isLoading()) {
-      <app-loading-state message="Loading your film graph..." />
+      <app-loading-state message="Loading your film graph..." data-testid="films-graph-loading" />
     } @else if (errorMessage()) {
-      <app-error-state [message]="errorMessage()" />
+      <app-error-state [message]="errorMessage()" data-testid="films-graph-error" />
     } @else if (isEmpty()) {
-      <div class="no-graph-placeholder">
+      <div class="no-graph-placeholder" data-testid="films-graph-empty">
         <lord-icon
           src="https://cdn.lordicon.com/tdrtiskw.json"
           trigger="loop"
@@ -33,12 +33,13 @@
       <!-- graph rendering handled by shared container below -->
     }
 
-    <div class="graph-section">
-      <div class="graph-container">
+    <div class="graph-section" data-testid="films-graph-section">
+      <div class="graph-container" data-testid="films-graph-visualization">
         <div
           #networkContainer
           class="network-canvas"
           [hidden]="isLoading() || errorMessage() || isEmpty()"
+          data-testid="films-graph-canvas"
         ></div>
       </div>
     </div>

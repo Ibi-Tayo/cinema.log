@@ -1,12 +1,12 @@
-<div class="comparison-interface">
-  <div class="comparison-progress">
+<div class="comparison-interface" data-testid="sequential-comparison-container">
+  <div class="comparison-progress" data-testid="sequential-comparison-progress">
     <span>Comparison {{ progressText() }}</span>
   </div>
-  <div class="comparison-cards">
+  <div class="comparison-cards" data-testid="sequential-comparison-cards">
     <!-- Current Film Card -->
-    <p-card styleClass="comparison-card current-film">
+    <p-card styleClass="comparison-card current-film" data-testid="sequential-comparison-target-card">
       <ng-template pTemplate="header">
-        <div class="card-header">
+        <div class="card-header" data-testid="sequential-comparison-target-header">
           <lord-icon
             src="https://cdn.lordicon.com/zczzhvwa.json"
             trigger="hover"
@@ -47,9 +47,9 @@
     </p-divider>
 
     <!-- Comparison Film Card -->
-    <p-card styleClass="comparison-card challenger-film">
+    <p-card styleClass="comparison-card challenger-film" data-testid="sequential-comparison-challenger-card">
       <ng-template pTemplate="header">
-        <div class="card-header">
+        <div class="card-header" data-testid="sequential-comparison-challenger-header">
           <lord-icon
             src="https://cdn.lordicon.com/uwnsxkfm.json"
             trigger="hover"
@@ -85,10 +85,10 @@
       </ng-template>
     </p-card>
   </div>
-  <div class="comparison-question">
+  <div class="comparison-question" data-testid="sequential-comparison-question">
     <p>Which film do you prefer?</p>
   </div>
-  <div class="comparison-actions">
+  <div class="comparison-actions" data-testid="sequential-comparison-actions">
     <p-button
       [label]="targetFilm().title"
       icon="pi pi-thumbs-up"
@@ -96,6 +96,7 @@
       [disabled]="isSubmitting()"
       styleClass="comparison-button better"
       [loading]="isSubmitting()"
+      data-testid="sequential-comparison-better-button"
     ></p-button>
 
     <p-button
@@ -105,9 +106,10 @@
       [disabled]="isSubmitting()"
       styleClass="comparison-button worse"
       [loading]="isSubmitting()"
+      data-testid="sequential-comparison-worse-button"
     ></p-button>
   </div>
-  <div class="same-section">
+  <div class="same-section" data-testid="sequential-comparison-same-section">
     <p-button
       label="About the Same"
       icon="pi pi-equals"
@@ -115,6 +117,7 @@
       [disabled]="isSubmitting()"
       styleClass="comparison-button same"
       [loading]="isSubmitting()"
+      data-testid="sequential-comparison-same-button"
     ></p-button>
   </div>
 </div>

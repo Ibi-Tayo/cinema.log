@@ -7,9 +7,9 @@
   />
 </div> -->
 
-<div class="community-banner">
-  <div class="banner-content">
-    <div class="secure-tag">
+<div class="community-banner" data-testid="login-container">
+  <div class="banner-content" data-testid="login-content">
+    <div class="secure-tag" data-testid="login-secure-tag">
       <lord-icon
         src="https://cdn.lordicon.com/bushiqea.json"
         trigger="loop"
@@ -19,25 +19,25 @@
       </lord-icon>
       SECURE LOGIN
     </div>
-    <div class="title">Join Our Film Community</div>
-    <div class="subtitle">
+    <div class="title" data-testid="login-title">Join Our Film Community</div>
+    <div class="subtitle" data-testid="login-subtitle">
       Sign in with your preferred account to get started
     </div>
 
     @if (errorMessage()) {
-      <div class="error-banner">
+      <div class="error-banner" data-testid="login-error-banner">
         <i class="pi pi-exclamation-triangle"></i>
         <span>{{ errorMessage() }}</span>
       </div>
     }
 
-    <div class="auth-buttons">
+    <div class="auth-buttons" data-testid="login-auth-buttons">
       @if (auth.env == "development") {
-        <button class="join-button github dev" (click)="devLogin()">
+        <button class="join-button github dev" (click)="devLogin()" data-testid="login-github-dev-button">
           <i class="pi pi-github"></i>
           Sign in with GitHub (Dev)
         </button>
-        <button class="join-button google dev" (click)="devGoogleLogin()">
+        <button class="join-button google dev" (click)="devGoogleLogin()" data-testid="login-google-dev-button">
           <img
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
             alt="Google logo"
@@ -45,11 +45,11 @@
           Sign in with Google (Dev)
         </button>
       } @else {
-        <button class="join-button github" (click)="login()">
+        <button class="join-button github" (click)="login()" data-testid="login-github-button">
           <i class="pi pi-github"></i>
           Sign in with GitHub
         </button>
-        <button class="join-button google" (click)="googleLogin()">
+        <button class="join-button google" (click)="googleLogin()" data-testid="login-google-button">
           <img
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
             alt="Google logo"

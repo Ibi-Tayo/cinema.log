@@ -1,18 +1,20 @@
-<div class="nav-wrapper">
-  <nav class="navbar">
-    <div class="nav-content">
+<div class="nav-wrapper" data-testid="navbar-wrapper">
+  <nav class="navbar" data-testid="navbar">
+    <div class="nav-content" data-testid="navbar-content">
       <a
         class="logo"
         routerLink="home"
         routerLinkActive="active"
         ariaCurrentWhenActive="page"
+        data-testid="navbar-logo"
         >_cinema.log()
       </a>
-      <div class="nav-links">
+      <div class="nav-links" data-testid="navbar-links">
         <a
           routerLink="search"
           routerLinkActive="active"
           ariaCurrentWhenActive="page"
+          data-testid="navbar-search-link"
           >Search
         </a>
         @if (auth.currentUser()) {
@@ -20,6 +22,7 @@
             [class.active]="isProfileAreaActive()"
             (click)="toggleProfileMenu($event); $event.preventDefault()"
             class="profile-link"
+            data-testid="navbar-profile-link"
             >{{ auth.currentUser()?.name }}
           </a>
         } @else {
@@ -28,6 +31,7 @@
             routerLink="login"
             routerLinkActive="active"
             ariaCurrentWhenActive="page"
+            data-testid="navbar-signin-link"
             >Sign in
           </a>
         }
@@ -41,9 +45,9 @@
   <p-menu #profileMenu [model]="menuItems" [popup]="true" />
 }
 
-<div class="nav-icons">
+<div class="nav-icons" data-testid="navbar-mobile-icons">
   <div class="icon">
-    <a routerLink="search" ariaCurrentWhenActive="page">
+    <a routerLink="search" ariaCurrentWhenActive="page" data-testid="navbar-mobile-search">
       <lord-icon
         routerLinkActive="active"
         src="https://cdn.lordicon.com/xaekjsls.json"
@@ -56,7 +60,7 @@
     </a>
   </div>
   <div class="icon">
-    <a routerLink="home" ariaCurrentWhenActive="page">
+    <a routerLink="home" ariaCurrentWhenActive="page" data-testid="navbar-mobile-home">
       <lord-icon
         routerLinkActive="active"
         src="https://cdn.lordicon.com/jeuxydnh.json"
@@ -71,7 +75,7 @@
   </div>
   @if (auth.currentUser()) {
     <div class="icon">
-      <a (click)="toggleProfileMenu($event); $event.preventDefault()">
+      <a (click)="toggleProfileMenu($event); $event.preventDefault()" data-testid="navbar-mobile-profile">
         <lord-icon
           [class.active]="isProfileAreaActive()"
           src="https://cdn.lordicon.com/bushiqea.json"
@@ -85,7 +89,7 @@
     </div>
   } @else {
     <div class="icon">
-      <a routerLink="login" ariaCurrentWhenActive="page">
+      <a routerLink="login" ariaCurrentWhenActive="page" data-testid="navbar-mobile-login">
         <lord-icon
           routerLinkActive="active"
           src="https://cdn.lordicon.com/bushiqea.json"

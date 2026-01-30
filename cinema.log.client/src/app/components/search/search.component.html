@@ -1,7 +1,7 @@
-<div class="search-container">
-  <div class="search-content">
+<div class="search-container" data-testid="search-container">
+  <div class="search-content" data-testid="search-content">
     <!-- Header Section -->
-    <div class="search-header">
+    <div class="search-header" data-testid="search-header">
       <lord-icon
         src="https://cdn.lordicon.com/wjyqkiew.json"
         trigger="loop"
@@ -9,12 +9,12 @@
         style="width: 80px; height: 80px"
       >
       </lord-icon>
-      <h1>Search for Films</h1>
-      <p class="subtitle">Find films to review and rate</p>
+      <h1 data-testid="search-title">Search for Films</h1>
+      <p class="subtitle" data-testid="search-subtitle">Find films to review and rate</p>
     </div>
 
     <!-- Search Input -->
-    <div class="search-input-wrapper">
+    <div class="search-input-wrapper" data-testid="search-input-wrapper">
       <p-iconfield iconPosition="left">
         <p-inputicon styleClass="pi pi-search" />
         <input
@@ -25,13 +25,14 @@
           (input)="searchQuery.set($any($event.target).value); onSearchInput()"
           placeholder="Search for a film by title..."
           class="w-full"
+          data-testid="search-input"
         />
       </p-iconfield>
     </div>
 
     <!-- Loading State -->
     @if (isLoading()) {
-      <div class="loading-state">
+      <div class="loading-state" data-testid="search-loading-state">
         <p-card>
           <div class="skeleton-list">
             @for (item of [1, 2, 3, 4]; track item) {
@@ -51,34 +52,35 @@
 
     <!-- Error State -->
     @if (errorMessage() && !isLoading()) {
-      <div class="error-state">
+      <div class="error-state" data-testid="search-error-state">
         <lord-icon
           src="https://cdn.lordicon.com/tdrtiskw.json"
           trigger="loop"
           style="width: 60px; height: 60px"
         >
         </lord-icon>
-        <p>{{ errorMessage() }}</p>
+        <p data-testid="search-error-message">{{ errorMessage() }}</p>
       </div>
     }
 
     <!-- Search Results with DataView -->
     @if (searchResults().length > 0 && !isLoading()) {
-      <div class="search-results">
+      <div class="search-results" data-testid="search-results">
         <p-dataview #dv [value]="searchResults()" layout="list">
           <ng-template #header>
             <div class="results-header">
-              <h2>Search Results ({{ searchResults().length }})</h2>
+              <h2 data-testid="search-results-count">Search Results ({{ searchResults().length }})</h2>
             </div>
           </ng-template>
 
           <ng-template #list let-films>
-            <div class="film-list">
+            <div class="film-list" data-testid="search-results-list">
               @for (film of films; track film.id; let first = $first) {
                 <div
                   class="film-list-item"
                   [ngClass]="{ 'border-top': !first }"
                   (click)="selectFilm(film)"
+                  [attr.data-testid]="'search-result-item-' + film.id"
                 >
                   <div class="film-poster-compact">
                     @if (film.posterUrl) {
@@ -110,7 +112,7 @@
 
     <!-- No Search Yet State -->
     @if (!hasSearched() && !isLoading() && searchResults().length === 0) {
-      <div class="empty-state">
+      <div class="empty-state" data-testid="search-empty-state">
         <lord-icon
           src="https://cdn.lordicon.com/fpmskzsv.json"
           trigger="loop"
@@ -119,8 +121,8 @@
           colors="primary:#D3D3D3"
         >
         </lord-icon>
-        <p class="empty-title">Start Your Search</p>
-        <p class="empty-subtitle">Type in the search box above to find films</p>
+        <p class="empty-title" data-testid="search-empty-title">Start Your Search</p>
+        <p class="empty-subtitle" data-testid="search-empty-subtitle">Type in the search box above to find films</p>
       </div>
     }
   </div>
