@@ -7,28 +7,44 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 60
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: test_database
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: "1.24"
           cache-dependency-path: cinema.log.server.golang/go.sum
-      
+
       - name: Install dependencies
         working-directory: ./cinema.log.server.golang
         run: go mod download
 
       - name: Install gotestsum
         run: go install gotest.tools/gotestsum@latest
-      
+
       - name: Run Go tests
         working-directory: ./cinema.log.server.golang
         run: gotestsum --format testname -- ./internal/... -v -cover
-      
+
       - name: Run Go tests with coverage report
         working-directory: ./cinema.log.server.golang
         run: |
@@ -36,22 +52,77 @@ jobs:
           go tool cover -func=coverage.out
           echo "## Go Test Summary" >> $GITHUB_STEP_SUMMARY
           go tool cover -func=coverage.out | tail -1 >> $GITHUB_STEP_SUMMARY
-      
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: cinema.log.client/package-lock.json
-      
+        env:
+          BLUEPRINT_DB_HOST: localhost
+          BLUEPRINT_DB_PORT: 5432
+          BLUEPRINT_DB_DATABASE: test_database
+          BLUEPRINT_DB_USERNAME: test_user
+          BLUEPRINT_DB_PASSWORD: test_password
+          BLUEPRINT_DB_SCHEMA: public
+
       - name: Install Angular dependencies
         working-directory: ./cinema.log.client
         run: npm ci
-      
+
       - name: Run Angular tests
         working-directory: ./cinema.log.client
         run: npm test -- --browsers=ChromeHeadless --watch=false
-      
+
       - name: Angular test summary
         if: always()
         run: echo "## Angular Test Summary" >> $GITHUB_STEP_SUMMARY
+
+      - name: Install Playwright Browsers
+        working-directory: ./cinema.log.client
+        run: npx playwright install --with-deps
+
+      - name: Build Angular app
+        working-directory: ./cinema.log.client
+        run: npm run build
+
+      - name: Start Go backend
+        working-directory: ./cinema.log.server.golang
+        run: |
+          go run cmd/api/main.go &
+          echo $! > /tmp/go_server.pid
+          sleep 5
+        env:
+          PORT: 8080
+          TOKEN_SECRET: test_secret_for_ci
+          FRONTEND_URL: http://localhost:4200
+          BLUEPRINT_DB_HOST: localhost
+          BLUEPRINT_DB_PORT: 5432
+          BLUEPRINT_DB_DATABASE: test_database
+          BLUEPRINT_DB_USERNAME: test_user
+          BLUEPRINT_DB_PASSWORD: test_password
+          BLUEPRINT_DB_SCHEMA: public
+
+      - name: Start Angular dev server
+        working-directory: ./cinema.log.client
+        run: |
+          npm run start &
+          echo $! > /tmp/ng_server.pid
+          sleep 10
+
+      - name: Run Playwright tests
+        working-directory: ./cinema.log.client
+        run: npx playwright test
+        env:
+          CI: true
+
+      - name: Playwright test summary
+        if: always()
+        run: echo "## Playwright Test Summary" >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: cinema.log.client/playwright-report/
+          retention-days: 30
+
+      - name: Cleanup servers
+        if: always()
+        run: |
+          if [ -f /tmp/go_server.pid ]; then kill $(cat /tmp/go_server.pid) || true; fi
+          if [ -f /tmp/ng_server.pid ]; then kill $(cat /tmp/ng_server.pid) || true; fi
