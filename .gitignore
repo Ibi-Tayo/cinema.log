@@ -17,3 +17,11 @@ cinema.log.client/.vscode
 *.zsh
 .vscode/launch.json
 .vscode/mcp.json
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
