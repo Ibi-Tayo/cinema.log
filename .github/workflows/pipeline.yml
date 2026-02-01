@@ -99,13 +99,6 @@ jobs:
           BLUEPRINT_DB_PASSWORD: test_password
           BLUEPRINT_DB_SCHEMA: public
 
-      - name: Start Angular dev server
-        working-directory: ./cinema.log.client
-        run: |
-          npm run start &
-          echo $! > /tmp/ng_server.pid
-          sleep 10
-
       - name: Run Playwright tests
         run: npx playwright test
         env:
@@ -126,4 +119,3 @@ jobs:
         if: always()
         run: |
           if [ -f /tmp/go_server.pid ]; then kill $(cat /tmp/go_server.pid) || true; fi
-          if [ -f /tmp/ng_server.pid ]; then kill $(cat /tmp/ng_server.pid) || true; fi
