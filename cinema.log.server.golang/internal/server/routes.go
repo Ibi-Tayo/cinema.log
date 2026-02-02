@@ -11,6 +11,7 @@ import (
 // isAuthExempt checks if a path should bypass authentication
 func isAuthExempt(path string) bool {
 	exemptPaths := []string{
+		"/health",
 		"/auth/github-login",
 		"/auth/github-callback",
 		"/auth/google-login",
@@ -31,6 +32,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux := http.NewServeMux()
 
 	// Register routes
+
+	// Health check endpoint (no auth required)
+	mux.HandleFunc("GET /health", s.healthCheck)
 
 	// User routes
 	mux.HandleFunc("GET /users/{id}", s.userHandler.GetUserById)
@@ -129,4 +133,16 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 
 	})
+}
+
+func (s *Server) healthCheck(w http.ResponseWriter, r *http.Request) {
+	// Check database connectivity
+	ctx := r.Context()
+	if err := s.db.PingContext(ctx); err != nil {
+		http.Error(w, "database unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }

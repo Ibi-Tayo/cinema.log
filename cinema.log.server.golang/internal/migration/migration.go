@@ -13,6 +13,7 @@ var embedMigrations embed.FS
 
 // RunMigrations runs all pending migrations using Goose
 func RunMigrations(db *sql.DB) error {
+	fmt.Println("Starting database migrations...")
 	goose.SetBaseFS(embedMigrations)
 
 	if err := goose.SetDialect("postgres"); err != nil {
@@ -22,10 +23,14 @@ func RunMigrations(db *sql.DB) error {
 	// check current version
 	currentVersion, err := goose.GetDBVersion(db)
 	if err != nil {
-		return fmt.Errorf("failed to get current version: %w", err)
+		fmt.Printf("Warning: Could not get current DB version (expected on first run): %v\n", err)
+		currentVersion = 0
+	} else {
+		fmt.Printf("Current migration version: %d\n", currentVersion)
 	}
 
 	// run migrations
+	fmt.Println("Running migrations...")
 	if err := goose.Up(db, "goose"); err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}

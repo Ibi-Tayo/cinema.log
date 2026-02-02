@@ -135,7 +135,21 @@ jobs:
         run: |
           go run cmd/api/main.go &
           echo $! > /tmp/go_server.pid
-          sleep 5
+          
+          # Wait for backend to be ready (up to 60 seconds)
+          echo "Waiting for Go backend to be ready..."
+          for i in {1..60}; do
+            if curl -f http://localhost:8080/health > /dev/null 2>&1; then
+              echo "Backend is ready!"
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "Backend failed to start within 60 seconds"
+              exit 1
+            fi
+            echo "Waiting... ($i/60)"
+            sleep 1
+          done
         env:
           PORT: 8080
           TOKEN_SECRET: test_secret_for_ci
