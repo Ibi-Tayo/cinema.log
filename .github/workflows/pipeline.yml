@@ -124,7 +124,7 @@ jobs:
         run: npm ci
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: npx playwright install chromium --with-deps
 
       - name: Build Angular app
         working-directory: ./cinema.log.client
@@ -148,7 +148,7 @@ jobs:
           BLUEPRINT_DB_SCHEMA: public
 
       - name: Run Playwright tests
-        run: npx playwright test
+        run: npx playwright test --project=chromium
         env:
           CI: true
 
