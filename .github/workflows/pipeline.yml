@@ -31,7 +31,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.24"
+          go-version: "1.23"
           cache-dependency-path: cinema.log.server.golang/go.sum
 
       - name: Install dependencies
