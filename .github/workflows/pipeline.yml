@@ -83,41 +83,40 @@ jobs:
   e2e-tests:
     name: Playwright E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     needs: [go-tests, angular-tests]
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: test_database
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.24"
-          cache-dependency-path: cinema.log.server.golang/go.sum
+      - name: Wait for Railway PR deployment
+        run: |
+          BASE_URL="https://reverse-proxy-cinemalog-pr-${{ github.event.pull_request.number }}.up.railway.app"
+          echo "Waiting for Railway deployment at $BASE_URL"
 
-      - name: Install Go dependencies
-        working-directory: ./cinema.log.server.golang
-        run: go mod download
+          MAX_ATTEMPTS=20
+          SLEEP_SECONDS=30
+          ATTEMPT=1
 
-      - name: Install Angular dependencies
-        working-directory: ./cinema.log.client
-        run: npm ci
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: Checking if deployment is ready..."
+            
+            if curl -sf --max-time 10 "$BASE_URL" > /dev/null 2>&1; then
+              echo "✓ Railway deployment is ready!"
+              exit 0
+            fi
+            
+            if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+              echo "Deployment not ready yet. Waiting ${SLEEP_SECONDS}s before retry..."
+              sleep $SLEEP_SECONDS
+            fi
+            
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+
+          echo "✗ Railway deployment did not become ready after $((MAX_ATTEMPTS * SLEEP_SECONDS)) seconds"
+          exit 1
 
       - name: Install Playwright dependencies
         run: npm ci
@@ -125,31 +124,13 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install chromium --with-deps
 
-      - name: Build Angular app
-        working-directory: ./cinema.log.client
-        run: npm run build
-
-      - name: Start Go backend
-        working-directory: ./cinema.log.server.golang
-        run: |
-          go run cmd/api/main.go &
-          echo $! > /tmp/go_server.pid
-          sleep 5
-        env:
-          PORT: 8080
-          TOKEN_SECRET: test_secret_for_ci
-          FRONTEND_URL: http://localhost:4200
-          BLUEPRINT_DB_HOST: localhost
-          BLUEPRINT_DB_PORT: 5432
-          BLUEPRINT_DB_DATABASE: test_database
-          BLUEPRINT_DB_USERNAME: test_user
-          BLUEPRINT_DB_PASSWORD: test_password
-          BLUEPRINT_DB_SCHEMA: public
-
       - name: Run Playwright tests
         run: npx playwright test --project=chromium
         env:
           CI: true
+          BASE_URL: https://reverse-proxy-cinemalog-pr-${{ github.event.pull_request.number }}.up.railway.app
+          TEST_GITHUB_EMAIL: ${{ secrets.TEST_GITHUB_EMAIL }}
+          TEST_GITHUB_PASSWORD: ${{ secrets.TEST_GITHUB_PASSWORD }}
 
       - name: Playwright test summary
         if: always()
@@ -161,8 +142,3 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
-
-      - name: Cleanup servers
-        if: always()
-        run: |
-          if [ -f /tmp/go_server.pid ]; then kill $(cat /tmp/go_server.pid) || true; fi
