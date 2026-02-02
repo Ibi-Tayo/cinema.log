@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"embed"
 	"fmt"
+	"log"
 
 	"github.com/pressly/goose/v3"
 )
@@ -13,7 +14,7 @@ var embedMigrations embed.FS
 
 // RunMigrations runs all pending migrations using Goose
 func RunMigrations(db *sql.DB) error {
-	fmt.Println("Starting database migrations...")
+	log.Println("Starting database migrations...")
 	goose.SetBaseFS(embedMigrations)
 
 	if err := goose.SetDialect("postgres"); err != nil {
@@ -23,14 +24,14 @@ func RunMigrations(db *sql.DB) error {
 	// check current version
 	currentVersion, err := goose.GetDBVersion(db)
 	if err != nil {
-		fmt.Printf("Warning: Could not get current DB version (expected on first run): %v\n", err)
+		log.Printf("Warning: Could not get current DB version (expected on first run): %v\n", err)
 		currentVersion = 0
 	} else {
-		fmt.Printf("Current migration version: %d\n", currentVersion)
+		log.Printf("Current migration version: %d\n", currentVersion)
 	}
 
 	// run migrations
-	fmt.Println("Running migrations...")
+	log.Println("Running migrations...")
 	if err := goose.Up(db, "goose"); err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}
@@ -42,9 +43,9 @@ func RunMigrations(db *sql.DB) error {
 	}
 
 	if newVersion == currentVersion {
-		fmt.Println("No new migrations applied, database up to date")
+		log.Println("No new migrations applied, database up to date")
 	} else {
-		fmt.Printf("Migrations applied successfully: %d -> %d\n", currentVersion, newVersion)
+		log.Printf("Migrations applied successfully: %d -> %d\n", currentVersion, newVersion)
 	}
 
 	return nil

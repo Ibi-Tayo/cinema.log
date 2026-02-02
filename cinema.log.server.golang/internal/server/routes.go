@@ -32,7 +32,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux := http.NewServeMux()
 
 	// Register routes
-
 	// Health check endpoint (no auth required)
 	mux.HandleFunc("GET /health", s.healthCheck)
 
@@ -144,5 +143,8 @@ func (s *Server) healthCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
+	if _, err := w.Write([]byte("OK")); err != nil {
+		// Log error but don't change response status as headers already sent
+		return
+	}
 }
