@@ -160,6 +160,7 @@ jobs:
           BLUEPRINT_DB_USERNAME: test_user
           BLUEPRINT_DB_PASSWORD: test_password
           BLUEPRINT_DB_SCHEMA: public
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
 
       - name: Run Playwright tests
         run: npx playwright test --project=chromium
