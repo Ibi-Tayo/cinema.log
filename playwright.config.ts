@@ -70,10 +70,19 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: "npm run start",
-    url: "http://localhost:4200",
-    cwd: "./cinema.log.client",
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: process.env.CI
+    ? {
+        // In CI, serve the built Angular app
+        command:
+          "npx http-server ./cinema.log.client/dist/cinema.log.client/browser -p 4200",
+        url: "http://localhost:4200",
+        reuseExistingServer: false,
+      }
+    : {
+        // Locally, use Angular dev server
+        command: "npm run start",
+        url: "http://localhost:4200",
+        cwd: "./cinema.log.client",
+        reuseExistingServer: true,
+      },
 });

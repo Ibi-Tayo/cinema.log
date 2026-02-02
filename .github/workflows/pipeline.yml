@@ -123,6 +123,9 @@ jobs:
       - name: Install Playwright dependencies
         run: npm ci
 
+      - name: Install http-server for serving built Angular app
+        run: npm install -g http-server
+
       - name: Install Playwright Browsers
         run: npx playwright install chromium --with-deps
 
@@ -138,14 +141,21 @@ jobs:
           sleep 5
         env:
           PORT: 8080
+          APP_ENV: ci
           TOKEN_SECRET: test_secret_for_ci
           FRONTEND_URL: http://localhost:4200
+          BACKEND_URL: http://localhost:8080
           BLUEPRINT_DB_HOST: localhost
           BLUEPRINT_DB_PORT: 5432
           BLUEPRINT_DB_DATABASE: test_database
           BLUEPRINT_DB_USERNAME: test_user
           BLUEPRINT_DB_PASSWORD: test_password
           BLUEPRINT_DB_SCHEMA: public
+          GITHUB_CLIENT_ID: ${{ secrets.GITHUBS_CLIENT_ID }}
+          GITHUB_CLIENT_SECRET: ${{ secrets.GITHUBS_CLIENT_SECRET }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
 
       - name: Run Playwright tests
         run: npx playwright test --project=chromium
