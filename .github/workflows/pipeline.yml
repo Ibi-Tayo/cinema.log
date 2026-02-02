@@ -78,7 +78,6 @@ jobs:
         run: npm test -- --browsers=ChromeHeadless --watch=false
 
       - name: Angular test summary
-        if: always()
         run: echo "## Angular Test Summary" >> $GITHUB_STEP_SUMMARY
 
   e2e-tests:
