@@ -4,10 +4,10 @@ on:
   pull_request:
 
 jobs:
-  test:
-    name: Run Tests
+  go-tests:
+    name: Go Unit Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 15
 
     services:
       postgres:
@@ -60,6 +60,15 @@ jobs:
           BLUEPRINT_DB_PASSWORD: test_password
           BLUEPRINT_DB_SCHEMA: public
 
+  angular-tests:
+    name: Angular Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Install Angular dependencies
         working-directory: ./cinema.log.client
         run: npm ci
@@ -71,6 +80,45 @@ jobs:
       - name: Angular test summary
         if: always()
         run: echo "## Angular Test Summary" >> $GITHUB_STEP_SUMMARY
+
+  e2e-tests:
+    name: Playwright E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [go-tests, angular-tests]
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: test_database
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dependency-path: cinema.log.server.golang/go.sum
+
+      - name: Install Go dependencies
+        working-directory: ./cinema.log.server.golang
+        run: go mod download
+
+      - name: Install Angular dependencies
+        working-directory: ./cinema.log.client
+        run: npm ci
 
       - name: Install Playwright dependencies
         run: npm ci
