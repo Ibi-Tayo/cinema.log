@@ -1,4 +1,5 @@
 import { test as setup, expect } from "@playwright/test";
+import { generate } from "otplib";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -7,6 +8,7 @@ const authFile = ".auth/user.json";
 setup("authenticate with GitHub OAuth", async ({ page, context }) => {
   const testEmail = process.env.TEST_GITHUB_EMAIL;
   const testPassword = process.env.TEST_GITHUB_PASSWORD;
+  const test2FAToken = process.env.TEST_GITHUB_TOTP_SECRET;
 
   if (!testEmail || !testPassword) {
     throw new Error(
@@ -14,6 +16,14 @@ setup("authenticate with GitHub OAuth", async ({ page, context }) => {
     );
   }
 
+  if (!test2FAToken) {
+    throw new Error(
+      "TEST_GITHUB_TOTP_SECRET environment variable must be set",
+    );
+  }
+
+  const code = await generate({ secret: test2FAToken });
+  
   // Navigate to the home page
   await page.goto("/");
   await expect(
@@ -34,6 +44,10 @@ setup("authenticate with GitHub OAuth", async ({ page, context }) => {
   await page.fill('input[name="login"]', testEmail);
   await page.fill('input[name="password"]', testPassword);
   await page.click('input[type="submit"]');
+
+  // Fill in 2FA code
+  await page.fill('input[name="app_otp"]', code);
+  await page.click('button[type="submit"]');
 
   // Handle authorization if needed (first time)
   const authorizeButton = page.locator('button[name="authorize"]');
