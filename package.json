@@ -23,6 +23,6 @@
     "@types/node": "^25.1.0"
   },
   "dependencies": {
-    "otplib": "^13.2.1"
+    "totp-generator": "^2.0.1"
   }
 }

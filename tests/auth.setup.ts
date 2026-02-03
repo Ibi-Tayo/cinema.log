@@ -1,5 +1,5 @@
 import { test as setup, expect } from "@playwright/test";
-import { generate } from "otplib";
+import { TOTP } from "totp-generator";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -17,13 +17,11 @@ setup("authenticate with GitHub OAuth", async ({ page, context }) => {
   }
 
   if (!test2FAToken) {
-    throw new Error(
-      "TEST_GITHUB_TOTP_SECRET environment variable must be set",
-    );
+    throw new Error("TEST_GITHUB_TOTP_SECRET environment variable must be set");
   }
 
-  const code = await generate({ secret: test2FAToken });
-  
+  const { otp } = await TOTP.generate(test2FAToken);
+
   // Navigate to the home page
   await page.goto("/");
   await expect(
@@ -46,7 +44,7 @@ setup("authenticate with GitHub OAuth", async ({ page, context }) => {
   await page.click('input[type="submit"]');
 
   // Fill in 2FA code
-  await page.fill('input[name="app_otp"]', code);
+  await page.fill('input[name="app_otp"]', otp);
   await page.click('button[type="submit"]');
 
   // Handle authorization if needed (first time)
