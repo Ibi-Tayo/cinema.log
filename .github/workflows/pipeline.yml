@@ -145,6 +145,7 @@ jobs:
           BASE_URL: https://reverse-proxy-cinemalog-pr-${{ github.event.pull_request.number }}.up.railway.app
           TEST_GITHUB_EMAIL: ${{ secrets.TEST_GITHUB_EMAIL }}
           TEST_GITHUB_PASSWORD: ${{ secrets.TEST_GITHUB_PASSWORD }}
+          TEST_GITHUB_TOTP_SECRET: ${{ secrets.TEST_GITHUB_TOTP_SECRET }}
 
       - name: Playwright test summary
         if: always()
