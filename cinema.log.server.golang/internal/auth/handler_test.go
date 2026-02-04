@@ -52,10 +52,27 @@ func TestGetCallbackBaseURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Save original values
+			// Save original values and set up cleanup
 			originalCallbackURL := os.Getenv("CALLBACK_BASE_URL")
 			originalRailwayDomain := os.Getenv("RAILWAY_PUBLIC_DOMAIN")
 			originalBackendURL := BackendURL
+
+			// Use t.Cleanup to ensure cleanup runs even if test panics
+			t.Cleanup(func() {
+				if originalCallbackURL != "" {
+					os.Setenv("CALLBACK_BASE_URL", originalCallbackURL)
+				} else {
+					os.Unsetenv("CALLBACK_BASE_URL")
+				}
+
+				if originalRailwayDomain != "" {
+					os.Setenv("RAILWAY_PUBLIC_DOMAIN", originalRailwayDomain)
+				} else {
+					os.Unsetenv("RAILWAY_PUBLIC_DOMAIN")
+				}
+
+				BackendURL = originalBackendURL
+			})
 
 			// Set test values
 			if tt.callbackBaseURL != "" {
@@ -77,29 +94,19 @@ func TestGetCallbackBaseURL(t *testing.T) {
 			if result != tt.expected {
 				t.Errorf("getCallbackBaseURL() = %v, want %v", result, tt.expected)
 			}
-
-			// Restore original values
-			if originalCallbackURL != "" {
-				os.Setenv("CALLBACK_BASE_URL", originalCallbackURL)
-			} else {
-				os.Unsetenv("CALLBACK_BASE_URL")
-			}
-
-			if originalRailwayDomain != "" {
-				os.Setenv("RAILWAY_PUBLIC_DOMAIN", originalRailwayDomain)
-			} else {
-				os.Unsetenv("RAILWAY_PUBLIC_DOMAIN")
-			}
-
-			BackendURL = originalBackendURL
 		})
 	}
 }
 
 func TestOAuthConfigUsesCorrectCallbackURL(t *testing.T) {
-	// This test verifies that the OAuth configs are using getCallbackBaseURL()
+	// This test verifies that the OAuth configs use the expected callback URL format.
 	// Note: Since conf and googleConf are package-level variables initialized at load time,
-	// this test just verifies they exist and have the expected structure
+	// we cannot test the dynamic behavior of getCallbackBaseURL() here. This would require
+	// either:
+	// 1. Refactoring to use a factory function for creating OAuth configs
+	// 2. Integration tests that restart the application with different env vars
+	//
+	// This test validates the structure and format of the callback URLs.
 
 	if conf == nil {
 		t.Error("GitHub OAuth config (conf) should not be nil")
@@ -134,4 +141,8 @@ func TestOAuthConfigUsesCorrectCallbackURL(t *testing.T) {
 			t.Errorf("Google OAuth RedirectURL should end with %s, got: %s", expectedSuffix, googleConf.RedirectURL)
 		}
 	}
+
+	// Log the actual URLs for debugging (useful when running tests with -v)
+	t.Logf("GitHub OAuth RedirectURL: %s", conf.RedirectURL)
+	t.Logf("Google OAuth RedirectURL: %s", googleConf.RedirectURL)
 }

@@ -23,10 +23,11 @@ In Railway's PR environment template/settings, add this environment variable:
 CALLBACK_BASE_URL=https://reverse-proxy-cinemalog-pr-${{PR_NUMBER}}.up.railway.app
 ```
 
-**Note**: The exact syntax for injecting PR number may vary in Railway. Common patterns:
-- `${{PR_NUMBER}}` 
-- `${RAILWAY_PR_NUMBER}`
-- Or it might need to be set via Railway's API/CLI per PR
+**⚠️ Important Notes**: 
+- The exact syntax for injecting PR number may vary by Railway's configuration
+- Common patterns include: `${{PR_NUMBER}}`, `${RAILWAY_PR_NUMBER}`, or other Railway-specific variables
+- **You must verify the correct syntax** in Railway's documentation: https://docs.railway.app/guides/public-networking
+- If Railway doesn't support dynamic variable injection, see Options 2 or 3 below
 
 ### Option 2: Use Railway's Public Domain Variable
 
