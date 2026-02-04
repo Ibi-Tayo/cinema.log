@@ -21,26 +21,6 @@ var GoogleClientID = os.Getenv("GOOGLE_CLIENT_ID")
 var GoogleClientSecret = os.Getenv("GOOGLE_CLIENT_SECRET")
 var BackendURL = os.Getenv("BACKEND_URL")
 
-// getCallbackBaseURL returns the base URL for OAuth callbacks.
-// Priority order:
-// 1. CALLBACK_BASE_URL (explicit override for PR environments)
-// 2. RAILWAY_PUBLIC_DOMAIN (Railway's auto-provided domain)
-// 3. BACKEND_URL (fallback for production and local dev)
-func getCallbackBaseURL() string {
-	// First check for explicit callback URL override
-	if callbackBaseURL := os.Getenv("CALLBACK_BASE_URL"); callbackBaseURL != "" {
-		return callbackBaseURL
-	}
-	
-	// Then check if Railway provides a public domain
-	if railwayDomain := os.Getenv("RAILWAY_PUBLIC_DOMAIN"); railwayDomain != "" {
-		return "https://" + railwayDomain
-	}
-	
-	// Fall back to BACKEND_URL
-	return BackendURL
-}
-
 func isProduction() bool {
 	return os.Getenv("ENVIRONMENT") == "production"
 }
@@ -59,7 +39,7 @@ func getCookieSecure() bool {
 var conf *oauth2.Config = &oauth2.Config{
 	ClientID:     GithubClientID,
 	ClientSecret: GithubClientSecret,
-	RedirectURL:  getCallbackBaseURL() + "/auth/github-callback",
+	RedirectURL:  BackendURL + "/auth/github-callback",
 	Scopes:       []string{"user:email", "read:user"},
 	Endpoint:     oauth2github.Endpoint,
 }
@@ -67,7 +47,7 @@ var conf *oauth2.Config = &oauth2.Config{
 var googleConf *oauth2.Config = &oauth2.Config{
 	ClientID:     GoogleClientID,
 	ClientSecret: GoogleClientSecret,
-	RedirectURL:  getCallbackBaseURL() + "/auth/google-callback",
+	RedirectURL:  BackendURL + "/auth/google-callback",
 	Scopes:       []string{"profile", "email"},
 	Endpoint:     oauth2google.Endpoint,
 }
