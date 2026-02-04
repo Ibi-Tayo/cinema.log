@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 const authFile = ".auth/user.json";
+const AUTH_TIMEOUT = 10000; // 10 seconds timeout for authentication verification
 
 setup("authenticate with dev login", async ({ page, context, baseURL }) => {
   // In CI/test environments, use the dev login endpoint to bypass OAuth
@@ -19,9 +20,6 @@ setup("authenticate with dev login", async ({ page, context, baseURL }) => {
       `This endpoint is only available in non-production environments.`
     );
   }
-
-  // Extract cookies from the response
-  const cookies = await context.cookies();
   
   // Navigate to the home page to verify authentication
   await page.goto("/");
@@ -31,7 +29,7 @@ setup("authenticate with dev login", async ({ page, context, baseURL }) => {
 
   // Verify user is logged in by checking for profile link in navigation
   // The dev user should be automatically created and logged in
-  await expect(page.getByTestId("navbar-profile-link")).toBeVisible({ timeout: 10000 });
+  await expect(page.getByTestId("navbar-profile-link")).toBeVisible({ timeout: AUTH_TIMEOUT });
 
   // Ensure .auth directory exists
   const authDir = path.dirname(authFile);
