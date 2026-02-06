@@ -1,63 +1,35 @@
 import { test as setup, expect } from "@playwright/test";
-import { TOTP } from "totp-generator";
 import * as fs from "fs";
 import * as path from "path";
 
 const authFile = ".auth/user.json";
+const AUTH_TIMEOUT = 10000; // 10 seconds timeout for authentication verification
 
-setup("authenticate with GitHub OAuth", async ({ page, context }) => {
-  const testEmail = process.env.TEST_GITHUB_EMAIL;
-  const testPassword = process.env.TEST_GITHUB_PASSWORD;
-  const test2FAToken = process.env.TEST_GITHUB_TOTP_SECRET;
+setup("authenticate with dev login", async ({ page, context, baseURL }) => {
+  // In CI/test environments, use the dev login endpoint to bypass OAuth
+  // This creates a test user automatically without requiring GitHub credentials
+  
+  // Call the dev login endpoint directly to get authentication cookies
+  const response = await page.request.get(`${baseURL}/api/auth/dev/login`, {
+    failOnStatusCode: false,
+  });
 
-  if (!testEmail || !testPassword) {
+  if (!response.ok()) {
     throw new Error(
-      "TEST_GITHUB_EMAIL and TEST_GITHUB_PASSWORD environment variables must be set",
+      `Dev login failed with status ${response.status()}. ` +
+      `This endpoint is only available in non-production environments.`
     );
   }
-
-  if (!test2FAToken) {
-    throw new Error("TEST_GITHUB_TOTP_SECRET environment variable must be set");
-  }
-
-  const { otp } = await TOTP.generate(test2FAToken);
-
-  // Navigate to the home page
+  
+  // Navigate to the home page to verify authentication
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: "Your personal hub for film review" }),
   ).toBeVisible();
 
-  // Click Sign In
-  await page.getByTestId("navbar-signin-link").click();
-  await expect(page.getByText("Join Our Film Community")).toBeVisible();
-
-  // Click Sign in with GitHub
-  await page.getByTestId("login-github-button").click();
-
-  // Wait for GitHub login page
-  await page.waitForURL(/github\.com\/login/);
-
-  // Fill in GitHub credentials
-  await page.fill('input[name="login"]', testEmail);
-  await page.fill('input[name="password"]', testPassword);
-  await page.click('input[type="submit"]');
-
-  // Fill in 2FA code
-  await page.fill('input[name="app_otp"]', otp);
-  await page.click('button[type="submit"]');
-
-  // Handle authorization if needed (first time)
-  const authorizeButton = page.locator('button[name="authorize"]');
-  if (await authorizeButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-    await authorizeButton.click();
-  }
-
-  // Wait for redirect back to the app with profile URL
-  await page.waitForURL(/\/profile\/.*/);
-
-  // Verify user is logged in by checking for user name in navigation
-  await expect(page.getByTestId("navbar-profile-link")).toBeVisible();
+  // Verify user is logged in by checking for profile link in navigation
+  // The dev user should be automatically created and logged in
+  await expect(page.getByTestId("navbar-profile-link")).toBeVisible({ timeout: AUTH_TIMEOUT });
 
   // Ensure .auth directory exists
   const authDir = path.dirname(authFile);
@@ -65,6 +37,7 @@ setup("authenticate with GitHub OAuth", async ({ page, context }) => {
     fs.mkdirSync(authDir, { recursive: true });
   }
 
-  // Save authentication state
+  // Save authentication state (cookies) for reuse in tests
   await context.storageState({ path: authFile });
 });
+
