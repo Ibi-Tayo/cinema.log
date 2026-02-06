@@ -1,6 +1,4 @@
 import { test as setup, expect } from "@playwright/test";
-import * as fs from "fs";
-import * as path from "path";
 
 const authFile = ".auth/user.json";
 const AUTH_TIMEOUT = 10000; // 10 seconds timeout for authentication verification
@@ -15,17 +13,8 @@ setup("authenticate with dev login", async ({ page, context, baseURL }) => {
     page.getByRole("heading", { name: "Your personal hub for film review" }),
   ).toBeVisible();
 
-  // Call the dev login endpoint directly to get authentication cookies
-  const response = await page.request.get(`${baseURL}/api/auth/dev/login`, {
-    failOnStatusCode: false,
-  });
-
-  if (!response.ok()) {
-    throw new Error(
-      `Dev login failed with status ${response.status()}. ` +
-        `This endpoint is only available in non-production environments.`,
-    );
-  }
+  await page.getByTestId("navbar-signin-link").click();
+  await page.getByTestId("login-github-dev-button").click();
 
   await page.reload();
 
@@ -34,12 +23,6 @@ setup("authenticate with dev login", async ({ page, context, baseURL }) => {
   await expect(page.getByTestId("navbar-profile-link")).toBeVisible({
     timeout: AUTH_TIMEOUT,
   });
-
-  // Ensure .auth directory exists
-  const authDir = path.dirname(authFile);
-  if (!fs.existsSync(authDir)) {
-    fs.mkdirSync(authDir, { recursive: true });
-  }
 
   // Save authentication state (cookies) for reuse in tests
   await context.storageState({ path: authFile });

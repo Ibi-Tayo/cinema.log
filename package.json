@@ -19,7 +19,6 @@
   },
   "homepage": "https://github.com/Ibi-Tayo/cinema.log#readme",
   "devDependencies": {
-    "@playwright/test": "^1.58.1",
-    "@types/node": "^25.1.0"
+    "@playwright/test": "^1.58.1"
   }
 }
