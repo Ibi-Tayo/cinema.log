@@ -8,7 +8,13 @@ const AUTH_TIMEOUT = 10000; // 10 seconds timeout for authentication verificatio
 setup("authenticate with dev login", async ({ page, context, baseURL }) => {
   // In CI/test environments, use the dev login endpoint to bypass OAuth
   // This creates a test user automatically without requiring GitHub credentials
-  
+
+  // Navigate to the home page to verify authentication
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Your personal hub for film review" }),
+  ).toBeVisible();
+
   // Call the dev login endpoint directly to get authentication cookies
   const response = await page.request.get(`${baseURL}/api/auth/dev/login`, {
     failOnStatusCode: false,
@@ -17,19 +23,17 @@ setup("authenticate with dev login", async ({ page, context, baseURL }) => {
   if (!response.ok()) {
     throw new Error(
       `Dev login failed with status ${response.status()}. ` +
-      `This endpoint is only available in non-production environments.`
+        `This endpoint is only available in non-production environments.`,
     );
   }
-  
-  // Navigate to the home page to verify authentication
-  await page.goto("/");
-  await expect(
-    page.getByRole("heading", { name: "Your personal hub for film review" }),
-  ).toBeVisible();
+
+  await page.reload();
 
   // Verify user is logged in by checking for profile link in navigation
   // The dev user should be automatically created and logged in
-  await expect(page.getByTestId("navbar-profile-link")).toBeVisible({ timeout: AUTH_TIMEOUT });
+  await expect(page.getByTestId("navbar-profile-link")).toBeVisible({
+    timeout: AUTH_TIMEOUT,
+  });
 
   // Ensure .auth directory exists
   const authDir = path.dirname(authFile);
@@ -40,4 +44,3 @@ setup("authenticate with dev login", async ({ page, context, baseURL }) => {
   // Save authentication state (cookies) for reuse in tests
   await context.storageState({ path: authFile });
 });
-
