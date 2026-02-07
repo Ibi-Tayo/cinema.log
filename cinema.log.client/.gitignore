@@ -37,9 +37,6 @@ yarn-error.log
 testem.log
 /typings
 
-# Generated environment files
-/src/assets/env.js
-
 # System files
 .DS_Store
 Thumbs.db
