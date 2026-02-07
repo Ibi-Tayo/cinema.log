@@ -1,6 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8080',
-  authDomain: '',
-  environment: 'development',
+  apiUrl: process.env['API_URL'] || 'http://localhost:8080',
 };

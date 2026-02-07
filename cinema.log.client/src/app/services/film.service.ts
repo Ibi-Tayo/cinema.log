@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { Observable, catchError, throwError, tap, of, map } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { handleHttpError } from '../utils/error-handler.util';
-import { EnvService } from './env.service';
 
 export interface Film {
   id: string;
@@ -20,14 +20,11 @@ export class FilmService {
   private filmCache = signal<Map<string, Film>>(new Map());
   private searchCache = signal<Map<string, Film[]>>(new Map());
 
-  constructor(
-    private http: HttpClient,
-    private envService: EnvService,
-  ) {}
+  constructor(private http: HttpClient) {}
 
   createFilm(film: Film): Observable<Film> {
     return this.http
-      .post<Film>(`${this.envService.apiUrl}/films`, film, {
+      .post<Film>(`${environment.apiUrl}/films`, film, {
         withCredentials: true,
       })
       .pipe(
@@ -48,9 +45,7 @@ export class FilmService {
     }
 
     return this.http
-      .get<Film>(`${this.envService.apiUrl}/films/${id}`, {
-        withCredentials: true,
-      })
+      .get<Film>(`${environment.apiUrl}/films/${id}`, { withCredentials: true })
       .pipe(
         tap((film) => {
           // Update cache
@@ -77,7 +72,7 @@ export class FilmService {
 
     return this.http
       .get<Film[]>(
-        `${this.envService.apiUrl}/films/search?f=${encodeURIComponent(query)}`,
+        `${environment.apiUrl}/films/search?f=${encodeURIComponent(query)}`,
         {
           withCredentials: true,
         },
@@ -107,7 +102,7 @@ export class FilmService {
     return this.http
       .get<
         Film[]
-      >(`${this.envService.apiUrl}/films/for-comparison?userId=${userId}&filmId=${filmId}`, { withCredentials: true })
+      >(`${environment.apiUrl}/films/for-comparison?userId=${userId}&filmId=${filmId}`, { withCredentials: true })
       .pipe(
         catchError(
           handleHttpError(
@@ -122,7 +117,7 @@ export class FilmService {
     return this.http
       .post<
         Film[]
-      >(`${this.envService.apiUrl}/films/generate-recommendations?userId=${userId}`, films, { withCredentials: true })
+      >(`${environment.apiUrl}/films/generate-recommendations?userId=${userId}`, films, { withCredentials: true })
       .pipe(
         tap((recommendedFilms) => {
           // Cache recommended films
@@ -142,7 +137,7 @@ export class FilmService {
   getSeenUnratedFilms(userId: string): Observable<Film[]> {
     return this.http
       .get<Film[] | null>(
-        `${this.envService.apiUrl}/films/seen-unrated/${userId}`,
+        `${environment.apiUrl}/films/seen-unrated/${userId}`,
         {
           withCredentials: true,
         },

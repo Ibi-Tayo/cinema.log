@@ -1,11 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
+import { environment } from '../../environments/environment';
 import {
   handleHttpError,
   handleExpectedError,
 } from '../utils/error-handler.util';
-import { EnvService } from './env.service';
 
 export interface UserFilmRating {
   id: string;
@@ -59,15 +59,12 @@ export interface BatchComparisonResponse {
   providedIn: 'root',
 })
 export class RatingService {
-  constructor(
-    private http: HttpClient,
-    private envService: EnvService,
-  ) {}
+  constructor(private http: HttpClient) {}
 
   getRating(userId: string, filmId: string): Observable<UserFilmRating> {
     return this.http
       .get<UserFilmRating>(
-        `${this.envService.apiUrl}/ratings?userId=${userId}&filmId=${filmId}`,
+        `${environment.apiUrl}/ratings?userId=${userId}&filmId=${filmId}`,
         { withCredentials: true },
       )
       .pipe(
@@ -82,12 +79,9 @@ export class RatingService {
 
   getRatingsByUserId(userId: string): Observable<UserFilmRatingDetail[]> {
     return this.http
-      .get<UserFilmRatingDetail[]>(
-        `${this.envService.apiUrl}/ratings/${userId}`,
-        {
-          withCredentials: true,
-        },
-      )
+      .get<UserFilmRatingDetail[]>(`${environment.apiUrl}/ratings/${userId}`, {
+        withCredentials: true,
+      })
       .pipe(
         catchError(
           handleHttpError(
@@ -101,7 +95,7 @@ export class RatingService {
   compareFilms(comparison: ComparisonRequest): Observable<ComparisonPair> {
     return this.http
       .post<ComparisonPair>(
-        `${this.envService.apiUrl}/ratings/compare-films`,
+        `${environment.apiUrl}/ratings/compare-films`,
         comparison,
         {
           withCredentials: true,
@@ -122,7 +116,7 @@ export class RatingService {
   ): Observable<BatchComparisonResponse> {
     return this.http
       .post<BatchComparisonResponse>(
-        `${this.envService.apiUrl}/ratings/compare-films-batch`,
+        `${environment.apiUrl}/ratings/compare-films-batch`,
         request,
         {
           withCredentials: true,

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { EnvService } from './env.service';
+import { environment } from '../../environments/environment';
 
 export interface FilmGraphNode {
   userId: string;
@@ -25,13 +25,10 @@ export interface UserGraph {
   providedIn: 'root',
 })
 export class GraphService {
-  constructor(
-    private http: HttpClient,
-    private envService: EnvService,
-  ) {}
+  constructor(private http: HttpClient) {}
 
   getUserGraph(): Observable<UserGraph> {
-    return this.http.get<UserGraph>(`${this.envService.apiUrl}/graph`, {
+    return this.http.get<UserGraph>(`${environment.apiUrl}/graph`, {
       withCredentials: true,
     });
   }

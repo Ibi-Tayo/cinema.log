@@ -1,6 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://cinema-log.up.railway.app/api',
-  authDomain: '',
-  environment: 'production',
+  apiUrl: process.env['API_URL'] || 'https://cinema-log.up.railway.app/api',
 };
