@@ -13,8 +13,18 @@ setup("authenticate with dev login", async ({ page, context, baseURL }) => {
     page.getByRole("heading", { name: "Your personal hub for film review" }),
   ).toBeVisible();
 
-  await page.getByTestId("navbar-signin-link").click();
-  await page.getByTestId("login-github-dev-button").click();
+  // Call the dev login endpoint directly to get authentication cookies
+  const response = await page.request.get(`${baseURL}/api/auth/dev/login`, {
+    failOnStatusCode: false,
+  });
+
+  if (!response.ok()) {
+    throw new Error(
+      `Dev login failed with status ${response.status()}. ` +
+        `This endpoint is only available in non-production environments.`,
+    );
+  }
+
 
   await page.reload();
 
