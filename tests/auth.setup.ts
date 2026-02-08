@@ -1,7 +1,7 @@
 import { test as setup, expect } from "@playwright/test";
 
 const authFile = ".auth/user.json";
-const AUTH_TIMEOUT = 10000; // 10 seconds timeout for authentication verification
+const AUTH_TIMEOUT = 10000;
 
 setup("authenticate with dev login", async ({ page, context, baseURL }) => {
   // In CI/test environments, use the dev login endpoint to bypass OAuth
@@ -13,18 +13,9 @@ setup("authenticate with dev login", async ({ page, context, baseURL }) => {
     page.getByRole("heading", { name: "Your personal hub for film review" }),
   ).toBeVisible();
 
-  // Call the dev login endpoint directly to get authentication cookies
-  const response = await page.request.get(`${baseURL}/api/auth/dev/login`, {
-    failOnStatusCode: false,
-  });
+  await page.getByTestId("navbar-signin-link").click();
 
-  if (!response.ok()) {
-    throw new Error(
-      `Dev login failed with status ${response.status()}. ` +
-        `This endpoint is only available in non-production environments.`,
-    );
-  }
-
+  await page.getByTestId("login-github-dev-button").click();
 
   await page.reload();
 
