@@ -1,10 +1,4 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  signal,
-  CUSTOM_ELEMENTS_SCHEMA,
-  OnInit,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, CUSTOM_ELEMENTS_SCHEMA, OnInit, inject } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../services/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -18,16 +12,14 @@ import { Router, ActivatedRoute } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent implements OnInit {
+  auth = inject(AuthService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
   errorMessage = signal<string>('');
   branchName = signal<string>(
     import.meta.env.NG_APP_BRANCH_NAME || 'production',
   );
-
-  constructor(
-    public auth: AuthService,
-    private router: Router,
-    private route: ActivatedRoute,
-  ) {}
 
   ngOnInit() {
     // Check for error query parameter

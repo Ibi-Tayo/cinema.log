@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Observable, catchError, throwError, tap, of, map } from 'rxjs';
 import { handleHttpError } from '../utils/error-handler.util';
 
@@ -16,10 +16,10 @@ export interface Film {
   providedIn: 'root',
 })
 export class FilmService {
+  private http = inject(HttpClient);
+
   private filmCache = signal<Map<string, Film>>(new Map());
   private searchCache = signal<Map<string, Film[]>>(new Map());
-
-  constructor(private http: HttpClient) {}
 
   createFilm(film: Film): Observable<Film> {
     return this.http

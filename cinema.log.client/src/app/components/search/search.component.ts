@@ -1,12 +1,4 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  CUSTOM_ELEMENTS_SCHEMA,
-  signal,
-  computed,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -40,6 +32,9 @@ import { SkeletonModule } from 'primeng/skeleton';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchComponent implements OnInit, OnDestroy {
+  private filmService = inject(FilmService);
+  private router = inject(Router);
+
   searchQuery = signal('');
   searchResults = signal<Film[]>([]);
   isLoading = signal(false);
@@ -49,8 +44,6 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   // Computed signals
   hasResults = computed(() => this.searchResults().length > 0);
-
-  constructor(private filmService: FilmService, private router: Router) {}
 
   ngOnInit(): void {
     // Debounce search input to avoid excessive API calls

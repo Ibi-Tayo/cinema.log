@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export interface FilmGraphNode {
@@ -24,7 +24,8 @@ export interface UserGraph {
   providedIn: 'root',
 })
 export class GraphService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
+
 
   getUserGraph(): Observable<UserGraph> {
     return this.http.get<UserGraph>(`${import.meta.env.NG_APP_API_URL}/graph`, {

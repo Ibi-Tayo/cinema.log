@@ -1,13 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  OnDestroy,
-  ViewChild,
-  signal,
-  CUSTOM_ELEMENTS_SCHEMA,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild, signal, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, inject } from '@angular/core';
 import { DataSet } from 'vis-data';
 import { Data, Edge, Network, Options } from 'vis-network';
 import { GraphService } from '../../services/graph.service';
@@ -24,6 +15,8 @@ import { ErrorStateComponent } from '../shared/error-state/error-state.component
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilmsGraphComponent implements AfterViewInit, OnDestroy {
+  private graphService = inject(GraphService);
+
   @ViewChild('networkContainer') networkContainer!: ElementRef;
 
   private network: Network | undefined;
@@ -31,8 +24,6 @@ export class FilmsGraphComponent implements AfterViewInit, OnDestroy {
   isLoading = signal(true);
   errorMessage = signal('');
   isEmpty = signal(false);
-
-  constructor(private graphService: GraphService) {}
 
   ngAfterViewInit(): void {
     this.loadGraphData();

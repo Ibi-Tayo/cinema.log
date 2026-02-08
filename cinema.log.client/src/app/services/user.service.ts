@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
 import { handleHttpError } from '../utils/error-handler.util';
 
@@ -17,7 +17,8 @@ export interface User {
   providedIn: 'root',
 })
 export class UserService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
+
 
   getUserById(id: string): Observable<User> {
     return this.http

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
 import { handleHttpError } from '../utils/error-handler.util';
 
@@ -27,7 +27,8 @@ export interface UpdateReviewRequest {
   providedIn: 'root',
 })
 export class ReviewService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
+
 
   getAllReviewsByUserId(userId: string): Observable<Review[]> {
     return this.http

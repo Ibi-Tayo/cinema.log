@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { catchError, Observable, tap } from 'rxjs';
 import {
   handleHttpError,
@@ -10,9 +10,9 @@ import {
   providedIn: 'root',
 })
 export class AuthService {
-  currentUser = signal<User | null>(null);
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+  currentUser = signal<User | null>(null);
 
   getCurrentUser(): Observable<User> {
     return this.http

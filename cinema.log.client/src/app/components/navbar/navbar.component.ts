@@ -1,11 +1,4 @@
-import {
-  Component,
-  CUSTOM_ELEMENTS_SCHEMA,
-  effect,
-  ChangeDetectionStrategy,
-  ViewChild,
-  OnInit,
-} from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, effect, ChangeDetectionStrategy, ViewChild, OnInit, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { MenuModule } from 'primeng/menu';
@@ -22,13 +15,15 @@ import { Menu } from 'primeng/menu';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavbarComponent implements OnInit {
+  auth = inject(AuthService);
+  private router = inject(Router);
+
   @ViewChild('profileMenu') profileMenu!: Menu;
   menuItems: MenuItem[] = [];
 
-  constructor(
-    public auth: AuthService,
-    private router: Router,
-  ) {
+  constructor() {
+    const auth = this.auth;
+
     effect(() => {
       if (!auth.currentUser()) {
         auth.getCurrentUser().subscribe();

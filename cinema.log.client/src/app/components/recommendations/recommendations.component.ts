@@ -1,12 +1,4 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  CUSTOM_ELEMENTS_SCHEMA,
-  signal,
-  computed,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -61,6 +53,11 @@ interface FilmSelection {
   providers: [MessageService],
 })
 export class RecommendationsComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private filmService = inject(FilmService);
+  private messageService = inject(MessageService);
+
   userId = signal<string>('');
   currentStep = signal<RecommendationStep>(RecommendationStep.seedSelection);
 
@@ -93,13 +90,6 @@ export class RecommendationsComponent implements OnInit, OnDestroy {
   isInRecommendationStep = computed(
     () => this.currentStep() === RecommendationStep.recommendations,
   );
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private filmService: FilmService,
-    private messageService: MessageService,
-  ) {}
 
   ngOnInit(): void {
     const userId = this.route.snapshot.paramMap.get('userId');

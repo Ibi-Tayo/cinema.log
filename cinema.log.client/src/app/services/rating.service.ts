@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
 import {
   handleHttpError,
@@ -58,7 +58,8 @@ export interface BatchComparisonResponse {
   providedIn: 'root',
 })
 export class RatingService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
+
 
   getRating(userId: string, filmId: string): Observable<UserFilmRating> {
     return this.http

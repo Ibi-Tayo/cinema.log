@@ -1,11 +1,4 @@
-import {
-  Component,
-  CUSTOM_ELEMENTS_SCHEMA,
-  input,
-  output,
-  computed,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, input, output, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Film } from '../../../../services/film.service';
 import { ComparisonStateService } from '../../../../services/comparison-state.service';
@@ -28,6 +21,8 @@ import { ButtonModule } from 'primeng/button';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BulkComparisonComponent {
+  comparisonState = inject(ComparisonStateService);
+
   // Inputs
   targetFilm = input.required<Film>();
   challengerFilms = input.required<Film[]>();
@@ -42,8 +37,6 @@ export class BulkComparisonComponent {
 
   // Computed
   selectedCount = computed(() => this.comparisonState.selectionCount());
-
-  constructor(public comparisonState: ComparisonStateService) {}
 
   setSelection(filmId: string, result: 'better' | 'worse' | 'same'): void {
     this.comparisonState.setSelection(filmId, result);
