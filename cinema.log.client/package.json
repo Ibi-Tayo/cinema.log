@@ -36,6 +36,7 @@
     "@angular/compiler-cli": "^21.0.6",
     "@ngx-env/builder": "^21.0.1",
     "@types/node": "^25.2.1",
+    "@vitest/browser-playwright": "^4.0.18",
     "jsdom": "^27.0.1",
     "typescript": "~5.9.3",
     "vitest": "^4.0.18"
