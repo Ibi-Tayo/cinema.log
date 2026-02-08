@@ -4,6 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { FilmService, Film } from './film.service';
+import { describe, beforeEach, vi, afterEach, it, expect } from 'vitest';
 
 describe('FilmService', () => {
   let service: FilmService;
@@ -27,7 +28,7 @@ describe('FilmService', () => {
 
     service = TestBed.inject(FilmService);
     httpMock = TestBed.inject(HttpTestingController);
-    spyOn(console, 'error');
+    vi.spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -55,7 +56,7 @@ describe('FilmService', () => {
 
   it('should handle error when getting film by id', () => {
     service.getFilmById('invalid-id').subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to fetch film');
       },
@@ -86,7 +87,7 @@ describe('FilmService', () => {
 
   it('should handle error when searching films', () => {
     service.searchFilms('test').subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to search films');
       },

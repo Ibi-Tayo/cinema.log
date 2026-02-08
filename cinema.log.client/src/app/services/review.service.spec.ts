@@ -9,6 +9,7 @@ import {
   CreateReviewRequest,
   UpdateReviewRequest,
 } from './review.service';
+import { describe, beforeEach, vi, afterEach, it, expect } from 'vitest';
 
 describe('ReviewService', () => {
   let service: ReviewService;
@@ -31,7 +32,7 @@ describe('ReviewService', () => {
 
     service = TestBed.inject(ReviewService);
     httpMock = TestBed.inject(HttpTestingController);
-    spyOn(console, 'error');
+    vi.spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -63,7 +64,7 @@ describe('ReviewService', () => {
     const userId = 'invalid-user-id';
 
     service.getAllReviewsByUserId(userId).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to fetch reviews');
       },
@@ -101,7 +102,7 @@ describe('ReviewService', () => {
     };
 
     service.createReview(createRequest).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to create review');
       },
@@ -145,7 +146,7 @@ describe('ReviewService', () => {
     };
 
     service.updateReview(updateRequest).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to update review');
       },
@@ -176,7 +177,7 @@ describe('ReviewService', () => {
     const reviewId = 'invalid-review-id';
 
     service.deleteReview(reviewId).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to delete review');
       },

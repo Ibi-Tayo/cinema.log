@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
+import { describe, beforeEach, it, expect } from 'vitest';
 
 describe('AppComponent', () => {
   beforeEach(async () => {

@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FilmDisplayComponent } from './film-display.component';
 import { Film } from '../../../services/film.service';
 import { UserFilmRating } from '../../../services/rating.service';
+import { describe, beforeEach, it, expect } from 'vitest';
 
 describe('FilmDisplayComponent', () => {
   let component: FilmDisplayComponent;

@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi, type MockedObject } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
@@ -10,37 +11,41 @@ import { RatingService } from '../../services/rating.service';
 describe('ReviewComponent', () => {
   let component: ReviewComponent;
   let fixture: ComponentFixture<ReviewComponent>;
-  let mockFilmService: jasmine.SpyObj<FilmService>;
-  let mockReviewService: jasmine.SpyObj<ReviewService>;
-  let mockAuthService: jasmine.SpyObj<AuthService>;
-  let mockRatingService: jasmine.SpyObj<RatingService>;
-  let mockRouter: jasmine.SpyObj<Router>;
+  let mockFilmService: Partial<MockedObject<FilmService>>;
+  let mockReviewService: Partial<MockedObject<ReviewService>>;
+  let mockAuthService: Partial<MockedObject<AuthService>>;
+  let mockRatingService: Partial<MockedObject<RatingService>>;
+  let mockRouter: Partial<MockedObject<Router>>;
   let mockActivatedRoute: any;
 
   beforeEach(async () => {
-    mockFilmService = jasmine.createSpyObj('FilmService', ['getFilmById']);
-    mockReviewService = jasmine.createSpyObj('ReviewService', ['createReview']);
-    mockAuthService = jasmine.createSpyObj('AuthService', ['getCurrentUser']);
-    mockRatingService = jasmine.createSpyObj('RatingService', [
-      'getRating',
-      'getFilmsForComparison',
-      'compareFilms',
-    ]);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate'], {
-      currentNavigation: jasmine
-        .createSpy('currentNavigation')
-        .and.returnValue(null),
-    });
+    mockFilmService = {
+      getFilmById: vi.fn().mockName('FilmService.getFilmById'),
+    };
+    mockReviewService = {
+      createReview: vi.fn().mockName('ReviewService.createReview'),
+    };
+    mockAuthService = {
+      getCurrentUser: vi.fn().mockName('AuthService.getCurrentUser'),
+    };
+    mockRatingService = {
+      getRating: vi.fn().mockName('RatingService.getRating'),
+      compareFilms: vi.fn().mockName('RatingService.compareFilms'),
+      compareBatch: vi.fn().mockName('RatingService.compareBatch'),
+    };
+    mockRouter = {
+      navigate: vi.fn().mockName('Router.navigate'),
+    };
     mockActivatedRoute = {
       snapshot: {
         paramMap: {
-          get: jasmine.createSpy('get').and.returnValue('test-film-id'),
+          get: vi.fn().mockReturnValue('test-film-id'),
         },
       },
     };
 
     // Setup default return values
-    mockFilmService.getFilmById.and.returnValue(
+    mockFilmService.getFilmById!.mockReturnValue(
       of({
         id: 'test-film-id',
         externalId: 123,
@@ -48,9 +53,9 @@ describe('ReviewComponent', () => {
         releaseYear: '2023',
         description: 'Test description',
         posterUrl: 'test-poster.jpg',
-      })
+      }),
     );
-    mockAuthService.getCurrentUser.and.returnValue(
+    mockAuthService.getCurrentUser!.mockReturnValue(
       of({
         id: 'test-user-id',
         githubId: 456,
@@ -59,9 +64,9 @@ describe('ReviewComponent', () => {
         profilePicUrl: 'test-profile.jpg',
         createdAt: '2023-01-01T00:00:00Z',
         updatedAt: '2023-01-01T00:00:00Z',
-      })
+      }),
     );
-    mockRatingService.getRating.and.returnValue(of(null as any));
+    mockRatingService.getRating!.mockReturnValue(of(null as any));
 
     await TestBed.configureTestingModule({
       imports: [ReviewComponent],

@@ -9,6 +9,7 @@ import {
   ComparisonPair,
   ComparisonRequest,
 } from './rating.service';
+import { describe, beforeEach, vi, afterEach, it, expect } from 'vitest';
 
 describe('RatingService', () => {
   let service: RatingService;
@@ -38,7 +39,7 @@ describe('RatingService', () => {
 
     service = TestBed.inject(RatingService);
     httpMock = TestBed.inject(HttpTestingController);
-    spyOn(console, 'error');
+    vi.spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -70,7 +71,7 @@ describe('RatingService', () => {
     const filmId = 'invalid-film-id';
 
     service.getRating(userId, filmId).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to fetch rating');
       },
@@ -135,7 +136,7 @@ describe('RatingService', () => {
     };
 
     service.compareFilms(comparisonRequest).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to compare films');
       },

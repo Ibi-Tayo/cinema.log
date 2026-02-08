@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { getTMDBPosterUrl, getTMDBBackdropUrl } from './tmdb-image.util';
 
 describe('TMDB Image Utility', () => {

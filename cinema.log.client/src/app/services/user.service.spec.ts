@@ -4,6 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { UserService, User } from './user.service';
+import { describe, beforeEach, vi, afterEach, it, expect } from 'vitest';
 
 describe('UserService', () => {
   let service: UserService;
@@ -27,7 +28,7 @@ describe('UserService', () => {
 
     service = TestBed.inject(UserService);
     httpMock = TestBed.inject(HttpTestingController);
-    spyOn(console, 'error');
+    vi.spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -55,7 +56,7 @@ describe('UserService', () => {
 
   it('should handle error when getting user by id', () => {
     service.getUserById('invalid-id').subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to fetch user');
       },
@@ -105,7 +106,7 @@ describe('UserService', () => {
     };
 
     service.createUser(newUser).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to create user');
       },
@@ -131,7 +132,7 @@ describe('UserService', () => {
 
   it('should handle error when updating user', () => {
     service.updateUser(mockUser).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to update user');
       },
@@ -156,7 +157,7 @@ describe('UserService', () => {
 
   it('should handle error when deleting user', () => {
     service.deleteUser('invalid-id').subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to delete user');
       },

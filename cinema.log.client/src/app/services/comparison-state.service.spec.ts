@@ -3,6 +3,7 @@ import {
   ComparisonStateService,
   ComparisonResult,
 } from './comparison-state.service';
+import { describe, beforeEach, afterEach, it, expect } from 'vitest';
 
 describe('ComparisonStateService', () => {
   let service: ComparisonStateService;
@@ -108,9 +109,15 @@ describe('ComparisonStateService', () => {
 
       const allSelections = service.getAllSelections();
       expect(allSelections.length).toBe(3);
-      expect(allSelections).toContain({ filmId: 'film1', result: 'better' });
-      expect(allSelections).toContain({ filmId: 'film2', result: 'worse' });
-      expect(allSelections).toContain({ filmId: 'film3', result: 'same' });
+      expect(allSelections).toContainEqual({
+        filmId: 'film1',
+        result: 'better',
+      });
+      expect(allSelections).toContainEqual({
+        filmId: 'film2',
+        result: 'worse',
+      });
+      expect(allSelections).toContainEqual({ filmId: 'film3', result: 'same' });
     });
 
     it('should reset all selections', () => {

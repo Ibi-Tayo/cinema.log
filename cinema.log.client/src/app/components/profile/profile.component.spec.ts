@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { ProfileComponent } from './profile.component';
 import { provideHttpClient } from '@angular/common/http';
+import { describe, beforeEach, it, expect } from 'vitest';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
