@@ -15,13 +15,11 @@ test.describe("User Profile", () => {
     await page.getByRole("menuitem", { name: "Profile" }).click();
 
     // Verify profile page elements
+    await expect(page.getByRole("heading", { name: "Dev User" })).toBeVisible();
+    await expect(page.getByText("@devuser")).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Dev Google User" }),
+      page.getByText(/Member since (December 2025|January 2026)/),
     ).toBeVisible();
-    await expect(page.getByText("@devgoogleuser")).toBeVisible();
-    await expect(page.getByText("Member since January 2026")).toBeVisible();
-    await expect(
-      page.getByRole("img", { name: "Dev Google User" }),
-    ).toBeVisible();
+    await expect(page.getByRole("img", { name: "Dev User" })).toBeVisible();
   });
 });

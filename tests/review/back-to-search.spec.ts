@@ -14,6 +14,7 @@ test.describe("Film Review and Rating", () => {
   }) => {
     // Navigate to search page
     await page.getByTestId("navbar-search-link").click();
+    await page.waitForURL("**/search");
 
     // 1. Search for and select a film to review
     await page.getByTestId("search-input").fill("Gladiator");

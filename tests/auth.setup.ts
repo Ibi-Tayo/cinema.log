@@ -8,16 +8,20 @@ setup("authenticate with dev login", async ({ page, context, baseURL }) => {
   // This creates a test user automatically without requiring GitHub credentials
 
   // Navigate to the home page to verify authentication
-  await page.goto("/");
+  await page.goto(baseURL || "http://localhost:4200");
   await expect(
     page.getByRole("heading", { name: "Your personal hub for film review" }),
   ).toBeVisible();
 
   await page.getByTestId("navbar-signin-link").click();
 
+  // Click dev login and wait for authentication to complete
+  // The dev login should redirect after successful authentication
   await page.getByTestId("login-github-dev-button").click();
 
-  await page.reload();
+  // Wait for navigation away from login page (auth cookie should be set and redirect happens)
+  // The app typically redirects to the profile page after successful login
+  await page.waitForURL(/\/(profile|home)\/.*/, { timeout: AUTH_TIMEOUT });
 
   // Verify user is logged in by checking for profile link in navigation
   // The dev user should be automatically created and logged in

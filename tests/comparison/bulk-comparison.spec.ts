@@ -7,6 +7,10 @@ test.describe("Bulk Film Comparison", () => {
   test.beforeEach(async ({ page }) => {
     // Authentication is already handled by auth.setup.ts
     await page.goto("/");
+
+    // Navigate to profile page
+    await page.getByTestId("navbar-profile-link").click();
+    await page.getByRole("menuitem", { name: "Profile" }).click();
   });
 
   test("User can perform bulk comparisons", async ({ page }) => {

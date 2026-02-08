@@ -12,6 +12,7 @@ test.describe("Film Review and Rating", () => {
   test("User cannot submit review without rating", async ({ page }) => {
     // Navigate to search page
     await page.getByTestId("navbar-search-link").click();
+    await page.waitForURL("**/search");
 
     // 1. Navigate to review page for a new film
     await page.getByTestId("search-input").fill("Forrest Gump");

@@ -16,6 +16,9 @@ test.describe("Authentication", () => {
     await page.getByTestId("navbar-profile-link").click();
     await page.getByRole("menuitem", { name: "Sign Out" }).click();
 
+    // Wait for redirect to login/home page after sign out
+    await page.waitForURL(/\/(login|home)/);
+
     // 1. Navigate directly to a profile URL without being logged in
     await page.goto("/profile/test-user-id");
     await expect(page.getByText("Join Our Film Community")).toBeVisible();

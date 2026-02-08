@@ -12,6 +12,7 @@ test.describe("Film Search", () => {
   test("User can click on a search result to review", async ({ page }) => {
     // Navigate to search page
     await page.getByTestId("navbar-search-link").click();
+    await page.waitForURL("**/search");
 
     // 1. Search for 'Inception'
     await page.getByTestId("search-input").fill("Inception");

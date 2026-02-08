@@ -12,10 +12,14 @@ test.describe("Film Review and Rating", () => {
   test("User can select different star ratings", async ({ page }) => {
     // Navigate to search page
     await page.getByTestId("navbar-search-link").click();
+    await page.waitForURL("**/search");
 
     // 1. Navigate to a film review page
     await page.getByTestId("search-input").fill("Schindler's List");
     await page.getByTestId("search-input").press("Enter");
+    await expect(
+      page.getByRole("heading", { name: /Search Results/ }),
+    ).toBeVisible();
     await page
       .getByRole("img", { name: "Schindler's List", exact: true })
       .click();
