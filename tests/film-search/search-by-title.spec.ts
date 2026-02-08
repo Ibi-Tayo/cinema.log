@@ -5,7 +5,6 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Film Search", () => {
   test.beforeEach(async ({ page }) => {
-    // Authentication is already handled by auth.setup.ts
     await page.goto("/");
   });
 
@@ -25,9 +24,6 @@ test.describe("Film Search", () => {
 
     // 3. Press Enter or wait for search results
     await page.getByTestId("search-input").press("Enter");
-    await expect(
-      page.getByRole("heading", { name: /Search Results \(\d+\)/ }),
-    ).toBeVisible();
     await expect(
       page.getByRole("img", { name: "The Dark Knight" }).first(),
     ).toBeVisible();

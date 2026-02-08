@@ -5,7 +5,6 @@ import { test, expect } from "@playwright/test";
 
 test.describe("User Profile", () => {
   test.beforeEach(async ({ page }) => {
-    // Authentication is already handled by auth.setup.ts
     await page.goto("/");
   });
 

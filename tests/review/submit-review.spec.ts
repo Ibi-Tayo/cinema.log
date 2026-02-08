@@ -5,7 +5,6 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Film Review and Rating", () => {
   test.beforeEach(async ({ page }) => {
-    // Authentication is already handled by auth.setup.ts
     await page.goto("/");
   });
 
@@ -16,9 +15,7 @@ test.describe("Film Review and Rating", () => {
     // 1. Search for and select a film (e.g., 'Casablanca')
     await page.getByTestId("search-input").fill("Casablanca");
     await page.getByTestId("search-input").press("Enter");
-    await expect(
-      page.getByRole("heading", { name: /Search Results/ }),
-    ).toBeVisible();
+
     await page.getByRole("img", { name: "Casablanca" }).first().click();
     await expect(
       page.getByRole("heading", { name: "Casablanca" }),

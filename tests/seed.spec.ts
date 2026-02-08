@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { ensureFilmExists } from "./utils/test-helpers";
 
 test.describe("Test group", () => {
   test("seed", async ({ page }) => {
