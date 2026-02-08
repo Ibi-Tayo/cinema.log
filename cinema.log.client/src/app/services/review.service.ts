@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { handleHttpError } from '../utils/error-handler.util';
 
 export interface Review {
@@ -32,53 +31,63 @@ export class ReviewService {
 
   getAllReviewsByUserId(userId: string): Observable<Review[]> {
     return this.http
-      .get<Review[]>(`${environment.apiUrl}/reviews/${userId}`, { withCredentials: true })
+      .get<
+        Review[]
+      >(`${import.meta.env.NG_APP_API_URL}/reviews/${userId}`, { withCredentials: true })
       .pipe(
         catchError(
           handleHttpError(
             'fetching reviews',
-            'Failed to fetch reviews. Please try again later.'
-          )
-        )
+            'Failed to fetch reviews. Please try again later.',
+          ),
+        ),
       );
   }
 
   createReview(review: CreateReviewRequest): Observable<Review> {
     return this.http
-      .post<Review>(`${environment.apiUrl}/reviews`, review, { withCredentials: true })
+      .post<Review>(`${import.meta.env.NG_APP_API_URL}/reviews`, review, {
+        withCredentials: true,
+      })
       .pipe(
         catchError(
           handleHttpError(
             'creating review',
-            'Failed to create review. Please try again later.'
-          )
-        )
+            'Failed to create review. Please try again later.',
+          ),
+        ),
       );
   }
 
   updateReview(review: UpdateReviewRequest): Observable<Review> {
     return this.http
-      .put<Review>(`${environment.apiUrl}/reviews/${review.reviewId}`, review, { withCredentials: true })
+      .put<Review>(
+        `${import.meta.env.NG_APP_API_URL}/reviews/${review.reviewId}`,
+        review,
+        { withCredentials: true },
+      )
       .pipe(
         catchError(
           handleHttpError(
             'updating review',
-            'Failed to update review. Please try again later.'
-          )
-        )
+            'Failed to update review. Please try again later.',
+          ),
+        ),
       );
   }
 
   deleteReview(id: string): Observable<void> {
     return this.http
-      .delete<void>(`${environment.apiUrl}/reviews?id=${id}`, { withCredentials: true })
+      .delete<void>(`${import.meta.env.NG_APP_API_URL}/reviews?id=${id}`, {
+        withCredentials: true,
+      })
       .pipe(
         catchError(
           handleHttpError(
             'deleting review',
-            'Failed to delete review. Please try again later.'
-          )
-        )
+            'Failed to delete review. Please try again later.',
+          ),
+        ),
       );
   }
 }

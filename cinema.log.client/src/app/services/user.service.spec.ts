@@ -4,7 +4,6 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { UserService, User } from './user.service';
-import { environment } from '../../environments/environment';
 
 describe('UserService', () => {
   let service: UserService;
@@ -47,7 +46,7 @@ describe('UserService', () => {
       });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/users/123e4567-e89b-12d3-a456-426614174000`
+      `${import.meta.env.NG_APP_API_URL}/users/123e4567-e89b-12d3-a456-426614174000`,
     );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
@@ -62,7 +61,9 @@ describe('UserService', () => {
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users/invalid-id`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/users/invalid-id`,
+    );
     req.error(new ProgressEvent('error'));
   });
 
@@ -74,7 +75,7 @@ describe('UserService', () => {
       expect(users.length).toBe(1);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users`);
+    const req = httpMock.expectOne(`${import.meta.env.NG_APP_API_URL}/users`);
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush(mockUsers);
@@ -90,7 +91,7 @@ describe('UserService', () => {
       expect(user).toEqual(mockUser);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users`);
+    const req = httpMock.expectOne(`${import.meta.env.NG_APP_API_URL}/users`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(newUser);
     expect(req.request.withCredentials).toBe(true);
@@ -110,7 +111,7 @@ describe('UserService', () => {
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users`);
+    const req = httpMock.expectOne(`${import.meta.env.NG_APP_API_URL}/users`);
     req.error(new ProgressEvent('error'));
   });
 
@@ -121,7 +122,7 @@ describe('UserService', () => {
       expect(user).toEqual(updatedUser);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users`);
+    const req = httpMock.expectOne(`${import.meta.env.NG_APP_API_URL}/users`);
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(updatedUser);
     expect(req.request.withCredentials).toBe(true);
@@ -136,7 +137,7 @@ describe('UserService', () => {
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users`);
+    const req = httpMock.expectOne(`${import.meta.env.NG_APP_API_URL}/users`);
     req.error(new ProgressEvent('error'));
   });
 
@@ -146,7 +147,7 @@ describe('UserService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/users/123e4567-e89b-12d3-a456-426614174000`
+      `${import.meta.env.NG_APP_API_URL}/users/123e4567-e89b-12d3-a456-426614174000`,
     );
     expect(req.request.method).toBe('DELETE');
     expect(req.request.withCredentials).toBe(true);
@@ -161,7 +162,9 @@ describe('UserService', () => {
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users/invalid-id`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/users/invalid-id`,
+    );
     req.error(new ProgressEvent('error'));
   });
 });

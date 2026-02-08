@@ -5,7 +5,6 @@ import {
 } from '@angular/common/http/testing';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
-import { environment } from '../../environments/environment';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -41,7 +40,9 @@ describe('AuthService', () => {
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/auth/logout`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/auth/logout`,
+    );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush({});
@@ -55,7 +56,9 @@ describe('AuthService', () => {
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/auth/logout`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/auth/logout`,
+    );
     req.error(new ProgressEvent('error'));
   });
 
@@ -66,7 +69,9 @@ describe('AuthService', () => {
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/auth/refresh-token`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/auth/refresh-token`,
+    );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush({});
@@ -80,7 +85,9 @@ describe('AuthService', () => {
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/auth/refresh-token`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/auth/refresh-token`,
+    );
     req.error(new ProgressEvent('error'));
   });
 

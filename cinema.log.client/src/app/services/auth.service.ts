@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { catchError, Observable, tap } from 'rxjs';
-import { environment } from '../../environments/environment';
 import {
   handleHttpError,
   handleExpectedError,
@@ -12,15 +11,14 @@ import {
 })
 export class AuthService {
   currentUser = signal<User | null>(null);
-  env: Env;
 
-  constructor(private http: HttpClient) {
-    this.env = environment.production ? Env.PROD : Env.DEV;
-  }
+  constructor(private http: HttpClient) {}
 
   getCurrentUser(): Observable<User> {
     return this.http
-      .get<User>(`${environment.apiUrl}/auth/me`, { withCredentials: true })
+      .get<User>(`${import.meta.env.NG_APP_API_URL}/auth/me`, {
+        withCredentials: true,
+      })
       .pipe(
         tap((user) => this.currentUser.set(user)),
         // Use handleExpectedError because 401/403 is expected when user is not logged in
@@ -32,12 +30,12 @@ export class AuthService {
 
   login(): void {
     // Redirect directly to the GitHub login endpoint
-    window.location.href = `${environment.apiUrl}/auth/github-login`;
+    window.location.href = `${import.meta.env.NG_APP_API_URL}/auth/github-login`;
   }
 
   devLogin(): Observable<void> {
     return this.http
-      .get<void>(`${environment.apiUrl}/auth/dev/login`, {
+      .get<void>(`${import.meta.env.NG_APP_API_URL}/auth/dev/login`, {
         withCredentials: true,
       })
       .pipe(
@@ -52,13 +50,13 @@ export class AuthService {
 
   googleLogin(): void {
     // Redirect directly to the Google login endpoint
-    window.location.href = `${environment.apiUrl}/auth/google-login`;
+    window.location.href = `${import.meta.env.NG_APP_API_URL}/auth/google-login`;
   }
 
   devGoogleLogin(): Observable<void> {
     return this.http
       .post<void>(
-        `${environment.apiUrl}/auth/dev/google-login`,
+        `${import.meta.env.NG_APP_API_URL}/auth/dev/google-login`,
         {},
         {
           withCredentials: true,
@@ -76,7 +74,9 @@ export class AuthService {
 
   logout(): Observable<void> {
     return this.http
-      .get<void>(`${environment.apiUrl}/auth/logout`, { withCredentials: true })
+      .get<void>(`${import.meta.env.NG_APP_API_URL}/auth/logout`, {
+        withCredentials: true,
+      })
       .pipe(
         tap(() => this.currentUser.set(null)),
         catchError(
@@ -87,7 +87,7 @@ export class AuthService {
 
   requestRefreshToken(): Observable<void> {
     return this.http
-      .get<void>(`${environment.apiUrl}/auth/refresh-token`, {
+      .get<void>(`${import.meta.env.NG_APP_API_URL}/auth/refresh-token`, {
         withCredentials: true,
       })
       .pipe(
@@ -125,9 +125,4 @@ export interface User {
   profilePicUrl: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export enum Env {
-  DEV = 'development',
-  PROD = 'production',
 }

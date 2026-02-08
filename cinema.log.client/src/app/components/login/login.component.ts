@@ -19,6 +19,9 @@ import { Router, ActivatedRoute } from '@angular/router';
 })
 export class LoginComponent implements OnInit {
   errorMessage = signal<string>('');
+  branchName = signal<string>(
+    import.meta.env.NG_APP_BRANCH_NAME || 'production',
+  );
 
   constructor(
     public auth: AuthService,

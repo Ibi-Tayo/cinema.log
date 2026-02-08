@@ -9,7 +9,6 @@ import {
   ComparisonPair,
   ComparisonRequest,
 } from './rating.service';
-import { environment } from '../../environments/environment';
 
 describe('RatingService', () => {
   let service: RatingService;
@@ -59,7 +58,7 @@ describe('RatingService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/ratings?userId=${userId}&filmId=${filmId}`
+      `${import.meta.env.NG_APP_API_URL}/ratings?userId=${userId}&filmId=${filmId}`,
     );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
@@ -78,7 +77,7 @@ describe('RatingService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/ratings?userId=${userId}&filmId=${filmId}`
+      `${import.meta.env.NG_APP_API_URL}/ratings?userId=${userId}&filmId=${filmId}`,
     );
     req.error(new ProgressEvent('error'));
   });
@@ -97,7 +96,7 @@ describe('RatingService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/ratings/compare-films`
+      `${import.meta.env.NG_APP_API_URL}/ratings/compare-films`,
     );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(comparisonRequest);
@@ -118,7 +117,7 @@ describe('RatingService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/ratings/compare-films`
+      `${import.meta.env.NG_APP_API_URL}/ratings/compare-films`,
     );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(comparisonRequest);
@@ -143,7 +142,7 @@ describe('RatingService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/ratings/compare-films`
+      `${import.meta.env.NG_APP_API_URL}/ratings/compare-films`,
     );
     req.error(new ProgressEvent('error'));
   });

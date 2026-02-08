@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
-import { environment } from '../../environments/environment';
 import {
   handleHttpError,
   handleExpectedError,
@@ -64,7 +63,7 @@ export class RatingService {
   getRating(userId: string, filmId: string): Observable<UserFilmRating> {
     return this.http
       .get<UserFilmRating>(
-        `${environment.apiUrl}/ratings?userId=${userId}&filmId=${filmId}`,
+        `${import.meta.env.NG_APP_API_URL}/ratings?userId=${userId}&filmId=${filmId}`,
         { withCredentials: true },
       )
       .pipe(
@@ -79,9 +78,12 @@ export class RatingService {
 
   getRatingsByUserId(userId: string): Observable<UserFilmRatingDetail[]> {
     return this.http
-      .get<UserFilmRatingDetail[]>(`${environment.apiUrl}/ratings/${userId}`, {
-        withCredentials: true,
-      })
+      .get<UserFilmRatingDetail[]>(
+        `${import.meta.env.NG_APP_API_URL}/ratings/${userId}`,
+        {
+          withCredentials: true,
+        },
+      )
       .pipe(
         catchError(
           handleHttpError(
@@ -95,7 +97,7 @@ export class RatingService {
   compareFilms(comparison: ComparisonRequest): Observable<ComparisonPair> {
     return this.http
       .post<ComparisonPair>(
-        `${environment.apiUrl}/ratings/compare-films`,
+        `${import.meta.env.NG_APP_API_URL}/ratings/compare-films`,
         comparison,
         {
           withCredentials: true,
@@ -116,7 +118,7 @@ export class RatingService {
   ): Observable<BatchComparisonResponse> {
     return this.http
       .post<BatchComparisonResponse>(
-        `${environment.apiUrl}/ratings/compare-films-batch`,
+        `${import.meta.env.NG_APP_API_URL}/ratings/compare-films-batch`,
         request,
         {
           withCredentials: true,

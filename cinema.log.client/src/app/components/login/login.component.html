@@ -32,7 +32,7 @@
     }
 
     <div class="auth-buttons" data-testid="login-auth-buttons">
-      @if (auth.env == "development") {
+      @if (branchName() == "development") {
         <button
           class="join-button github dev"
           (click)="devLogin()"
