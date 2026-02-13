@@ -41,7 +41,7 @@ make test  # OR: go test ./... -v
 
 # Frontend
 cd cinema.log.client
-npm run test  # Uses Karma + Jasmine
+npm run test  # Uses vitest with Angular TestBed for component/service tests
 ```
 
 ## Backend Architecture (Go)
@@ -61,7 +61,7 @@ internal/films/
 
 ### Dependency Injection (DI)
 
-All wiring happens in [internal/server/server.go](cinema.log.server.golang/internal/server/server.go):
+All wiring happens in [internal/server/server.go](../cinema.log.server.golang/internal/server/server.go):
 
 ```go
 // Pattern: DB -> Store -> Service -> Handler
@@ -70,12 +70,12 @@ filmService := films.NewService(filmStore, graphService)
 filmHandler := films.NewHandler(filmService, ratingService)
 ```
 
-**Cross-slice dependencies** use interface types defined in the _consuming_ handler/service (e.g., `FilmService` interface in [review_handler.go](cinema.log.server.golang/internal/reviews/review_handler.go)).
+**Cross-slice dependencies** use interface types defined in the _consuming_ handler/service (e.g., `FilmService` interface in [review_handler.go](../cinema.log.server.golang/internal/reviews/review_handler.go)).
 
 ### Adding New Routes
 
 1. Create handler method in `{feature}/handler.go`
-2. Register in [internal/server/routes.go](cinema.log.server.golang/internal/server/routes.go):
+2. Register in [internal/server/routes.go](../cinema.log.server.golang/internal/server/routes.go):
    ```go
    mux.HandleFunc("GET /new-route", s.newHandler.NewMethod)
    ```
@@ -84,12 +84,12 @@ filmHandler := films.NewHandler(filmService, ratingService)
 
 ### Testing Strategy
 
-- **Unit tests**: Use hand-written mock structs (e.g., `mockFilmService` in [film_handler_test.go](cinema.log.server.golang/internal/films/film_handler_test.go)) with function fields for custom behavior
-- **Integration tests**: Use testcontainers ([utils/test_utils.go](cinema.log.server.golang/internal/utils/test_utils.go)) - see `StartTestPostgres()` for real DB setup
+- **Unit tests**: Use hand-written mock structs (e.g., `mockFilmService` in [film_handler_test.go](../cinema.log.server.golang/internal/films/film_handler_test.go)) with function fields for custom behavior
+- **Integration tests**: Use testcontainers ([utils/test_utils.go](../cinema.log.server.golang/internal/utils/test_utils.go)) - see `StartTestPostgres()` for real DB setup
 - **Mock Updates**: When adding new interface methods, ensure mocks in test files implement them:
   - Handler tests: Update `mock*Service` structs
   - Service tests: Update `mock*Store` structs with function fields and corresponding methods
-- **Frontend tests**: Karma + Jasmine with ChromeHeadless (73 tests), all service/component specs passing
+- **Frontend tests**: Vitest with Angular TestBed
 
 ### Database Migrations
 
@@ -99,7 +99,7 @@ filmHandler := films.NewHandler(filmService, ratingService)
 
 ### Auth Middleware
 
-[routes.go](cinema.log.server.golang/internal/server/routes.go) validates JWT on all routes except:
+[routes.go](../cinema.log.server.golang/internal/server/routes.go) validates JWT on all routes except:
 
 - `/auth/github-login`, `/auth/github-callback`, `/auth/refresh-token`
 - `/auth/dev/login` (dev-only bypass)
@@ -115,20 +115,21 @@ userId, err := middleware.GetUserIDFromContext(r.Context())
 ### Modern Angular Patterns
 
 - **Standalone components** (no NgModules except legacy)
+- **Inject() for DI** (no constructor injection in services/components)
 - **Signals** for reactive state (`signal()`, `computed()`)
   ```typescript
   currentUser = signal<User | null>(null); // in AuthService
   isLoading = signal(true); // in components
   ```
-- **Functional guards** ([auth.guard.ts](cinema.log.client/src/app/guards/auth.guard.ts)) - checks `currentUser()` signal or calls `/auth/me`
+- **Functional guards** ([auth.guard.ts](../cinema.log.client/src/app/guards/auth.guard.ts)) - checks `currentUser()` signal or calls `/auth/me`
 
 ### Services & HTTP
 
 - All HTTP calls use `withCredentials: true` for cookies (JWT storage)
-- Error handling via [utils/error-handler.util.ts](cinema.log.client/src/app/utils/error-handler.util.ts):
+- Error handling via [utils/error-handler.util.ts](../cinema.log.client/src/app/utils/error-handler.util.ts):
   - `handleHttpError()` - unexpected errors (show user-friendly message)
   - `handleExpectedError()` - auth failures (silent, e.g., 401 on `/auth/me`)
-- Base API URL from [environments/environment.ts](cinema.log.client/src/environments/environment.ts) (`apiUrl`)
+- Base API URL from `import.meta.env.NG_APP_API_URL`
 
 ### Component Structure
 
@@ -144,7 +145,7 @@ components/{feature}/
 
 - Theme: Aura (dark mode via `.dark-mode` class)
 - Import individual components: `import { ButtonModule } from 'primeng/button';`
-- Config in [app.config.ts](cinema.log.client/src/app/app.config.ts) with ripple effects enabled
+- Config in [app.config.ts](../cinema.log.client/src/app/app.config.ts) with ripple effects enabled
 
 ## Environment Variables
 
@@ -165,7 +166,11 @@ GITHUB_CLIENT_SECRET=xxx
 TMDB_ACCESS_TOKEN=xxx  # For film search API
 ```
 
-Frontend: Uses [environment.ts](cinema.log.client/src/environments/environment.ts) (prod) and `environment.development.ts` (dev)
+Frontend: .env file with:
+
+```env
+NG_APP_API_URL=http://localhost:8080
+```
 
 ## Key Integration Points
 
@@ -198,7 +203,7 @@ Frontend: Uses [environment.ts](cinema.log.client/src/environments/environment.t
 
 ### External API (TMDB)
 
-Film search via `GET /films/search?f=query` proxied through backend [films/film_service.go](cinema.log.server.golang/internal/films/film_service.go) to avoid exposing API keys
+Film search via `GET /films/search?f=query` proxied through backend [films/film_service.go](../cinema.log.server.golang/internal/films/film_service.go) to avoid exposing API keys
 
 ## Common Patterns
 
@@ -207,11 +212,10 @@ Film search via `GET /films/search?f=query` proxied through backend [films/film_
 - **Error handling**: Return `fmt.Errorf("description: %w", err)` for wrapping
 - **Context propagation**: Always pass `ctx context.Context` as first param
 - **SQL queries**: Use `pgx` driver with prepared statements (`$1`, `$2` placeholders)
-- **HTTP responses**: Use utility from [utils/json.go](cinema.log.server.golang/internal/utils/json.go)
+- **HTTP responses**: Use utility from [utils/json.go](../cinema.log.server.golang/internal/utils/json.go)
 - **Transactions**: Use `BeginTx()` for multi-step database operations (e.g., batch updates)
 
 ### Frontend
-
 - **HTTP error handling**: Always use `catchError()` with error handler utilities
 - **Loading states**: Use signals for `isLoading`, `errorMessage`
 - **Router navigation**: Inject `Router` for programmatic nav (e.g., after login success)
@@ -220,7 +224,7 @@ Film search via `GET /films/search?f=query` proxied through backend [films/film_
 
 ## Migration/Deployment Notes
 
-- Production backend: Railway deployment (see `environment.apiUrl`)
+- Production backend: Railway deployment 
 - Frontend build: `ng build` → outputs to `dist/`
 - DB migrations: Goose applies in order based on timestamp prefix
 - Docker: Use `docker compose` (v2 syntax) in scripts, not `docker-compose`

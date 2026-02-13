@@ -1,6 +1,6 @@
-<div class="review-form-section">
+<div class="review-form-section" data-testid="review-form-section">
   @if (hasRating()) {
-    <h3>
+    <h3 data-testid="review-form-title">
       <lord-icon
         src="https://cdn.lordicon.com/cvwrvyjv.json"
         trigger="hover"
@@ -10,7 +10,7 @@
       Update Review
     </h3>
   } @else {
-    <h3>
+    <h3 data-testid="review-form-title">
       <lord-icon
         src="https://cdn.lordicon.com/cvwrvyjv.json"
         trigger="hover"
@@ -23,7 +23,7 @@
 
   <!-- Success Message -->
   @if (submitSuccess()) {
-    <div class="success-message">
+    <div class="success-message" data-testid="review-form-success-message">
       <lord-icon
         src="https://cdn.lordicon.com/lomfljuq.json"
         trigger="loop"
@@ -36,12 +36,14 @@
 
   <!-- Review Form -->
   @if (!submitSuccess()) {
-    <div class="review-form">
+    <div class="review-form" data-testid="review-form">
       <!-- Rating Section (only for new reviews) -->
       @if (!hasRating()) {
-        <div class="rating-section">
-          <p class="rating-label">Rating (out of 5)</p>
-          <div class="star-rating">
+        <div class="rating-section" data-testid="review-form-rating-section">
+          <p class="rating-label" data-testid="review-form-rating-label">
+            Rating (out of 5)
+          </p>
+          <div class="star-rating" data-testid="review-form-star-rating">
             @for (star of getStars(); track star) {
               <span
                 class="star"
@@ -51,20 +53,23 @@
                 role="button"
                 tabindex="0"
                 [attr.aria-label]="'Rate ' + star + ' out of 5 stars'"
+                [attr.data-testid]="'review-form-star-' + star"
               >
                 ★
               </span>
             }
           </div>
-          <p class="rating-hint">
+          <p class="rating-hint" data-testid="review-form-rating-hint">
             Click to rate ({{ selectedRating() || "Not rated" }})
           </p>
         </div>
       }
 
       <!-- Review Text Section -->
-      <div class="review-text-section">
-        <label for="reviewText">Your Thoughts</label>
+      <div class="review-text-section" data-testid="review-form-text-section">
+        <label for="reviewText" data-testid="review-form-text-label"
+          >Your Thoughts</label
+        >
         <textarea
           id="reviewText"
           [value]="reviewText()"
@@ -72,12 +77,13 @@
           placeholder="Share your thoughts about this film..."
           rows="8"
           [disabled]="isSubmitting()"
+          data-testid="review-form-textarea"
         ></textarea>
       </div>
 
       <!-- Error Message -->
       @if (submitError()) {
-        <div class="error-message">
+        <div class="error-message" data-testid="review-form-error-message">
           <lord-icon
             src="https://cdn.lordicon.com/tdrtiskw.json"
             trigger="loop"
@@ -89,12 +95,13 @@
       }
 
       <!-- Submit Button -->
-      <div class="submit-section">
+      <div class="submit-section" data-testid="review-form-submit-section">
         @if (!hasRating()) {
           <button
             class="submit-button"
             (click)="onSubmitReview()"
             [disabled]="isSubmitDisabled()"
+            data-testid="review-form-submit-button"
           >
             @if (!isSubmitting()) {
               <lord-icon
@@ -119,6 +126,7 @@
             class="submit-button"
             (click)="onUpdateReview()"
             [disabled]="isSubmitDisabled()"
+            data-testid="review-form-update-button"
           >
             @if (!isSubmitting()) {
               <lord-icon

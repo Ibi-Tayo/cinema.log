@@ -1,3 +1,4 @@
+import type { MockedObject } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
@@ -7,21 +8,24 @@ import { FilmService } from '../../services/film.service';
 describe('SearchComponent', () => {
   let component: SearchComponent;
   let fixture: ComponentFixture<SearchComponent>;
-  let mockFilmService: jasmine.SpyObj<FilmService>;
-  let mockRouter: jasmine.SpyObj<Router>;
+  let mockFilmService: Partial<MockedObject<FilmService>>;
+  let mockRouter: Partial<MockedObject<Router>>;
 
   beforeEach(async () => {
-    mockFilmService = jasmine.createSpyObj('FilmService', ['searchFilms']);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockFilmService = {
+      searchFilms: vi.fn().mockName('FilmService.searchFilms'),
+    };
+    mockRouter = {
+      navigate: vi.fn().mockName('Router.navigate'),
+    };
 
     await TestBed.configureTestingModule({
       imports: [SearchComponent],
       providers: [
         { provide: FilmService, useValue: mockFilmService },
-        { provide: Router, useValue: mockRouter }
-      ]
-    })
-    .compileComponents();
+        { provide: Router, useValue: mockRouter },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(SearchComponent);
     component = fixture.componentInstance;

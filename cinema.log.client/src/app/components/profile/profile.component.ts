@@ -1,11 +1,4 @@
-import {
-  Component,
-  OnInit,
-  CUSTOM_ELEMENTS_SCHEMA,
-  signal,
-  computed,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TableModule } from 'primeng/table';
@@ -45,6 +38,13 @@ interface ReviewWithFilm extends Review {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private userService = inject(UserService);
+  private reviewService = inject(ReviewService);
+  private filmService = inject(FilmService);
+  private ratingsService = inject(RatingService);
+
   user = signal<User | null>(null);
   recentReviews = signal<ReviewWithFilm[]>([]);
   userRatings = signal<UserFilmRatingDetail[]>([]);
@@ -73,15 +73,6 @@ export class ProfileComponent implements OnInit {
         (a, b) => a.rating.numberOfComparisons - b.rating.numberOfComparisons,
       ),
   );
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private userService: UserService,
-    private reviewService: ReviewService,
-    private filmService: FilmService,
-    private ratingsService: RatingService,
-  ) {}
 
   ngOnInit(): void {
     const userId = this.route.snapshot.paramMap.get('id');

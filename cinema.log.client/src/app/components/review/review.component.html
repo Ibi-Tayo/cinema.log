@@ -1,7 +1,10 @@
-<div class="review-container">
+<div class="review-container" data-testid="review-container">
   <!-- Loading State -->
   @if (isLoading()) {
-    <app-loading-state message="Loading film details..." />
+    <app-loading-state
+      message="Loading film details..."
+      data-testid="review-loading-state"
+    />
   }
 
   <!-- Error State -->
@@ -11,15 +14,20 @@
       [showRetryButton]="true"
       retryButtonLabel="Back to Search"
       (retry)="goBackToSearch()"
+      data-testid="review-error-state"
     />
   }
 
   <!-- Film Details & Review Form -->
   @if (film() && !isLoading()) {
-    <div class="review-content">
+    <div class="review-content" data-testid="review-content">
       <!-- Header -->
-      <div class="review-header">
-        <button class="back-button" (click)="goBackToSearch()">
+      <div class="review-header" data-testid="review-header">
+        <button
+          class="back-button"
+          (click)="goBackToSearch()"
+          data-testid="review-back-button"
+        >
           <lord-icon
             src="https://cdn.lordicon.com/jarmuava.json"
             trigger="hover"
@@ -36,9 +44,9 @@
 
       <!-- Comparison Section -->
       @if (showComparisons()) {
-        <div class="comparison-section">
-          <div class="comparison-header">
-            <h2>
+        <div class="comparison-section" data-testid="review-comparison-section">
+          <div class="comparison-header" data-testid="review-comparison-header">
+            <h2 data-testid="review-comparison-title">
               <lord-icon
                 src="https://cdn.lordicon.com/fvgfpgpu.json"
                 trigger="hover"
@@ -47,12 +55,15 @@
               </lord-icon>
               Rate Your Films
             </h2>
-            <p class="comparison-description">
+            <p
+              class="comparison-description"
+              data-testid="review-comparison-description"
+            >
               Compare this film with others you've rated to build your personal
               ranking
             </p>
             <!-- Mode Toggle -->
-            <div class="mode-toggle">
+            <div class="mode-toggle" data-testid="review-mode-toggle">
               <label class="toggle-label">
                 <input
                   id="comparisonModeToggle"
@@ -61,8 +72,9 @@
                   [checked]="comparisonState.mode() === 'bulk'"
                   (change)="onToggleMode()"
                   class="toggle-checkbox"
+                  data-testid="review-mode-toggle-input"
                 />
-                <span class="toggle-text">
+                <span class="toggle-text" data-testid="review-mode-toggle-text">
                   {{
                     comparisonState.mode() === "bulk"
                       ? "Bulk Mode"
@@ -94,15 +106,19 @@
             !comparisonError() &&
             filmsForComparison().length === 0
           ) {
-            <div class="no-comparisons">
+            <div class="no-comparisons" data-testid="review-no-comparisons">
               <lord-icon
                 src="https://cdn.lordicon.com/tdrtiskw.json"
                 trigger="loop"
                 style="width: 64px; height: 64px"
               >
               </lord-icon>
-              <p>No more films available for comparison.</p>
-              <p class="hint">Rate more films to build your ranking!</p>
+              <p data-testid="review-no-comparisons-message">
+                No more films available for comparison.
+              </p>
+              <p class="hint" data-testid="review-no-comparisons-hint">
+                Rate more films to build your ranking!
+              </p>
             </div>
           }
 

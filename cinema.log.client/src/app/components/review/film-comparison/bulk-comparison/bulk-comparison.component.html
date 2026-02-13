@@ -1,16 +1,18 @@
-<div class="bulk-comparison-interface">
-  <div class="bulk-header">
-    <p>Select your preference for each film below</p>
-    <span class="films-count"
+<div class="bulk-comparison-interface" data-testid="bulk-comparison-container">
+  <div class="bulk-header" data-testid="bulk-comparison-header">
+    <p data-testid="bulk-comparison-instruction">
+      Select your preference for each film below
+    </p>
+    <span class="films-count" data-testid="bulk-comparison-films-count"
       >{{ loadedFilmsCount() }} / {{ maxFilms() }} films loaded</span
     >
   </div>
 
   <!-- Target Film (Sticky) -->
-  <div class="target-film-sticky">
+  <div class="target-film-sticky" data-testid="bulk-comparison-target-film">
     <p-card styleClass="target-film-card">
       <ng-template pTemplate="header">
-        <div class="target-header">
+        <div class="target-header" data-testid="bulk-comparison-target-header">
           <lord-icon
             src="https://cdn.lordicon.com/zczzhvwa.json"
             trigger="hover"
@@ -28,9 +30,12 @@
   </div>
 
   <!-- Challenger Films Grid -->
-  <div class="bulk-films-grid">
+  <div class="bulk-films-grid" data-testid="bulk-comparison-films-grid">
     @for (challengerFilm of challengerFilms(); track challengerFilm.id) {
-      <div class="bulk-film-item">
+      <div
+        class="bulk-film-item"
+        [attr.data-testid]="'bulk-comparison-film-' + challengerFilm.id"
+      >
         <div class="bulk-film-poster">
           @if (challengerFilm.posterUrl) {
             <img
@@ -52,7 +57,10 @@
           <h4>{{ challengerFilm.title }}</h4>
           <p>{{ challengerFilm.releaseYear }}</p>
         </div>
-        <div class="bulk-film-actions">
+        <div
+          class="bulk-film-actions"
+          [attr.data-testid]="'bulk-comparison-actions-' + challengerFilm.id"
+        >
           <button
             class="bulk-button better"
             [class.selected]="
@@ -60,6 +68,7 @@
             "
             (click)="setSelection(challengerFilm.id, 'better')"
             title="This film is better"
+            [attr.data-testid]="'bulk-comparison-better-' + challengerFilm.id"
           >
             Better
           </button>
@@ -70,6 +79,7 @@
             "
             (click)="setSelection(challengerFilm.id, 'same')"
             title="About the same"
+            [attr.data-testid]="'bulk-comparison-same-' + challengerFilm.id"
           >
             Same
           </button>
@@ -80,6 +90,7 @@
             "
             (click)="setSelection(challengerFilm.id, 'worse')"
             title="Challenger is better"
+            [attr.data-testid]="'bulk-comparison-worse-' + challengerFilm.id"
           >
             Worse
           </button>
@@ -89,7 +100,7 @@
   </div>
 
   <!-- Load More / Submit Actions -->
-  <div class="bulk-actions-section">
+  <div class="bulk-actions-section" data-testid="bulk-comparison-actions">
     @if (canLoadMore() && challengerFilms().length >= 10) {
       <p-button
         label="Load More Films"
@@ -97,6 +108,7 @@
         (onClick)="onLoadMore()"
         [disabled]="isSubmitting()"
         styleClass="load-more-button"
+        data-testid="bulk-comparison-load-more-button"
       ></p-button>
     }
 
@@ -107,6 +119,7 @@
       [disabled]="isSubmitting() || selectedCount() === 0"
       [loading]="isSubmitting()"
       styleClass="submit-batch-button"
+      data-testid="bulk-comparison-submit-button"
     ></p-button>
   </div>
 </div>

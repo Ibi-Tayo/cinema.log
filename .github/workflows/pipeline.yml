@@ -4,31 +4,47 @@ on:
   pull_request:
 
 jobs:
-  test:
-    name: Run Tests
+  go-tests:
+    name: Go Unit Tests
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: test_database
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: "1.23"
           cache-dependency-path: cinema.log.server.golang/go.sum
-      
+
       - name: Install dependencies
         working-directory: ./cinema.log.server.golang
         run: go mod download
 
       - name: Install gotestsum
         run: go install gotest.tools/gotestsum@latest
-      
+
       - name: Run Go tests
         working-directory: ./cinema.log.server.golang
         run: gotestsum --format testname -- ./internal/... -v -cover
-      
+
       - name: Run Go tests with coverage report
         working-directory: ./cinema.log.server.golang
         run: |
@@ -36,22 +52,112 @@ jobs:
           go tool cover -func=coverage.out
           echo "## Go Test Summary" >> $GITHUB_STEP_SUMMARY
           go tool cover -func=coverage.out | tail -1 >> $GITHUB_STEP_SUMMARY
-      
+        env:
+          BLUEPRINT_DB_HOST: localhost
+          BLUEPRINT_DB_PORT: 5432
+          BLUEPRINT_DB_DATABASE: test_database
+          BLUEPRINT_DB_USERNAME: test_user
+          BLUEPRINT_DB_PASSWORD: test_password
+          BLUEPRINT_DB_SCHEMA: public
+
+  angular-tests:
+    name: Angular Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "23"
+          cache: "npm"
           cache-dependency-path: cinema.log.client/package-lock.json
-      
+
       - name: Install Angular dependencies
         working-directory: ./cinema.log.client
         run: npm ci
-      
+
+      - name: Install Playwright browsers
+        working-directory: ./cinema.log.client
+        run: npx playwright install --with-deps chromium
+
       - name: Run Angular tests
         working-directory: ./cinema.log.client
-        run: npm test -- --browsers=ChromeHeadless --watch=false
-      
+        run: npm test -- --browsers=chromium --watch=false
+
       - name: Angular test summary
-        if: always()
         run: echo "## Angular Test Summary" >> $GITHUB_STEP_SUMMARY
+
+  e2e-tests:
+    name: Playwright E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: [go-tests, angular-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "23"
+          cache: "npm"
+          cache-dependency-path: cinema.log.client/package-lock.json
+
+      - name: Wait for Railway PR deployment
+        run: |
+          BASE_URL="https://reverse-proxy-cinemalog-pr-${{ github.event.pull_request.number }}.up.railway.app"
+          echo "Waiting for Railway deployment at $BASE_URL"
+
+          MAX_ATTEMPTS=20
+          SLEEP_SECONDS=30
+          ATTEMPT=1
+
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: Checking if deployment is ready..."
+            
+            if curl -sf --max-time 10 "$BASE_URL" > /dev/null 2>&1; then
+              echo "✓ Railway deployment is ready!"
+              exit 0
+            fi
+            
+            if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+              echo "Deployment not ready yet. Waiting ${SLEEP_SECONDS}s before retry..."
+              sleep $SLEEP_SECONDS
+            fi
+            
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+
+          echo "✗ Railway deployment did not become ready after $((MAX_ATTEMPTS * SLEEP_SECONDS)) seconds"
+          exit 1
+
+      - name: Install Playwright dependencies
+        working-directory: ./cinema.log.client
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        working-directory: ./cinema.log.client
+        run: npx playwright install chromium --with-deps
+
+      - name: Run Playwright tests
+        working-directory: ./cinema.log.client
+        run: npx playwright test --project=chromium
+        env:
+          CI: true
+          BASE_URL: https://reverse-proxy-cinemalog-pr-${{ github.event.pull_request.number }}.up.railway.app
+
+      - name: Playwright test summary
+        if: always()
+        run: echo "## Playwright Test Summary" >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: cinema.log.client/playwright-report/
+          retention-days: 30

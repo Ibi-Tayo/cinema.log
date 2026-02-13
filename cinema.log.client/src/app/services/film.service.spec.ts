@@ -4,7 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { FilmService, Film } from './film.service';
-import { environment } from '../../environments/environment';
+import { describe, beforeEach, vi, afterEach, it, expect } from 'vitest';
 
 describe('FilmService', () => {
   let service: FilmService;
@@ -28,7 +28,7 @@ describe('FilmService', () => {
 
     service = TestBed.inject(FilmService);
     httpMock = TestBed.inject(HttpTestingController);
-    spyOn(console, 'error');
+    vi.spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -47,7 +47,7 @@ describe('FilmService', () => {
       });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/films/123e4567-e89b-12d3-a456-426614174000`
+      `${import.meta.env.NG_APP_API_URL}/films/123e4567-e89b-12d3-a456-426614174000`,
     );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
@@ -56,13 +56,15 @@ describe('FilmService', () => {
 
   it('should handle error when getting film by id', () => {
     service.getFilmById('invalid-id').subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to fetch film');
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/films/invalid-id`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/films/invalid-id`,
+    );
     req.error(new ProgressEvent('error'));
   });
 
@@ -76,7 +78,7 @@ describe('FilmService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/films/search?f=${encodeURIComponent(query)}`
+      `${import.meta.env.NG_APP_API_URL}/films/search?f=${encodeURIComponent(query)}`,
     );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
@@ -85,13 +87,15 @@ describe('FilmService', () => {
 
   it('should handle error when searching films', () => {
     service.searchFilms('test').subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to search films');
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/films/search?f=test`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/films/search?f=test`,
+    );
     req.error(new ProgressEvent('error'));
   });
 });

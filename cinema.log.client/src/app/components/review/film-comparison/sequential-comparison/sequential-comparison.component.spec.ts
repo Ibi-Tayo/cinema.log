@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SequentialComparisonComponent } from './sequential-comparison.component';
 import { Film } from '../../../../services/film.service';
+import { describe, beforeEach, it, expect } from 'vitest';
 
 describe('SequentialComparisonComponent', () => {
   let component: SequentialComparisonComponent;

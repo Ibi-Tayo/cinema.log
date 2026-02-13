@@ -1,11 +1,4 @@
-import {
-  Component,
-  OnInit,
-  CUSTOM_ELEMENTS_SCHEMA,
-  signal,
-  computed,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FilmService, Film } from '../../services/film.service';
@@ -59,6 +52,14 @@ import { MessageModule } from 'primeng/message';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReviewComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private filmService = inject(FilmService);
+  private reviewService = inject(ReviewService);
+  private authService = inject(AuthService);
+  private ratingService = inject(RatingService);
+  comparisonState = inject(ComparisonStateService);
+
   private static readonly REDIRECT_DELAY_MS = 1500;
 
   // Core data signals
@@ -103,15 +104,7 @@ export class ReviewComponent implements OnInit {
     return loaded < max && !this.isLoadingComparisons();
   });
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private filmService: FilmService,
-    private reviewService: ReviewService,
-    private authService: AuthService,
-    private ratingService: RatingService,
-    public comparisonState: ComparisonStateService,
-  ) {
+  constructor() {
     const navigation = this.router.currentNavigation?.();
     const filmFromState = navigation?.extras.state?.['film'];
     if (filmFromState) {

@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { NavbarComponent } from './navbar.component';
+import { describe, beforeEach, it, expect } from 'vitest';
 
 describe('NavbarComponent', () => {
   let component: NavbarComponent;

@@ -4,7 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { UserService, User } from './user.service';
-import { environment } from '../../environments/environment';
+import { describe, beforeEach, vi, afterEach, it, expect } from 'vitest';
 
 describe('UserService', () => {
   let service: UserService;
@@ -28,7 +28,7 @@ describe('UserService', () => {
 
     service = TestBed.inject(UserService);
     httpMock = TestBed.inject(HttpTestingController);
-    spyOn(console, 'error');
+    vi.spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -47,7 +47,7 @@ describe('UserService', () => {
       });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/users/123e4567-e89b-12d3-a456-426614174000`
+      `${import.meta.env.NG_APP_API_URL}/users/123e4567-e89b-12d3-a456-426614174000`,
     );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
@@ -56,13 +56,15 @@ describe('UserService', () => {
 
   it('should handle error when getting user by id', () => {
     service.getUserById('invalid-id').subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to fetch user');
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users/invalid-id`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/users/invalid-id`,
+    );
     req.error(new ProgressEvent('error'));
   });
 
@@ -74,7 +76,7 @@ describe('UserService', () => {
       expect(users.length).toBe(1);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users`);
+    const req = httpMock.expectOne(`${import.meta.env.NG_APP_API_URL}/users`);
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush(mockUsers);
@@ -90,7 +92,7 @@ describe('UserService', () => {
       expect(user).toEqual(mockUser);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users`);
+    const req = httpMock.expectOne(`${import.meta.env.NG_APP_API_URL}/users`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(newUser);
     expect(req.request.withCredentials).toBe(true);
@@ -104,13 +106,13 @@ describe('UserService', () => {
     };
 
     service.createUser(newUser).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to create user');
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users`);
+    const req = httpMock.expectOne(`${import.meta.env.NG_APP_API_URL}/users`);
     req.error(new ProgressEvent('error'));
   });
 
@@ -121,7 +123,7 @@ describe('UserService', () => {
       expect(user).toEqual(updatedUser);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users`);
+    const req = httpMock.expectOne(`${import.meta.env.NG_APP_API_URL}/users`);
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(updatedUser);
     expect(req.request.withCredentials).toBe(true);
@@ -130,13 +132,13 @@ describe('UserService', () => {
 
   it('should handle error when updating user', () => {
     service.updateUser(mockUser).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to update user');
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users`);
+    const req = httpMock.expectOne(`${import.meta.env.NG_APP_API_URL}/users`);
     req.error(new ProgressEvent('error'));
   });
 
@@ -146,7 +148,7 @@ describe('UserService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/users/123e4567-e89b-12d3-a456-426614174000`
+      `${import.meta.env.NG_APP_API_URL}/users/123e4567-e89b-12d3-a456-426614174000`,
     );
     expect(req.request.method).toBe('DELETE');
     expect(req.request.withCredentials).toBe(true);
@@ -155,13 +157,15 @@ describe('UserService', () => {
 
   it('should handle error when deleting user', () => {
     service.deleteUser('invalid-id').subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to delete user');
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/users/invalid-id`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/users/invalid-id`,
+    );
     req.error(new ProgressEvent('error'));
   });
 });

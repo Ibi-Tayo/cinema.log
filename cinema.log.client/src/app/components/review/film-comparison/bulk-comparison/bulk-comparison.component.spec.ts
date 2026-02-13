@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BulkComparisonComponent } from './bulk-comparison.component';
 import { ComparisonStateService } from '../../../../services/comparison-state.service';
 import { Film } from '../../../../services/film.service';
+import { describe, beforeEach, afterEach, it, expect } from 'vitest';
 
 describe('BulkComparisonComponent', () => {
   let component: BulkComparisonComponent;

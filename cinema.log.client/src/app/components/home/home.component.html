@@ -1,7 +1,7 @@
-<div class="about-container">
-  <div class="about-content">
+<div class="about-container" data-testid="home-container">
+  <div class="about-content" data-testid="home-content">
     <!-- Hero Section -->
-    <div class="hero-section">
+    <div class="hero-section" data-testid="home-hero-section">
       <lord-icon
         src="https://cdn.lordicon.com/ugllxeyl.json"
         trigger="loop"
@@ -9,12 +9,14 @@
         style="width: 100px; height: 100px"
       >
       </lord-icon>
-      <h1>Your personal hub for film review</h1>
-      <p class="subtitle">A smarter way to track and rate the films you love</p>
+      <h1 data-testid="home-title">Your personal hub for film review</h1>
+      <p class="subtitle" data-testid="home-subtitle">
+        A smarter way to track and rate the films you love
+      </p>
     </div>
 
     <!-- Rating System Section -->
-    <div class="feature-section">
+    <div class="feature-section" data-testid="home-rating-section">
       <div class="feature-content">
         <div class="feature-icon">
           <lord-icon
@@ -25,7 +27,7 @@
           </lord-icon>
         </div>
         <div class="feature-text">
-          <h2>Review & Rate Films</h2>
+          <h2 data-testid="home-rating-title">Review & Rate Films</h2>
           <p>
             Share your thoughts on films with our simple 5-star rating system.
             Whether it's a masterpiece or a letdown, your opinion matters.
@@ -46,7 +48,7 @@
     </div>
 
     <!-- ELO Rating System Section -->
-    <div class="feature-section elo-section">
+    <div class="feature-section elo-section" data-testid="home-elo-section">
       <div class="feature-content reverse">
         <div class="feature-icon">
           <lord-icon
@@ -57,7 +59,7 @@
           </lord-icon>
         </div>
         <div class="feature-text">
-          <h2>ELO Rating System</h2>
+          <h2 data-testid="home-elo-title">ELO Rating System</h2>
           <p class="elo-intro">
             Inspired by the <strong>ELO rating system</strong> used in chess,
             Cinema.Log helps you build a more accurate picture of your film
@@ -107,7 +109,7 @@
     </div>
 
     <!-- Call to Action -->
-    <div class="cta-section">
+    <div class="cta-section" data-testid="home-cta-section">
       <lord-icon
         src="https://cdn.lordicon.com/jvucoldz.json"
         trigger="loop"
@@ -115,21 +117,21 @@
         style="width: 60px; height: 60px"
       >
       </lord-icon>
-      <h2>Ready to Start?</h2>
-      <p>
+      <h2 data-testid="home-cta-title">Ready to Start?</h2>
+      <p data-testid="home-cta-description">
         Join our community and begin building your personalized film rankings
         today.
       </p>
       @if (!isLoggedIn()) {
-      <a href="/login" class="cta-button">
-        Get Started
-        <lord-icon
-          src="https://cdn.lordicon.com/zmkotitn.json"
-          trigger="hover"
-          style="width: 24px; height: 24px; transform: rotate(180deg)"
-        >
-        </lord-icon>
-      </a>
+        <a href="/login" class="cta-button" data-testid="home-cta-button">
+          Get Started
+          <lord-icon
+            src="https://cdn.lordicon.com/zmkotitn.json"
+            trigger="hover"
+            style="width: 24px; height: 24px; transform: rotate(180deg)"
+          >
+          </lord-icon>
+        </a>
       }
     </div>
   </div>

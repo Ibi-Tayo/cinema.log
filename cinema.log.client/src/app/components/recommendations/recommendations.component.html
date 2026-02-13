@@ -1,9 +1,13 @@
-<div class="recommendations-container">
+<div class="recommendations-container" data-testid="recommendations-container">
   <p-toast />
 
   <!-- Header -->
-  <div class="recommendations-header">
-    <button class="back-button" (click)="goBack()">
+  <div class="recommendations-header" data-testid="recommendations-header">
+    <button
+      class="back-button"
+      (click)="goBack()"
+      data-testid="recommendations-back-button"
+    >
       <lord-icon
         src="https://cdn.lordicon.com/zmkotitn.json"
         trigger="hover"
@@ -24,10 +28,15 @@
 
   <!-- Seed Selection Step -->
   @if (isInSeedStep()) {
-    <div class="seed-selection-section">
-      <div class="instructions">
-        <h2>Select 3 Films You've Seen</h2>
-        <p>
+    <div
+      class="seed-selection-section"
+      data-testid="recommendations-seed-section"
+    >
+      <div class="instructions" data-testid="recommendations-seed-instructions">
+        <h2 data-testid="recommendations-seed-title">
+          Select 3 Films You've Seen
+        </h2>
+        <p data-testid="recommendations-seed-description">
           These films will help us understand your taste and generate
           personalised recommendations so we can build up a network of films
           that you have seen. (Try to pick a variety of genres)
@@ -35,10 +44,18 @@
       </div>
 
       <!-- Selected Seed Films -->
-      <div class="seed-films-list">
-        <h3>Selected Films ({{ seedFilms().length }}/3)</h3>
+      <div
+        class="seed-films-list"
+        data-testid="recommendations-seed-films-list"
+      >
+        <h3 data-testid="recommendations-seed-films-count">
+          Selected Films ({{ seedFilms().length }}/3)
+        </h3>
         @if (seedFilms().length === 0) {
-          <div class="empty-state">
+          <div
+            class="empty-state"
+            data-testid="recommendations-seed-empty-state"
+          >
             <lord-icon
               src="https://cdn.lordicon.com/fpmskzsv.json"
               trigger="loop"
@@ -48,9 +65,15 @@
             <p>Search and add 3 films below to get started</p>
           </div>
         }
-        <div class="seed-films-grid">
+        <div
+          class="seed-films-grid"
+          data-testid="recommendations-seed-films-grid"
+        >
           @for (film of seedFilms(); track film.id) {
-            <div class="seed-film-card">
+            <div
+              class="seed-film-card"
+              [attr.data-testid]="'recommendations-seed-film-' + film.id"
+            >
               @if (film.posterUrl) {
                 <img
                   [src]="getPosterUrl(film.posterUrl, 'w185')"
@@ -74,8 +97,8 @@
       </div>
 
       <!-- Search Section -->
-      <div class="search-section">
-        <h3>Search for Films</h3>
+      <div class="search-section" data-testid="recommendations-search-section">
+        <h3 data-testid="recommendations-search-title">Search for Films</h3>
         <p-iconfield iconPosition="left">
           <p-inputicon class="pi pi-search" />
           <input
@@ -86,12 +109,16 @@
             (ngModelChange)="onSearchInput()"
             placeholder="Search for a film..."
             class="search-input"
+            data-testid="recommendations-search-input"
           />
         </p-iconfield>
 
         <!-- Loading State -->
         @if (isSearching()) {
-          <div class="search-results">
+          <div
+            class="search-results"
+            data-testid="recommendations-search-loading"
+          >
             @for (i of [1, 2, 3]; track i) {
               <div class="skeleton-card">
                 <p-skeleton width="100%" height="200px" />
@@ -104,9 +131,16 @@
 
         <!-- Search Results -->
         @if (searchResults().length > 0 && !isSearching()) {
-          <div class="search-results">
+          <div
+            class="search-results"
+            data-testid="recommendations-search-results"
+          >
             @for (film of searchResults(); track film.id) {
-              <div class="search-result-card" (click)="addSeedFilm(film)">
+              <div
+                class="search-result-card"
+                (click)="addSeedFilm(film)"
+                [attr.data-testid]="'recommendations-search-result-' + film.id"
+              >
                 @if (film.posterUrl) {
                   <img
                     [src]="getPosterUrl(film.posterUrl, 'w780')"
@@ -137,7 +171,7 @@
       </div>
 
       <!-- Start Button -->
-      <div class="action-section">
+      <div class="action-section" data-testid="recommendations-action-section">
         <p-button
           label="Start Generating Recommendations"
           icon="pi pi-play"
@@ -145,6 +179,7 @@
           [loading]="isLoadingRecommendations()"
           (onClick)="startGeneratingRecommendations()"
           styleClass="p-button-lg p-button-success"
+          data-testid="recommendations-start-button"
         />
       </div>
     </div>
@@ -152,10 +187,15 @@
 
   <!-- Recommendations Step -->
   @if (isInRecommendationStep()) {
-    <div class="recommendations-section">
-      <div class="round-info">
-        <h2>Round {{ currentRound() }}</h2>
-        <div class="selection-counter">
+    <div class="recommendations-section" data-testid="recommendations-section">
+      <div class="round-info" data-testid="recommendations-round-info">
+        <h2 data-testid="recommendations-round-number">
+          Round {{ currentRound() }}
+        </h2>
+        <div
+          class="selection-counter"
+          data-testid="recommendations-selection-counter"
+        >
           <p-chip
             [label]="'Selected: ' + selectedSeenCount() + '/10'"
             [styleClass]="selectedSeenCount() >= 10 ? 'limit-reached' : ''"
@@ -182,12 +222,13 @@
 
       <!-- Recommendations Grid -->
       @if (!isLoadingRecommendations() && recommendedFilms().length > 0) {
-        <div class="recommendations-grid">
+        <div class="recommendations-grid" data-testid="recommendations-grid">
           @for (selection of recommendedFilms(); track selection.film.id) {
             <div
               class="recommendation-card"
               [class.selected]="selection.hasSeen"
               (click)="toggleFilmSeen(selection)"
+              [attr.data-testid]="'recommendations-card-' + selection.film.id"
             >
               @if (selection.film.posterUrl) {
                 <img
@@ -228,7 +269,7 @@
       }
 
       <!-- Action Buttons -->
-      <div class="action-section">
+      <div class="action-section" data-testid="recommendations-actions">
         <p-button
           label="Next Round"
           icon="pi pi-arrow-right"
@@ -237,6 +278,7 @@
           [loading]="isLoadingRecommendations()"
           (onClick)="nextRound()"
           styleClass="p-button-lg"
+          data-testid="recommendations-next-button"
         />
         <p-button
           label="Finish"
@@ -245,6 +287,7 @@
           [loading]="isLoadingRecommendations()"
           (onClick)="finish()"
           styleClass="p-button-lg p-button-success"
+          data-testid="recommendations-finish-button"
         />
       </div>
     </div>

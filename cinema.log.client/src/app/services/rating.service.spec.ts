@@ -9,7 +9,7 @@ import {
   ComparisonPair,
   ComparisonRequest,
 } from './rating.service';
-import { environment } from '../../environments/environment';
+import { describe, beforeEach, vi, afterEach, it, expect } from 'vitest';
 
 describe('RatingService', () => {
   let service: RatingService;
@@ -39,7 +39,7 @@ describe('RatingService', () => {
 
     service = TestBed.inject(RatingService);
     httpMock = TestBed.inject(HttpTestingController);
-    spyOn(console, 'error');
+    vi.spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -59,7 +59,7 @@ describe('RatingService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/ratings?userId=${userId}&filmId=${filmId}`
+      `${import.meta.env.NG_APP_API_URL}/ratings?userId=${userId}&filmId=${filmId}`,
     );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
@@ -71,14 +71,14 @@ describe('RatingService', () => {
     const filmId = 'invalid-film-id';
 
     service.getRating(userId, filmId).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to fetch rating');
       },
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/ratings?userId=${userId}&filmId=${filmId}`
+      `${import.meta.env.NG_APP_API_URL}/ratings?userId=${userId}&filmId=${filmId}`,
     );
     req.error(new ProgressEvent('error'));
   });
@@ -97,7 +97,7 @@ describe('RatingService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/ratings/compare-films`
+      `${import.meta.env.NG_APP_API_URL}/ratings/compare-films`,
     );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(comparisonRequest);
@@ -118,7 +118,7 @@ describe('RatingService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/ratings/compare-films`
+      `${import.meta.env.NG_APP_API_URL}/ratings/compare-films`,
     );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(comparisonRequest);
@@ -136,14 +136,14 @@ describe('RatingService', () => {
     };
 
     service.compareFilms(comparisonRequest).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to compare films');
       },
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/ratings/compare-films`
+      `${import.meta.env.NG_APP_API_URL}/ratings/compare-films`,
     );
     req.error(new ProgressEvent('error'));
   });

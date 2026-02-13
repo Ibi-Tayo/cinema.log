@@ -9,7 +9,7 @@ import {
   CreateReviewRequest,
   UpdateReviewRequest,
 } from './review.service';
-import { environment } from '../../environments/environment';
+import { describe, beforeEach, vi, afterEach, it, expect } from 'vitest';
 
 describe('ReviewService', () => {
   let service: ReviewService;
@@ -32,7 +32,7 @@ describe('ReviewService', () => {
 
     service = TestBed.inject(ReviewService);
     httpMock = TestBed.inject(HttpTestingController);
-    spyOn(console, 'error');
+    vi.spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -52,7 +52,9 @@ describe('ReviewService', () => {
       expect(reviews.length).toBe(1);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/reviews/${userId}`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/reviews/${userId}`,
+    );
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush(mockReviews);
@@ -62,13 +64,15 @@ describe('ReviewService', () => {
     const userId = 'invalid-user-id';
 
     service.getAllReviewsByUserId(userId).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to fetch reviews');
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/reviews/${userId}`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/reviews/${userId}`,
+    );
     req.error(new ProgressEvent('error'));
   });
 
@@ -83,7 +87,7 @@ describe('ReviewService', () => {
       expect(review).toEqual(mockReview);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/reviews`);
+    const req = httpMock.expectOne(`${import.meta.env.NG_APP_API_URL}/reviews`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(createRequest);
     expect(req.request.withCredentials).toBe(true);
@@ -98,13 +102,13 @@ describe('ReviewService', () => {
     };
 
     service.createReview(createRequest).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to create review');
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/reviews`);
+    const req = httpMock.expectOne(`${import.meta.env.NG_APP_API_URL}/reviews`);
     req.error(new ProgressEvent('error'));
   });
 
@@ -125,7 +129,9 @@ describe('ReviewService', () => {
       expect(review).toEqual(updatedReview);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/reviews/${reviewId}`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/reviews/${reviewId}`,
+    );
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(updateRequest);
     expect(req.request.withCredentials).toBe(true);
@@ -140,13 +146,15 @@ describe('ReviewService', () => {
     };
 
     service.updateReview(updateRequest).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to update review');
       },
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/reviews/${reviewId}`);
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/reviews/${reviewId}`,
+    );
     req.error(new ProgressEvent('error'));
   });
 
@@ -158,7 +166,7 @@ describe('ReviewService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/reviews?id=${reviewId}`
+      `${import.meta.env.NG_APP_API_URL}/reviews?id=${reviewId}`,
     );
     expect(req.request.method).toBe('DELETE');
     expect(req.request.withCredentials).toBe(true);
@@ -169,14 +177,14 @@ describe('ReviewService', () => {
     const reviewId = 'invalid-review-id';
 
     service.deleteReview(reviewId).subscribe({
-      next: () => fail('should have failed'),
+      next: () => expect.fail('should have failed'),
       error: (error) => {
         expect(error.message).toContain('Failed to delete review');
       },
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/reviews?id=${reviewId}`
+      `${import.meta.env.NG_APP_API_URL}/reviews?id=${reviewId}`,
     );
     req.error(new ProgressEvent('error'));
   });

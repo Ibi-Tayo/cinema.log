@@ -21,6 +21,7 @@
     "@lordicon/element": "^1.10.1",
     "@primeng/themes": "^21.0.0",
     "lottie-web": "^5.12.2",
+    "ngx-env": "^0.1.0",
     "primeicons": "^7.0.0",
     "primeng": "^21.0.0",
     "rxjs": "~7.8.0",
@@ -33,13 +34,12 @@
     "@angular/build": "^21.0.4",
     "@angular/cli": "^21.0.4",
     "@angular/compiler-cli": "^21.0.6",
-    "@types/jasmine": "~5.1.0",
-    "jasmine-core": "~5.4.0",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.3"
+    "@ngx-env/builder": "^21.0.1",
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.2.1",
+    "@vitest/browser-playwright": "^4.0.18",
+    "jsdom": "^27.0.1",
+    "typescript": "~5.9.3",
+    "vitest": "^4.0.18"
   }
 }
