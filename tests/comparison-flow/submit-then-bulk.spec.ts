@@ -62,29 +62,39 @@ test.describe.serial("Submit Reviews then Bulk Film Comparison", () => {
     await page.getByTestId("navbar-profile-link").click();
     await page.getByRole("menuitem", { name: "Profile" }).click();
 
-    // Navigate to film review page with comparison mode by clicking first available film in table
-    await page
+    // Wait for table to load and check if there are any rows
+    const tableRow = page
       .getByTestId("profile-least-comparisons-table")
       .locator("tbody")
       .getByRole("row")
-      .first()
-      .getByRole("cell")
-      .first()
-      .click();
+      .first();
+
+    await expect(tableRow).toBeVisible({ timeout: 10000 });
+
+    // Navigate to film review page with comparison mode by clicking first available film in table
+    await tableRow.getByRole("cell").first().click();
 
     // 1. Verify bulk mode is active
-    await expect(page.getByRole("checkbox", { name: "Bulk Mode" })).toBeChecked();
+    await expect(
+      page.getByRole("checkbox", { name: "Bulk Mode" }),
+    ).toBeChecked();
 
     // Check if films are available for comparison
-    const noFilmsMessage = page.getByText("No more films available for comparison.");
-    const noFilmsVisible = await noFilmsMessage.isVisible({ timeout: 2000 }).catch(() => false);
+    const noFilmsMessage = page.getByText(
+      "No more films available for comparison.",
+    );
+    const noFilmsVisible = await noFilmsMessage
+      .isVisible({ timeout: 2000 })
+      .catch(() => false);
 
     if (noFilmsVisible) {
       // Skip the rest of the test if no films available (all comparisons already done)
       return;
     }
 
-    await expect(page.getByText("Select your preference for each film below")).toBeVisible();
+    await expect(
+      page.getByText("Select your preference for each film below"),
+    ).toBeVisible();
 
     // 2. Click the 'Bulk Mode' checkbox to uncheck it
     await page.getByTestId("review-mode-toggle-input").click();
@@ -93,7 +103,9 @@ test.describe.serial("Submit Reviews then Bulk Film Comparison", () => {
 
     // 3. Click the checkbox again to re-enable bulk mode
     await page.getByTestId("review-mode-toggle-input").click();
-    await expect(page.getByText("Select your preference for each film below")).toBeVisible();
+    await expect(
+      page.getByText("Select your preference for each film below"),
+    ).toBeVisible();
   });
 
   test("User can perform bulk comparisons", async ({ page }) => {

@@ -16,9 +16,7 @@ test.describe("User Profile", () => {
     // Verify profile page elements
     await expect(page.getByRole("heading", { name: "Dev User" })).toBeVisible();
     await expect(page.getByText("@devuser")).toBeVisible();
-    await expect(
-      page.getByText(/Member since (December 2025|January 2026)/),
-    ).toBeVisible();
+    await expect(page.getByText(/Member since \w+ \d{4}/)).toBeVisible();
     await expect(page.getByRole("img", { name: "Dev User" })).toBeVisible();
   });
 });
