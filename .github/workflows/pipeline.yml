@@ -106,7 +106,7 @@ jobs:
         with:
           node-version: "23"
           cache: "npm"
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: cinema.log.client/package-lock.json
 
       - name: Wait for Railway PR deployment
         run: |
@@ -137,12 +137,15 @@ jobs:
           exit 1
 
       - name: Install Playwright dependencies
+        working-directory: ./cinema.log.client
         run: npm ci
 
       - name: Install Playwright Browsers
+        working-directory: ./cinema.log.client
         run: npx playwright install chromium --with-deps
 
       - name: Run Playwright tests
+        working-directory: ./cinema.log.client
         run: npx playwright test --project=chromium
         env:
           CI: true
@@ -156,5 +159,5 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: playwright-report/
+          path: cinema.log.client/playwright-report/
           retention-days: 30
