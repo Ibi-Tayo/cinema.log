@@ -80,6 +80,10 @@ jobs:
         working-directory: ./cinema.log.client
         run: npm ci
 
+      - name: Install Playwright browsers
+        working-directory: ./cinema.log.client
+        run: npx playwright install --with-deps chromium
+
       - name: Run Angular tests
         working-directory: ./cinema.log.client
         run: npm test -- --browsers=chromium --watch=false
