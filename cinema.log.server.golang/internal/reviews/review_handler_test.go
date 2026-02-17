@@ -261,6 +261,37 @@ func TestHandler_CreateReview_InvalidJSON(t *testing.T) {
 	}
 }
 
+func TestHandler_CreateReview_EmptyContent(t *testing.T) {
+	mockReviewSvc := &mockReviewService{}
+	mockRatingSvc := &mockRatingService{}
+	mockGraphSvc := &mockGraphService{}
+	mockFilmSvc := &mockFilmService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc, mockGraphSvc, mockFilmSvc)
+
+	userId := uuid.New()
+	filmId := uuid.New()
+	user := &domain.User{ID: userId, Name: "Test User", Username: "testuser"}
+
+	reviewReq := map[string]interface{}{
+		"content": "",
+		"rating":  4.5,
+		"filmId":  filmId.String(),
+	}
+	body, _ := json.Marshal(reviewReq)
+
+	req := httptest.NewRequest(http.MethodPost, "/reviews", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	ctx := context.WithValue(req.Context(), middleware.KeyUser, user)
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	handler.CreateReview(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Errorf("expected status %d, got %d, body: %s", http.StatusCreated, w.Code, w.Body.String())
+	}
+}
+
 func TestHandler_UpdateReview_Success(t *testing.T) {
 	mockReviewSvc := &mockReviewService{}
 	mockRatingSvc := &mockRatingService{}
@@ -279,6 +310,42 @@ func TestHandler_UpdateReview_Success(t *testing.T) {
 
 	updateReq := map[string]interface{}{
 		"content":  "Updated review!",
+		"reviewId": reviewId.String(),
+	}
+	body, _ := json.Marshal(updateReq)
+
+	req := httptest.NewRequest(http.MethodPut, "/reviews/"+reviewId.String(), bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.SetPathValue("id", reviewId.String())
+	ctx := context.WithValue(req.Context(), middleware.KeyUser, user)
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	handler.UpdateReview(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("expected status %d, got %d, body: %s", http.StatusOK, w.Code, w.Body.String())
+	}
+}
+
+func TestHandler_UpdateReview_EmptyContent(t *testing.T) {
+	mockReviewSvc := &mockReviewService{}
+	mockRatingSvc := &mockRatingService{}
+	mockGraphSvc := &mockGraphService{}
+	mockFilmSvc := &mockFilmService{}
+	handler := NewHandler(mockReviewSvc, mockRatingSvc, mockGraphSvc, mockFilmSvc)
+
+	userId := uuid.New()
+	reviewId := uuid.New()
+	user := &domain.User{ID: userId, Name: "Test User", Username: "testuser"}
+
+	// Put a dummy review in the mock service to be updated
+	mockReviewSvc.getReview = func(ctx context.Context, reviewId uuid.UUID) (*domain.Review, error) {
+		return &domain.Review{ID: reviewId, UserId: userId, Content: "Old review"}, nil
+	}
+
+	updateReq := map[string]interface{}{
+		"content":  "",
 		"reviewId": reviewId.String(),
 	}
 	body, _ := json.Marshal(updateReq)

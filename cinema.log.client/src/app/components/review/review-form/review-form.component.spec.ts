@@ -222,6 +222,87 @@ describe('ReviewFormComponent', () => {
     expect(emittedContent).toBe('Updated review text');
   });
 
+  it('should emit reviewSubmit event with empty content when submitting new review with rating only', () => {
+    fixture.componentRef.setInput('hasRating', false);
+    fixture.componentRef.setInput('isSubmitting', false);
+    fixture.componentRef.setInput('submitSuccess', false);
+
+    let emittedData: { rating: number; content: string } | undefined;
+    fixture.componentInstance.reviewSubmit.subscribe((data) => {
+      emittedData = data;
+    });
+
+    component.selectedRating.set(4);
+    component.reviewText.set('');
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const submitButton = compiled.querySelector(
+      '.submit-button',
+    ) as HTMLButtonElement;
+    submitButton.click();
+
+    expect(emittedData).toBeDefined();
+    expect(emittedData!.rating).toBe(4);
+    expect(emittedData!.content).toBe('');
+  });
+
+  it('should emit reviewUpdate event with empty content when updating existing review', () => {
+    fixture.componentRef.setInput('hasRating', true);
+    fixture.componentRef.setInput('isSubmitting', false);
+    fixture.componentRef.setInput('submitSuccess', false);
+
+    let emittedContent: string | undefined;
+    fixture.componentInstance.reviewUpdate.subscribe((content) => {
+      emittedContent = content;
+    });
+
+    component.reviewText.set('');
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const submitButton = compiled.querySelector(
+      '.submit-button',
+    ) as HTMLButtonElement;
+    submitButton.click();
+
+    expect(emittedContent).toBeDefined();
+    expect(emittedContent).toBe('');
+  });
+
+  it('should not disable submit button when rating is selected but content is empty for new reviews', () => {
+    fixture.componentRef.setInput('hasRating', false);
+    fixture.componentRef.setInput('isSubmitting', false);
+    fixture.componentRef.setInput('submitSuccess', false);
+    fixture.detectChanges();
+
+    component.reviewText.set('');
+    component.selectedRating.set(3);
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const submitButton = compiled.querySelector(
+      '.submit-button',
+    ) as HTMLButtonElement;
+    expect(submitButton.disabled).toBe(false);
+  });
+
+  it('should not disable update button when content is empty for existing reviews', () => {
+    fixture.componentRef.setInput('hasRating', true);
+    fixture.componentRef.setInput('isSubmitting', false);
+    fixture.componentRef.setInput('submitSuccess', false);
+    fixture.detectChanges();
+
+    component.reviewText.set('');
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const submitButton = compiled.querySelector(
+      '.submit-button',
+    ) as HTMLButtonElement;
+    expect(submitButton.disabled).toBe(false);
+  });
+
   it('should show success message when submitSuccess is true', () => {
     fixture.componentRef.setInput('hasRating', false);
     fixture.componentRef.setInput('isSubmitting', false);
