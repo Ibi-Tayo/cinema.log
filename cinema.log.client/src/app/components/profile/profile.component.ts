@@ -185,6 +185,13 @@ export class ProfileComponent implements OnInit {
     this.router.navigate(['/review', filmId]);
   }
 
+  navigateToFilmsToReview(): void {
+    const userId = this.route.snapshot.paramMap.get('id');
+    if (userId) {
+      this.router.navigate(['/films-to-review', userId]);
+    }
+  }
+
   /**
    * Gets the TMDB poster URL for a film with specified size
    * @param posterPath - The poster path from the film

@@ -1,0 +1,115 @@
+<div class="films-to-review-container" data-testid="films-to-review-container">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state" data-testid="films-to-review-loading-state">
+      <lord-icon
+        src="https://cdn.lordicon.com/xjovhxra.json"
+        trigger="loop"
+        style="width: 100px; height: 100px"
+      >
+      </lord-icon>
+      <p>Loading films to review...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (errorMessage() && !isLoading()) {
+    <div class="error-state" data-testid="films-to-review-error-state">
+      <lord-icon
+        src="https://cdn.lordicon.com/tdrtiskw.json"
+        trigger="loop"
+        style="width: 80px; height: 80px"
+      >
+      </lord-icon>
+      <p data-testid="films-to-review-error-message">{{ errorMessage() }}</p>
+    </div>
+  }
+
+  <!-- Films to Review Content -->
+  @if (!isLoading() && !errorMessage()) {
+    <div class="films-to-review-content" data-testid="films-to-review-content">
+      <!-- Header -->
+      <div class="films-to-review-header" data-testid="films-to-review-header">
+        <h1 data-testid="films-to-review-title">
+          <lord-icon
+            src="https://cdn.lordicon.com/lecprnjb.json"
+            trigger="hover"
+            style="width: 40px; height: 40px; margin-right: 8px"
+          >
+          </lord-icon>
+          Films to Review
+        </h1>
+        <p class="films-count" data-testid="films-to-review-count">
+          {{ filmsToReview().length }} film{{ filmsToReview().length === 1 ? '' : 's' }} waiting for your review
+        </p>
+      </div>
+
+      @if (filmsToReview().length === 0) {
+        <div
+          class="no-films-placeholder"
+          data-testid="films-to-review-no-films"
+        >
+          <lord-icon
+            src="https://cdn.lordicon.com/egiwmiit.json"
+            trigger="loop"
+            style="width: 120px; height: 120px"
+            colors="primary:#D3D3D3"
+          >
+          </lord-icon>
+          <p class="placeholder-title">No Films Waiting</p>
+          <p class="placeholder-subtitle">
+            All your seen films have been reviewed!
+          </p>
+        </div>
+      }
+
+      @if (filmsToReview().length > 0) {
+        <div class="films-grid" data-testid="films-to-review-grid">
+          @for (film of filmsToReview(); track film.id) {
+            <div
+              class="film-card"
+              (click)="selectFilm(film.id)"
+              [attr.data-testid]="'films-to-review-film-card-' + film.id"
+            >
+              <div class="film-poster-container">
+                @if (film.posterUrl) {
+                  <img
+                    [src]="getPosterUrl(film.posterUrl, 'w342')"
+                    [alt]="film.title"
+                    class="film-poster"
+                  />
+                }
+                @if (!film.posterUrl) {
+                  <div class="poster-placeholder">
+                    <lord-icon
+                      src="https://cdn.lordicon.com/ugllxeyl.json"
+                      trigger="hover"
+                      style="width: 60px; height: 60px"
+                    >
+                    </lord-icon>
+                  </div>
+                }
+                <div class="film-overlay">
+                  <lord-icon
+                    src="https://cdn.lordicon.com/zrkkrrpl.json"
+                    trigger="hover"
+                    colors="primary:#ffffff"
+                    style="width: 48px; height: 48px"
+                  >
+                  </lord-icon>
+                  <p>Review Now</p>
+                </div>
+              </div>
+              <div class="film-info">
+                <h4>{{ film.title }}</h4>
+                <p class="film-year">
+                  {{ film.releaseYear | date: "yyyy" }}
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
