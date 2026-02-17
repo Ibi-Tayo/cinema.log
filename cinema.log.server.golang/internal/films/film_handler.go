@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 
 	"cinema.log.server.golang/internal/domain"
 	"cinema.log.server.golang/internal/utils"
@@ -121,6 +122,17 @@ func (h *Handler) GetFilmsForComparison(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// Parse optional excludeFilmIds parameter (comma-separated UUIDs)
+	excludeFilmIds := make(map[uuid.UUID]bool)
+	if excludeStr := r.URL.Query().Get("excludeFilmIds"); excludeStr != "" {
+		excludeStrs := strings.Split(excludeStr, ",")
+		for _, idStr := range excludeStrs {
+			if excludeID, err := utils.ParseUUID(strings.TrimSpace(idStr)); err == nil {
+				excludeFilmIds[excludeID] = true
+			}
+		}
+	}
+
 	// Get films for rating that the user has already rated (excluding the current film)
 	candidateFilms, err := h.FilmService.GetFilmsForRating(r.Context(), userID, filmID)
 	if err != nil {
@@ -128,9 +140,14 @@ func (h *Handler) GetFilmsForComparison(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Filter out films that have already been compared
+	// Filter out films that have already been compared or are in the exclude list
 	var filmsForComparison []domain.Film
 	for _, film := range candidateFilms {
+		// Skip if film is in the exclude list
+		if excludeFilmIds[film.ID] {
+			continue
+		}
+
 		hasBeenCompared, err := h.RatingService.HasBeenCompared(r.Context(), userID, filmID, film.ID)
 		if err != nil {
 			log.Printf("error checking comparison history: %v", err)

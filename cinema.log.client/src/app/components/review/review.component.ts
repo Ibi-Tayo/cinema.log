@@ -387,7 +387,11 @@ export class ReviewComponent implements OnInit {
     this.isLoadingComparisons.set(true);
     this.comparisonError.set('');
 
-    this.filmService.getFilmsForComparison(userId, film.id).subscribe({
+    // Get IDs of already loaded films to exclude them
+    const currentFilms = this.filmsForComparison();
+    const excludeFilmIds = currentFilms.map(f => f.id);
+
+    this.filmService.getFilmsForComparison(userId, film.id, excludeFilmIds).subscribe({
       next: (newFilms) => {
         if (newFilms && newFilms.length > 0) {
           const currentFilms = this.filmsForComparison();
