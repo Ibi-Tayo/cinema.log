@@ -1,5 +1,6 @@
-@import 'variables';
-@import 'mixins';
+@use 'variables' as *;
+@use 'mixins' as *;
+@use 'sass:map';
 
 .films-to-review-container {
   max-width: 1400px;
@@ -23,14 +24,14 @@
 
   p {
     margin-top: 1rem;
-    font-size: 1.125rem;
-    color: $text-secondary;
+    font-size: map.get($font-sizes, 'lg');
+    color: get-color(neutral, 600);
   }
 }
 
 .error-state {
   p {
-    color: $error-color;
+    color: get-color(error);
   }
 }
 
@@ -48,19 +49,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.5rem;
+    font-size: map.get($font-sizes, '4xl');
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: $text-primary;
+    color: get-color(neutral, 300);
 
     @media (max-width: 768px) {
-      font-size: 2rem;
+      font-size: map.get($font-sizes, '3xl');
     }
   }
 
   .films-count {
-    font-size: 1.125rem;
-    color: $text-secondary;
+    font-size: map.get($font-sizes, 'lg');
+    color: get-color(neutral, 600);
     margin: 0;
   }
 }
@@ -74,15 +75,15 @@
   text-align: center;
 
   .placeholder-title {
-    font-size: 1.5rem;
+    font-size: map.get($font-sizes, '2xl');
     font-weight: 600;
-    color: $text-secondary;
+    color: get-color(neutral, 400);
     margin: 1rem 0 0.5rem;
   }
 
   .placeholder-subtitle {
-    font-size: 1rem;
-    color: $text-tertiary;
+    font-size: map.get($font-sizes, 'base');
+    color: get-color(neutral, 600);
     margin: 0;
   }
 }
@@ -104,12 +105,12 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border-radius: 12px;
   overflow: hidden;
-  background: $card-background;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: get-color(backgroundColor);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
   &:hover {
     transform: translateY(-8px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 24px rgba(129, 103, 151, 0.4);
 
     .film-overlay {
       opacity: 1;
@@ -121,7 +122,7 @@
     width: 100%;
     padding-top: 150%;
     overflow: hidden;
-    background: $poster-background;
+    background: get-color(neutral, 800);
 
     .film-poster {
       position: absolute;
@@ -141,7 +142,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, get-color(primary, 600) 0%, get-color(secondary, 600) 100%);
     }
 
     .film-overlay {
@@ -150,7 +151,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(129, 103, 151, 0.95);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -161,7 +162,7 @@
       p {
         color: white;
         font-weight: 600;
-        font-size: 1rem;
+        font-size: map.get($font-sizes, 'base');
         margin: 0.5rem 0 0;
       }
     }
@@ -172,9 +173,9 @@
 
     h4 {
       margin: 0 0 0.25rem;
-      font-size: 1rem;
+      font-size: map.get($font-sizes, 'base');
       font-weight: 600;
-      color: $text-primary;
+      color: get-color(neutral, 300);
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
@@ -186,40 +187,8 @@
 
     .film-year {
       margin: 0;
-      font-size: 0.875rem;
-      color: $text-tertiary;
-    }
-  }
-}
-
-// Dark mode support
-:host-context(.dark-mode) {
-  .films-to-review-container {
-    .films-to-review-header h1 {
-      color: $text-primary-dark;
-    }
-
-    .films-count {
-      color: $text-secondary-dark;
-    }
-
-    .film-card {
-      background: $card-background-dark;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-
-      &:hover {
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      }
-
-      .film-info {
-        h4 {
-          color: $text-primary-dark;
-        }
-
-        .film-year {
-          color: $text-tertiary-dark;
-        }
-      }
+      font-size: map.get($font-sizes, 'sm');
+      color: get-color(neutral, 600);
     }
   }
 }
