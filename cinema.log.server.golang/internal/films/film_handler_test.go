@@ -12,11 +12,11 @@ import (
 )
 
 type mockFilmService struct {
-	createFilmFunc           func(ctx context.Context, film *domain.Film) (*domain.Film, error)
-	getFilmByIdFunc          func(ctx context.Context, id uuid.UUID) (*domain.Film, error)
-	getFilmsFromExternalFunc func(ctx context.Context, query string) ([]domain.Film, error)
+	createFilmFunc                  func(ctx context.Context, film *domain.Film) (*domain.Film, error)
+	getFilmByIdFunc                 func(ctx context.Context, id uuid.UUID) (*domain.Film, error)
+	getFilmsFromExternalFunc        func(ctx context.Context, query string) ([]domain.Film, error)
 	generateFilmRecommendationsFunc func(ctx context.Context, userId uuid.UUID, films []domain.Film) ([]domain.Film, error)
-	getSeenUnratedFilmsFunc  func(ctx context.Context, userId uuid.UUID) ([]domain.Film, error)
+	getSeenUnratedFilmsFunc         func(ctx context.Context, userId uuid.UUID) ([]domain.Film, error)
 }
 
 func (m *mockFilmService) GetFilmsForRating(ctx context.Context, userId uuid.UUID, filmId uuid.UUID) ([]domain.Film, error) {

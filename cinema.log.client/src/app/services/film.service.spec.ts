@@ -98,4 +98,56 @@ describe('FilmService', () => {
     );
     req.error(new ProgressEvent('error'));
   });
+
+  it('should get films for comparison without excludeFilmIds', () => {
+    const mockFilms: Film[] = [mockFilm];
+    const userId = 'user-123';
+    const filmId = 'film-456';
+
+    service.getFilmsForComparison(userId, filmId).subscribe((films) => {
+      expect(films).toEqual(mockFilms);
+    });
+
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/films/for-comparison?userId=${userId}&filmId=${filmId}`,
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.withCredentials).toBe(true);
+    req.flush(mockFilms);
+  });
+
+  it('should get films for comparison with excludeFilmIds', () => {
+    const mockFilms: Film[] = [mockFilm];
+    const userId = 'user-123';
+    const filmId = 'film-456';
+    const excludeIds = ['exclude-1', 'exclude-2'];
+
+    service.getFilmsForComparison(userId, filmId, excludeIds).subscribe((films) => {
+      expect(films).toEqual(mockFilms);
+    });
+
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/films/for-comparison?userId=${userId}&filmId=${filmId}&excludeFilmIds=${excludeIds.join(',')}`,
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.withCredentials).toBe(true);
+    req.flush(mockFilms);
+  });
+
+  it('should handle error when getting films for comparison', () => {
+    const userId = 'user-123';
+    const filmId = 'film-456';
+
+    service.getFilmsForComparison(userId, filmId).subscribe({
+      next: () => expect.fail('should have failed'),
+      error: (error) => {
+        expect(error.message).toContain('Failed to fetch films for comparison');
+      },
+    });
+
+    const req = httpMock.expectOne(
+      `${import.meta.env.NG_APP_API_URL}/films/for-comparison?userId=${userId}&filmId=${filmId}`,
+    );
+    req.error(new ProgressEvent('error'));
+  });
 });
