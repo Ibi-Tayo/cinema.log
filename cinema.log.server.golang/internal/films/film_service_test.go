@@ -388,3 +388,176 @@ func TestService_GenerateFilmRecommendations_EmptyFilmList(t *testing.T) {
 		t.Errorf("expected error message %q, got %q", expectedErrMsg, err.Error())
 	}
 }
+
+func TestService_GenerateFilmRecommendations_FiltersCircularRecommendations(t *testing.T) {
+	ctx := context.Background()
+	userID := uuid.New()
+
+	seedFilm := domain.Film{
+		ID:          uuid.New(),
+		ExternalID:  100,
+		Title:       "The Matrix",
+		Description: "A hacker discovers reality",
+		PosterUrl:   "/matrix.jpg",
+		ReleaseYear: "1999",
+	}
+
+	// This film will be recommended but already marked as seen
+	alreadySeenFilm := domain.Film{
+		ID:          uuid.New(),
+		ExternalID:  200,
+		Title:       "Inception",
+		Description: "Dreams within dreams",
+		PosterUrl:   "/inception.jpg",
+		ReleaseYear: "2010",
+	}
+
+	// This film should be included in results
+	newRecommendation := domain.Film{
+		ID:          uuid.New(),
+		ExternalID:  300,
+		Title:       "Interstellar",
+		Description: "Space exploration",
+		PosterUrl:   "/interstellar.jpg",
+		ReleaseYear: "2014",
+	}
+
+	mockStore := &mockFilmStore{
+		createFilmFunc: func(ctx context.Context, film *domain.Film) (*domain.Film, error) {
+			return film, nil
+		},
+		getFilmRecommendation: func(ctx context.Context, userId uuid.UUID, externalFilmId int) (*domain.FilmRecommendation, error) {
+			// Simulate that alreadySeenFilm was already marked as seen
+			if externalFilmId == 200 {
+				return &domain.FilmRecommendation{
+					ID:                       uuid.New(),
+					UserID:                   userId,
+					ExternalFilmID:           externalFilmId,
+					HasSeen:                  true,
+					HasBeenRecommended:       false,
+					RecommendationsGenerated: false,
+				}, nil
+			}
+			// All others are new
+			return nil, ErrFilmRecommendationNotFound
+		},
+		createFilmRecommendationFunc: func(ctx context.Context, recommendation *domain.FilmRecommendation) (*domain.FilmRecommendation, error) {
+			return recommendation, nil
+		},
+	}
+
+	mockGraph := &mockGraphService{
+		addFilmToGraphFunc: func(ctx context.Context, userID uuid.UUID, film domain.Film, recommendations []domain.Film) error {
+			return nil
+		},
+	}
+
+	service := NewService(mockStore, mockGraph)
+
+	// Mock TMDB to return both films
+	service.tmdbRecommendationFunc = func(film domain.Film) []domain.Film {
+		if film.ExternalID == 100 {
+			return []domain.Film{alreadySeenFilm, newRecommendation}
+		}
+		return []domain.Film{}
+	}
+
+	results, err := service.GenerateFilmRecommendations(ctx, userID, []domain.Film{seedFilm})
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	// Should only return newRecommendation, not alreadySeenFilm
+	if len(results) != 1 {
+		t.Errorf("expected 1 recommendation (filtered), got %d", len(results))
+	}
+
+	if len(results) > 0 && results[0].ExternalID != 300 {
+		t.Errorf("expected Interstellar (300), got %d - %s", results[0].ExternalID, results[0].Title)
+	}
+}
+
+func TestService_GenerateFilmRecommendations_ReturnsEmptyWhenAllFiltered(t *testing.T) {
+	ctx := context.Background()
+	userID := uuid.New()
+
+	seedFilm := domain.Film{
+		ID:          uuid.New(),
+		ExternalID:  100,
+		Title:       "The Matrix",
+		Description: "A hacker discovers reality",
+		PosterUrl:   "/matrix.jpg",
+		ReleaseYear: "1999",
+	}
+
+	// Both recommendations will be filtered out (already seen)
+	seenFilm1 := domain.Film{
+		ID:          uuid.New(),
+		ExternalID:  200,
+		Title:       "Inception",
+		Description: "Dreams within dreams",
+		PosterUrl:   "/inception.jpg",
+		ReleaseYear: "2010",
+	}
+
+	seenFilm2 := domain.Film{
+		ID:          uuid.New(),
+		ExternalID:  300,
+		Title:       "Interstellar",
+		Description: "Space exploration",
+		PosterUrl:   "/interstellar.jpg",
+		ReleaseYear: "2014",
+	}
+
+	mockStore := &mockFilmStore{
+		createFilmFunc: func(ctx context.Context, film *domain.Film) (*domain.Film, error) {
+			return film, nil
+		},
+		getFilmRecommendation: func(ctx context.Context, userId uuid.UUID, externalFilmId int) (*domain.FilmRecommendation, error) {
+			// Mark all recommended films as already seen
+			if externalFilmId == 200 || externalFilmId == 300 {
+				return &domain.FilmRecommendation{
+					ID:                       uuid.New(),
+					UserID:                   userId,
+					ExternalFilmID:           externalFilmId,
+					HasSeen:                  true,
+					HasBeenRecommended:       false,
+					RecommendationsGenerated: false,
+				}, nil
+			}
+			return nil, ErrFilmRecommendationNotFound
+		},
+		createFilmRecommendationFunc: func(ctx context.Context, recommendation *domain.FilmRecommendation) (*domain.FilmRecommendation, error) {
+			return recommendation, nil
+		},
+	}
+
+	mockGraph := &mockGraphService{
+		addFilmToGraphFunc: func(ctx context.Context, userID uuid.UUID, film domain.Film, recommendations []domain.Film) error {
+			return nil
+		},
+	}
+
+	service := NewService(mockStore, mockGraph)
+
+	// Mock TMDB to return films that user has already seen
+	service.tmdbRecommendationFunc = func(film domain.Film) []domain.Film {
+		if film.ExternalID == 100 {
+			return []domain.Film{seenFilm1, seenFilm2}
+		}
+		return []domain.Film{}
+	}
+
+	results, err := service.GenerateFilmRecommendations(ctx, userID, []domain.Film{seedFilm})
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	// Should return empty array when all recommendations are filtered
+	if len(results) != 0 {
+		t.Errorf("expected 0 recommendations (all filtered), got %d", len(results))
+	}
+}
+

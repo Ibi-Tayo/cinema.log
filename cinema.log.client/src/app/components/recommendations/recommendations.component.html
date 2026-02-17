@@ -256,6 +256,37 @@
         </div>
       }
 
+      <!-- Empty Recommendations State -->
+      @if (hasNoRecommendations()) {
+        <div
+          class="empty-recommendations-state"
+          data-testid="recommendations-empty-state"
+        >
+          <lord-icon
+            src="https://cdn.lordicon.com/tdrtiskw.json"
+            trigger="loop"
+            style="width: 100px; height: 100px"
+            colors="primary:#D3D3D3"
+          ></lord-icon>
+          <h3>No Recommendations Found</h3>
+          <p>
+            We couldn't find any new films to recommend based on your selections.
+            This might happen if you've already seen all similar films in our
+            database.
+          </p>
+          <p class="suggestion-text">
+            Try selecting different seed films to get fresh recommendations.
+          </p>
+          <p-button
+            label="Select New Seed Films"
+            icon="pi pi-refresh"
+            (onClick)="resetRecommendations()"
+            styleClass="p-button-lg"
+            data-testid="recommendations-reset-button"
+          />
+        </div>
+      }
+
       <!-- Error State -->
       @if (recommendationsError()) {
         <div class="error-message">

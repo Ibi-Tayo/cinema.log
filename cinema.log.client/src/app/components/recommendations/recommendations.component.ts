@@ -84,6 +84,13 @@ export class RecommendationsComponent implements OnInit, OnDestroy {
     const count = this.selectedSeenCount();
     return count > 0 && count <= MAX_FILMS_PER_ROUND;
   });
+  hasNoRecommendations = computed(
+    () =>
+      this.isInRecommendationStep() &&
+      !this.isLoadingRecommendations() &&
+      this.recommendedFilms().length === 0 &&
+      !this.recommendationsError(),
+  );
   isInSeedStep = computed(
     () => this.currentStep() === RecommendationStep.seedSelection,
   );
@@ -332,5 +339,18 @@ export class RecommendationsComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/profile', this.userId()]);
+  }
+
+  resetRecommendations(): void {
+    this.currentStep.set(RecommendationStep.seedSelection);
+    this.seedFilms.set([]);
+    this.recommendedFilms.set([]);
+    this.recommendationsError.set('');
+    this.currentRound.set(1);
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Reset',
+      detail: 'Select new seed films to generate fresh recommendations',
+    });
   }
 }

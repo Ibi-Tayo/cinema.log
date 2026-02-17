@@ -539,6 +539,47 @@
         text-align: center;
       }
     }
+
+    .empty-recommendations-state {
+      @include flex-center;
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: 4rem 2rem;
+      background: linear-gradient(
+        135deg,
+        get-color(primary, 800),
+        get-color(primary, 900)
+      );
+      border: 2px dashed get-color(primary, 600);
+      border-radius: 12px;
+      text-align: center;
+
+      h3 {
+        font-size: map.get($font-sizes, "2xl");
+        font-weight: 600;
+        color: get-color(primary, 300);
+        margin: 0;
+      }
+
+      p {
+        font-size: map.get($font-sizes, "lg");
+        color: get-color(neutral, 400);
+        margin: 0;
+        max-width: 600px;
+        line-height: 1.6;
+      }
+
+      .suggestion-text {
+        font-weight: 600;
+        color: get-color(neutral, 300);
+      }
+
+      ::ng-deep {
+        .p-button {
+          margin-top: 1rem;
+        }
+      }
+    }
   }
 
   // Action Section
