@@ -99,11 +99,13 @@ export class FilmService {
       );
   }
 
-  getFilmsForComparison(userId: string, filmId: string): Observable<Film[]> {
+  getFilmsForComparison(userId: string, filmId: string, excludeFilmIds?: string[]): Observable<Film[]> {
+    let url = `${import.meta.env.NG_APP_API_URL}/films/for-comparison?userId=${userId}&filmId=${filmId}`;
+    if (excludeFilmIds && excludeFilmIds.length > 0) {
+      url += `&excludeFilmIds=${excludeFilmIds.join(',')}`;
+    }
     return this.http
-      .get<
-        Film[]
-      >(`${import.meta.env.NG_APP_API_URL}/films/for-comparison?userId=${userId}&filmId=${filmId}`, { withCredentials: true })
+      .get<Film[]>(url, { withCredentials: true })
       .pipe(
         catchError(
           handleHttpError(
