@@ -382,6 +382,57 @@
         }
       }
 
+      .films-to-review-link-card {
+        cursor: pointer;
+        background: linear-gradient(
+          135deg,
+          get-color(primary, 800) 0%,
+          get-color(secondary, 800) 100%
+        );
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 24px rgba(129, 103, 151, 0.4);
+        }
+
+        .card-content {
+          display: flex;
+          align-items: center;
+          gap: 2rem;
+
+          @media (max-width: 768px) {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+          }
+
+          .card-text {
+            flex: 1;
+
+            h3 {
+              font-size: map.get($font-sizes, "xl");
+              font-weight: 600;
+              color: get-color(neutral, 200);
+              margin: 0 0 0.5rem;
+            }
+
+            p {
+              font-size: map.get($font-sizes, "base");
+              color: get-color(neutral, 400);
+              margin: 0;
+            }
+          }
+
+          lord-icon {
+            pointer-events: none;
+          }
+        }
+      }
+
       .films-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

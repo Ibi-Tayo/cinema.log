@@ -40,6 +40,14 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'films-to-review/:userId',
+    loadComponent: () =>
+      import('./components/films-to-review/films-to-review.component').then(
+        (m) => m.FilmsToReviewComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'recommendations/:userId',
     loadComponent: () =>
       import('./components/recommendations/recommendations.component').then(

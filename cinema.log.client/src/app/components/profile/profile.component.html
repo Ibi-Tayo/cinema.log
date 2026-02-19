@@ -204,50 +204,25 @@
           </div>
         }
         @if (filmsToReview().length > 0) {
-          <div class="films-grid" data-testid="profile-films-to-review-grid">
-            @for (film of filmsToReview(); track film.id) {
-              <div
-                class="film-card"
-                (click)="selectFilm(film.id)"
-                [attr.data-testid]="'profile-film-card-' + film.id"
+          <div class="films-to-review-link-card" data-testid="profile-films-to-review-link" (click)="navigateToFilmsToReview()">
+            <div class="card-content">
+              <lord-icon
+                src="https://cdn.lordicon.com/lecprnjb.json"
+                trigger="hover"
+                style="width: 80px; height: 80px"
               >
-                <div class="film-poster-container">
-                  @if (film.posterUrl) {
-                    <img
-                      [src]="getPosterUrl(film.posterUrl, 'w342')"
-                      [alt]="film.title"
-                      class="film-poster"
-                    />
-                  }
-                  @if (!film.posterUrl) {
-                    <div class="poster-placeholder">
-                      <lord-icon
-                        src="https://cdn.lordicon.com/ugllxeyl.json"
-                        trigger="hover"
-                        style="width: 60px; height: 60px"
-                      >
-                      </lord-icon>
-                    </div>
-                  }
-                  <div class="film-overlay">
-                    <lord-icon
-                      src="https://cdn.lordicon.com/zrkkrrpl.json"
-                      trigger="hover"
-                      colors="primary:#ffffff"
-                      style="width: 48px; height: 48px"
-                    >
-                    </lord-icon>
-                    <p>Review Now</p>
-                  </div>
-                </div>
-                <div class="film-info">
-                  <h4>{{ film.title }}</h4>
-                  <p class="film-year">
-                    {{ film.releaseYear | date: "yyyy" }}
-                  </p>
-                </div>
+              </lord-icon>
+              <div class="card-text">
+                <h3>You have {{ filmsToReview().length }} film{{ filmsToReview().length === 1 ? '' : 's' }} waiting for your review</h3>
+                <p>Click here to view and review all your unwatched films</p>
               </div>
-            }
+              <lord-icon
+                src="https://cdn.lordicon.com/zmkotitn.json"
+                trigger="hover"
+                style="width: 40px; height: 40px"
+              >
+              </lord-icon>
+            </div>
           </div>
         }
       </div>
