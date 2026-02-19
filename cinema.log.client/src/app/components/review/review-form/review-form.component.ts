@@ -52,7 +52,7 @@ export class ReviewFormComponent {
    * Submit a new review
    */
   onSubmitReview(): void {
-    if (this.selectedRating() === 0 || !this.reviewText().trim()) {
+    if (this.selectedRating() === 0) {
       return;
     }
     this.reviewSubmit.emit({
@@ -65,9 +65,6 @@ export class ReviewFormComponent {
    * Update existing review
    */
   onUpdateReview(): void {
-    if (!this.reviewText().trim()) {
-      return;
-    }
     this.reviewUpdate.emit(this.reviewText().trim());
   }
 
@@ -84,8 +81,8 @@ export class ReviewFormComponent {
   isSubmitDisabled(): boolean {
     if (this.isSubmitting()) return true;
     if (this.hasRating()) {
-      return !this.reviewText().trim();
+      return false;
     }
-    return this.selectedRating() === 0 || !this.reviewText().trim();
+    return this.selectedRating() === 0;
   }
 }

@@ -102,6 +102,8 @@
               Unlike simple star ratings, ELO gives you a
               <strong>living, evolving</strong>
               ranking that truly reflects your taste in cinema.
+              <strong>Higher ELO ratings</strong> indicate films you prefer more compared to others you've seen,
+              while <strong>lower ELO ratings</strong> represent films you enjoy less relatively.
             </p>
           </div>
         </div>
@@ -109,20 +111,20 @@
     </div>
 
     <!-- Call to Action -->
-    <div class="cta-section" data-testid="home-cta-section">
-      <lord-icon
-        src="https://cdn.lordicon.com/jvucoldz.json"
-        trigger="loop"
-        delay="2000"
-        style="width: 60px; height: 60px"
-      >
-      </lord-icon>
-      <h2 data-testid="home-cta-title">Ready to Start?</h2>
-      <p data-testid="home-cta-description">
-        Join our community and begin building your personalized film rankings
-        today.
-      </p>
-      @if (!isLoggedIn()) {
+    @if (!isLoggedIn()) {
+      <div class="cta-section" data-testid="home-cta-section">
+        <lord-icon
+          src="https://cdn.lordicon.com/jvucoldz.json"
+          trigger="loop"
+          delay="2000"
+          style="width: 60px; height: 60px"
+        >
+        </lord-icon>
+        <h2 data-testid="home-cta-title">Ready to Start?</h2>
+        <p data-testid="home-cta-description">
+          Join our community and begin building your personalized film rankings
+          today.
+        </p>
         <a href="/login" class="cta-button" data-testid="home-cta-button">
           Get Started
           <lord-icon
@@ -132,7 +134,7 @@
           >
           </lord-icon>
         </a>
-      }
-    </div>
+      </div>
+    }
   </div>
 </div>
