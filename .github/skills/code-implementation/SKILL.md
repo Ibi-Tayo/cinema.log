@@ -5,7 +5,7 @@ description: Specialized skill for executing file changes, maintaining style gui
 # Implementation Framework
 
 ### 1. Code Construction
-- **Style Alignment:** Match the indentation, naming conventions (camelCase vs snake_case), and documentation style of the surrounding code.
+- **Style Alignment:** Match the indentation, naming conventions (camelCase etc), and documentation style of the surrounding code.
 - **Robustness:** Implement the error handling and edge cases identified by the Analyst.
 - **Modularity:** Ensure new functions are focused and do not exceed 30-40 lines where possible.
 

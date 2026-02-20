@@ -21,3 +21,8 @@ description: Generic high-standard audit for Modern Angular and Backend services
 ### 4. Test Verification
 - **Gap Analysis:** Do the tests cover the edge cases and business logic defined in the feature spec?
 - **Mocking:** Are external dependencies properly mocked to ensure test isolation?
+
+### 5. Visual & Runtime Verification (MCP)
+- **Render Check:** Use Chrome DevTools to verify the component renders without console errors.
+- **PrimeNG Styles:** Inspect the element to ensure `.dark-mode` or PrimeNG-specific classes are applied.
+- **Responsive Layout:** Check the component at different viewport widths to ensure cards wrap correctly.
