@@ -1,7 +1,7 @@
 ---
 name: Manager
 description: Orchestrates the 4-role development lifecycle.
-model: Claude Opus 4.6 (copilot)
+model: Claude Sonnet 4.6 (copilot)
 tools: ["agent", "read", "search/listDirectory", "edit/createDirectory"]
 agents: ["Analyst", "Architect", "Developer", "Reviewer"]
 ---
