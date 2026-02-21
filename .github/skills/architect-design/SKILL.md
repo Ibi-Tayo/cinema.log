@@ -3,7 +3,7 @@ name: architect-design
 description: Technical design framework for planning file structures, design patterns, and data flow.
 ---
 # Technical Design Framework
-When this skill is activated, you must evaluate the Analyst's spec against these architectural pillars. Use subagents to gather information you need to ensure your design aligns with the existing codebase and is consistent with current patterns.
+When this skill is activated, you must evaluate the Analyst's spec against these architectural pillars. Call on subagents to speed up your process, you need to ensure your design aligns with the existing codebase and is consistent with current patterns.
 
 ### 1. Impact Analysis
 - **Core Logic:** Which existing services or controllers are affected?
