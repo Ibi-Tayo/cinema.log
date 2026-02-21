@@ -1,6 +1,7 @@
 ---
 name: Reviewer
 description: Quality gatekeeper that audits code against project-specific documentation.
+model: Gemini 3 Pro (Preview) (copilot) # May be better at multimodal/visual reasoning needed for MCP checks
 tools:
   [
     "read",

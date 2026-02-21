@@ -1,6 +1,7 @@
 ---
 name: Analyst
 description: Requirements interviewer. Blocks the workflow until requirements are 100% clear.
+model: Claude Sonnet 4.6 (copilot)
 tools: ["read", "search"]
 ---
 
