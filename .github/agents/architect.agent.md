@@ -2,7 +2,7 @@
 name: Architect
 description: Plans technical implementation. Uses the architect-design skill for system-level planning.
 model: Claude Opus 4.6 (copilot)
-tools: ["read", "search", "search/listDirectory"]
+tools: ["read", "search", "search/listDirectory", "edit", "web"]
 ---
 
 # Role: Technical Architect

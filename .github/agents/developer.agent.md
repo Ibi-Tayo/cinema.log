@@ -5,9 +5,11 @@ model: GPT-5.3-Codex (copilot)
 tools:
   [
     "edit",
+    "execute",
     "vscode/runCommand",
     "read",
     "search",
+    "todo",
     "primeng/get_component",
     "primeng/get_component_props",
     "primeng/get_component_events",
