@@ -39,9 +39,16 @@ The script:
 cd cinema.log.server.golang
 make test  # OR: go test ./... -v
 
-# Frontend
+# Frontend - Unit/Component tests
 cd cinema.log.client
 npm run test  # Uses vitest with Angular TestBed for component/service tests
+
+# Frontend - E2E tests with Playwright
+cd cinema.log.client
+npx playwright test              # Run all e2e tests
+npx playwright test --ui         # Interactive UI mode
+npx playwright test --headed     # Run with browser visible
+npx playwright show-report       # View HTML test report
 ```
 
 ## Backend Architecture (Go)
@@ -89,7 +96,8 @@ filmHandler := films.NewHandler(filmService, ratingService)
 - **Mock Updates**: When adding new interface methods, ensure mocks in test files implement them:
   - Handler tests: Update `mock*Service` structs
   - Service tests: Update `mock*Store` structs with function fields and corresponding methods
-- **Frontend tests**: Vitest with Angular TestBed
+- **Frontend unit tests**: Vitest with Angular TestBed for components/services
+- **E2E tests**: Playwright for full user journey testing (see E2E Testing section below)
 
 ### Database Migrations
 
@@ -204,6 +212,129 @@ NG_APP_API_URL=http://localhost:8080
 ### External API (TMDB)
 
 Film search via `GET /films/search?f=query` proxied through backend [films/film_service.go](../cinema.log.server.golang/internal/films/film_service.go) to avoid exposing API keys
+E2E Testing (Playwright)
+
+### Test Structure
+
+Tests are organized by feature in `cinema.log.client/tests/`:
+
+```
+tests/
+  ├── auth.setup.ts              # Global auth setup (runs before all tests)
+  ├── seed.spec.ts               # Verifies auth is working
+  ├── authentication/            # Auth-related tests
+  │   ├── protected-routes.spec.ts
+  │   └── sign-out.spec.ts
+  ├── film-search/               # Film search feature tests
+  │   ├── search-by-title.spec.ts
+  │   ├── select-film.spec.ts
+  │   └── no-results.spec.ts
+  ├── review/                    # Review submission tests
+  │   ├── submit-review.spec.ts
+  │   ├── star-rating-selection.spec.ts
+  │   └── validation-no-rating.spec.ts
+  ├── comparison-flow/           # Bulk comparison tests
+  │   └── submit-then-bulk.spec.ts
+  ├── profile/                   # User profile tests
+  │   └── profile-information.spec.ts
+  ├── navigation/                # Navigation tests
+  │   └── logo-home.spec.ts
+  └── utils/                     # Test utilities
+      └── test-helpers.ts
+```
+
+### Authentication Setup
+
+Tests use a **global authentication setup** via [auth.setup.ts](../cinema.log.client/tests/auth.setup.ts):
+
+- Runs once before all tests (defined in `playwright.config.ts` as `setup` project)
+- Uses `/auth/dev/login` endpoint to bypass OAuth (creates test user automatically)
+- Saves authentication state to `.auth/user.json`
+- All test projects depend on the `setup` project and load stored auth state
+
+```typescript
+// Tests automatically have authenticated context
+test("some test", async ({ page }) => {
+  await page.goto("/"); // Already logged in!
+});
+```
+
+### Test Helpers & Utilities
+
+[tests/utils/test-helpers.ts](../cinema.log.client/tests/utils/test-helpers.ts) provides:
+
+- **`ensureFilmExists(page, filmTitle, rating?, reviewText?)`**: Idempotent test data creation
+  - Searches for film and adds it to user's collection if not present
+  - Makes tests independent and repeatable
+  - Example:
+    ```typescript
+    await ensureFilmExists(page, "The Dark Knight", 5, "Great film!");
+    ```
+
+### Configuration
+
+[playwright.config.ts](../cinema.log.client/playwright.config.ts) settings:
+
+- **Base URL**: `http://localhost:4200` (or `process.env.BASE_URL`)
+- **Test isolation**: Fully parallel execution
+- **Projects**: Setup project + Chromium (with stored auth state)
+- **CI Configuration**:
+  - 3 retries on CI, 0 locally
+  - Sequential execution on CI (`workers: 1`)
+  - Fails build if `test.only` found
+- **Reporting**: HTML reports (`npx playwright show-report`)
+
+### Test Patterns
+
+**Test structure**:
+
+```typescript
+import { test, expect } from "@playwright/test";
+
+test.describe("Feature Name", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+  });
+
+  test("user can perform action", async ({ page }) => {
+    // Use data-testid attributes for reliable selectors
+    await page.getByTestId("navbar-search-link").click();
+    await expect(page.getByRole("heading", { name: "Search" })).toBeVisible();
+  });
+});
+```
+
+**Selector strategy**:
+
+- **Preferred**: `getByTestId()` for custom `data-testid` attributes
+- **Fallback**: `getByRole()` for semantic elements (headings, buttons, etc.)
+- **Avoid**: CSS class selectors (too brittle)
+
+**Common patterns**:
+
+- Navigation tests verify routing and redirects
+- Form tests check validation and submission
+- Protected route tests verify auth guards
+- Use `waitForURL()` for navigation assertions
+- Use `ensureFilmExists()` for idempotent test data
+
+### Running E2E Tests
+
+```bash
+# Ensure dev environment is running first
+./run-dev.zsh
+
+# In another terminal:
+cd cinema.log.client
+npx playwright test                    # Run all tests
+npx playwright test --ui               # Interactive mode with time-travel debugging
+npx playwright test film-search/       # Run specific directory
+npx playwright test --grep "search"    # Run tests matching pattern
+npx playwright test --headed           # See browser during test
+npx playwright show-report             # View last test report
+```
+
+##
 
 ## Common Patterns
 
@@ -216,6 +347,7 @@ Film search via `GET /films/search?f=query` proxied through backend [films/film_
 - **Transactions**: Use `BeginTx()` for multi-step database operations (e.g., batch updates)
 
 ### Frontend
+
 - **HTTP error handling**: Always use `catchError()` with error handler utilities
 - **Loading states**: Use signals for `isLoading`, `errorMessage`
 - **Router navigation**: Inject `Router` for programmatic nav (e.g., after login success)
@@ -224,7 +356,7 @@ Film search via `GET /films/search?f=query` proxied through backend [films/film_
 
 ## Migration/Deployment Notes
 
-- Production backend: Railway deployment 
+- Production backend: Railway deployment
 - Frontend build: `ng build` → outputs to `dist/`
 - DB migrations: Goose applies in order based on timestamp prefix
 - Docker: Use `docker compose` (v2 syntax) in scripts, not `docker-compose`
