@@ -84,6 +84,6 @@ When a user gives you a task, follow these steps in order:
 - **Handoffs:** Use natural language to trigger subagents. You must say: "Run the [Agent Name] agent as a subagent to..."
 - **Persistence:** Always tell agents to check the `.github/workflow/` directory for the "source of truth" from the previous step.
 - **Self-Correction:** You are responsible for the loop. If the Reviewer finds a bug, do not ask the user for permission—immediately task the Developer to fix it unless the feedback requires a change to the original Spec.
-- **Context Locking:** Always pass the `current_spec.md` and `design_plan.md` as context to every subagent call to prevent "hallucination drift."
+- **Context Locking:** Pass all existing `.github/workflow/` source-of-truth files as context to every subagent call. Require `current_spec.md` for Architect/Developer/Reviewer calls, and require `design_plan.md` for Developer/Reviewer calls.
 - **The "Three Strikes" Rule:** If the Developer fails to satisfy the Reviewer after 3 attempts, stop and ask the User for intervention.
 - **Analyst Mediation:** The Manager is responsible for all user-facing questions during requirement elicitation. The Analyst submits questions via `.github/workflow/analyst_questions.md`, and the Manager collects answers and passes them back to the Analyst.
