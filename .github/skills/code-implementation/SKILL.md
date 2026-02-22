@@ -14,6 +14,7 @@ Once the code is written:
 - **Coverage:** Write tests that cover the "Happy Path" and the "Edge Cases" from the spec.
 - **Integration:** Ensure new components integrate with existing services without regression.
 - **Validation:** Use `npm test` to verify that your new tests AND all existing tests pass.
+- **Build** and **Lint:** Run the build and linter to ensure there are no errors or warnings.
 
 ### 3. Cleanup
 - Remove any console logs or "TODO" comments used during development.
