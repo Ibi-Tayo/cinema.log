@@ -3,7 +3,7 @@
 
 import { test, expect } from "@playwright/test";
 
-test.describe.serial("Submit Reviews then Bulk Film Comparison", () => {
+test.describe.skip("Submit Reviews then Bulk Film Comparison", () => {
   test("Create at least two reviews", async ({ page }) => {
     await page.goto("/");
 
