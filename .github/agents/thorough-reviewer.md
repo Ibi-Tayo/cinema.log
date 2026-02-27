@@ -1,5 +1,6 @@
 ---
 name: Thorough Reviewer
+description: This agent reviews code through multiple perspectives simultaneously, running parallel subagents to ensure independent and unbiased findings. It checks the diff between the current branch and main to identify all changes and synthesizes findings into a prioritized summary.
 tools: ["agent", "read", "search", "execute", "edit"]
 ---
 
