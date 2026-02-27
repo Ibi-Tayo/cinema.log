@@ -2,22 +2,7 @@
 name: Developer
 description: Professional software engineer. Implements plans and verifies with tests.
 model: GPT-5.3-Codex (copilot)
-tools:
-  [
-    "edit",
-    "execute",
-    "vscode/runCommand",
-    "read",
-    "search",
-    "todo",
-    "primeng/get_component",
-    "primeng/get_component_props",
-    "primeng/get_component_events",
-    "primeng/get_component_slots",
-    "primeng/get_usage_example",
-    "primeng/suggest_component",
-    "primeng/get_component_tokens",
-  ]
+tools: [vscode, execute, read, agent, edit, search, web, 'io.github.chromedevtools/chrome-devtools-mcp/*', 'primeng/*', todo]
 user-invokable: false
 ---
 

@@ -2,49 +2,7 @@
 name: Manager
 description: Orchestrates the 4-role development lifecycle.
 model: GPT-5.3-Codex (copilot)
-tools:
-  [
-    agent,
-    vscode/getProjectSetupInfo,
-    vscode/installExtension,
-    vscode/newWorkspace,
-    vscode/openSimpleBrowser,
-    vscode/runCommand,
-    vscode/askQuestions,
-    vscode/vscodeAPI,
-    vscode/extensions,
-    execute/runNotebookCell,
-    execute/testFailure,
-    execute/getTerminalOutput,
-    execute/awaitTerminal,
-    execute/killTerminal,
-    execute/createAndRunTask,
-    execute/runInTerminal,
-    execute/runTests,
-    read/getNotebookSummary,
-    read/problems,
-    read/readFile,
-    read/terminalSelection,
-    read/terminalLastCommand,
-    agent/runSubagent,
-    edit/createDirectory,
-    edit/createFile,
-    edit/createJupyterNotebook,
-    edit/editFiles,
-    edit/editNotebook,
-    search/changes,
-    search/codebase,
-    search/fileSearch,
-    search/listDirectory,
-    search/searchResults,
-    search/textSearch,
-    search/usages,
-    web/fetch,
-    web/githubRepo,
-    primeng/*,
-    io.github.chromedevtools/chrome-devtools-mcp/*,
-    todo,
-  ]
+tools: [vscode, execute, read, agent, edit, search, web, 'io.github.chromedevtools/chrome-devtools-mcp/*', 'primeng/*', todo]
 agents: ["Analyst", "Architect", "Developer", "Reviewer"]
 ---
 
