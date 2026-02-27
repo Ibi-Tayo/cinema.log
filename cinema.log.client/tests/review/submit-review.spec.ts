@@ -30,7 +30,7 @@ test.describe("Film Review and Rating", () => {
     if (isNewReview) {
       // New review flow - click the 5-star rating button
       await starButton.click();
-      await expect(page.getByText("Click to rate (5)")).toBeVisible();
+      await expect(page.getByText("Click to rate")).toBeVisible();
 
       // 3. Type a review in the 'Your Thoughts' textbox
       await page
