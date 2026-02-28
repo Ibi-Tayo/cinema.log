@@ -86,11 +86,11 @@ describe('ReviewFormComponent', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const stars = compiled.querySelectorAll('.star');
+    const stars = compiled.querySelectorAll('.star:not(.zero-star)');
     expect(stars.length).toBe(5);
   });
 
-  it('should update selected rating when star is clicked', () => {
+  it('should update selected rating when star half is clicked', () => {
     fixture.componentRef.setInput('hasRating', false);
     fixture.componentRef.setInput('isSubmitting', false);
     fixture.componentRef.setInput('submitSuccess', false);
@@ -99,11 +99,31 @@ describe('ReviewFormComponent', () => {
     expect(component.selectedRating()).toBe(0);
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const stars = compiled.querySelectorAll('.star');
-    (stars[2] as HTMLElement).click(); // Click 3rd star
+    const stars = compiled.querySelectorAll('.star:not(.zero-star)');
+
+    const thirdStar = stars[2] as HTMLElement;
+    const rect = {
+      left: 0,
+      width: 20,
+      top: 0,
+      right: 20,
+      bottom: 20,
+      height: 20,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    } as DOMRect;
+
+    Object.defineProperty(thirdStar, 'getBoundingClientRect', {
+      value: () => rect,
+    });
+
+    thirdStar.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, clientX: rect.left + 5 }),
+    );
     fixture.detectChanges();
 
-    expect(component.selectedRating()).toBe(3);
+    expect(component.selectedRating()).toBe(2.5);
   });
 
   it('should update review text when typing', () => {
