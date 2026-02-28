@@ -25,6 +25,17 @@ export class FilmDisplayComponent {
   film = input.required<Film>();
   filmRating = input<UserFilmRating | null>(null);
 
+  getStars(rating: number): string[] {
+    return Array(5)
+      .fill('star')
+      .map((_, index) => {
+        const starIndex = index + 1;
+        if (rating >= starIndex) return 'full';
+        if (rating >= starIndex - 0.5) return 'half';
+        return 'empty';
+      });
+  }
+
   getPosterUrl(
     posterPath: string | null | undefined,
     size: TMDBPosterSize = 'original',
