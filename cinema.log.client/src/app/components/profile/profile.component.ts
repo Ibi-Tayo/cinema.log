@@ -1,4 +1,12 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  CUSTOM_ELEMENTS_SCHEMA,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TableModule } from 'primeng/table';
@@ -177,7 +185,12 @@ export class ProfileComponent implements OnInit {
   getStars(rating: number): string[] {
     return Array(5)
       .fill('star')
-      .map((_, i) => (i < rating ? 'full' : 'empty'));
+      .map((_, i) => {
+        const starIndex = i + 1;
+        if (rating >= starIndex) return 'full';
+        if (rating >= starIndex - 0.5) return 'half';
+        return 'empty';
+      });
   }
 
   selectFilm(filmId: string): void {

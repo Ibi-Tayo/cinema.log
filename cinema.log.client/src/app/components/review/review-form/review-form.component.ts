@@ -8,11 +8,13 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Review } from '../../../services/review.service';
+import { NgxStarsModule } from 'ngx-stars';
+
 
 @Component({
   selector: 'app-review-form',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgxStarsModule],
   templateUrl: './review-form.component.html',
   styleUrl: './review-form.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

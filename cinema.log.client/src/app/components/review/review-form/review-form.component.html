@@ -44,20 +44,15 @@
             Rating (out of 5)
           </p>
           <div class="star-rating" data-testid="review-form-star-rating">
-            @for (star of getStars(); track star) {
-              <span
-                class="star"
-                [class.selected]="star <= selectedRating()"
-                [class.hover]="star <= selectedRating()"
-                (click)="selectRating(star)"
-                role="button"
-                tabindex="0"
-                [attr.aria-label]="'Rate ' + star + ' out of 5 stars'"
-                [attr.data-testid]="'review-form-star-' + star"
-              >
-                ★
-              </span>
-            }
+            <ngx-stars
+              [maxStars]="5"
+              [initialStars]="selectedRating()"
+              [size]="28"
+              [color]="'#FFD055'"
+              [animation]="true"
+              [wholeStars]="false"
+              (ratingOutput)="selectRating($event)"
+            ></ngx-stars>
           </div>
           <p class="rating-hint" data-testid="review-form-rating-hint">
             Click to rate ({{ selectedRating() || "Not rated" }})
