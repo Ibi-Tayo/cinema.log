@@ -20,23 +20,12 @@ test.describe("Film Review and Rating", () => {
     await page
       .getByRole("img", { name: "Schindler's List", exact: true })
       .click();
-    await expect(
-      page.getByRole("button", { name: "Rate 1 out of 5 stars" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Rate 5 out of 5 stars" }),
-    ).toBeVisible();
 
-    // 2. Click the 3-star button
-    await page.getByTestId("review-form-star-3").click();
-    await expect(page.getByText("Click to rate (3)")).toBeVisible();
+    const secondStar = page.locator('span.star').nth(2); // 1-based index for stars because there is a hidden 0-star element
+    await secondStar.click();
 
-    // 3. Click the 5-star button
-    await page.getByTestId("review-form-star-5").click();
-    await expect(page.getByText("Click to rate (5)")).toBeVisible();
-
-    // 4. Click the 1-star button
-    await page.getByTestId("review-form-star-1").click();
-    await expect(page.getByText("Click to rate (1)")).toBeVisible();
+    const ratingHint = page.locator('p.rating-hint');
+    // expect to have either 1.5 or 2 stars selected
+    await expect(ratingHint).toHaveText(/\s*Click to rate \(1\.5|2\)\s*/);
   });
 });

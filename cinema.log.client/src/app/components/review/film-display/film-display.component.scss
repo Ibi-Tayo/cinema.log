@@ -77,11 +77,22 @@
       @include rounded(xl);
       border: 1px solid rgba(get-color(primary, 500), 0.3);
 
-      .elo-rating-badge {
+      .elo-rating-metrics {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 8px;
+
+        @include breakpoint-max(md) {
+          flex-direction: column;
+          gap: 12px;
+        }
+      }
+
+      .elo-rating-badge,
+      .initial-rating-badge {
         display: flex;
         align-items: center;
         gap: 12px;
-        margin-bottom: 8px;
 
         .elo-info {
           display: flex;
@@ -93,7 +104,13 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
           }
+        }
+      }
 
+      .elo-rating-badge {
+        min-width: 170px;
+
+        .elo-info {
           .elo-value {
             font-size: 1.8rem;
             font-weight: 700;
@@ -101,6 +118,33 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+          }
+        }
+      }
+
+      .initial-rating-badge {
+        .rating-stars {
+          display: flex;
+          gap: 0.25rem;
+          margin-top: 2px;
+
+          .star {
+            font-size: 1.1rem;
+            color: get-color(neutral, 600);
+
+            &.filled {
+              color: get-color(warning);
+            }
+
+            &.half {
+              background: linear-gradient(
+                90deg,
+                get-color(warning) 50%,
+                get-color(neutral, 600) 50%
+              );
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+            }
           }
         }
       }

@@ -134,7 +134,11 @@
                       </p>
                       <div class="rating">
                         @for (star of getStars(review.rating); track $index) {
-                          <span class="star" [class.filled]="star === 'full'">
+                          <span
+                            class="star"
+                            [class.filled]="star === 'full'"
+                            [class.half]="star === 'half'"
+                          >
                             ★
                           </span>
                         }
@@ -204,7 +208,11 @@
           </div>
         }
         @if (filmsToReview().length > 0) {
-          <div class="films-to-review-link-card" data-testid="profile-films-to-review-link" (click)="navigateToFilmsToReview()">
+          <div
+            class="films-to-review-link-card"
+            data-testid="profile-films-to-review-link"
+            (click)="navigateToFilmsToReview()"
+          >
             <div class="card-content">
               <lord-icon
                 src="https://cdn.lordicon.com/lecprnjb.json"
@@ -213,7 +221,12 @@
               >
               </lord-icon>
               <div class="card-text">
-                <h3>You have {{ filmsToReview().length }} film{{ filmsToReview().length === 1 ? '' : 's' }} waiting for your review</h3>
+                <h3>
+                  You have {{ filmsToReview().length }} film{{
+                    filmsToReview().length === 1 ? "" : "s"
+                  }}
+                  waiting for your review
+                </h3>
                 <p>Click here to view and review all your unwatched films</p>
               </div>
               <lord-icon

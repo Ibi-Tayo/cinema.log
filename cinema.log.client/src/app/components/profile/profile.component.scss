@@ -297,6 +297,15 @@
                 &.filled {
                   color: #fbbf24; // Gold color for filled stars
                 }
+                &.half {
+                  background: linear-gradient(
+                    90deg,
+                    #fbbf24 50%,
+                    get-color(neutral, 700) 50%
+                  );
+                  -webkit-background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                }
               }
             }
 

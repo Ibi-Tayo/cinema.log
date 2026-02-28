@@ -122,6 +122,48 @@ describe('FilmDisplayComponent', () => {
     expect(eloValue?.textContent).toContain('1,500');
   });
 
+  it('should display initial rating section', () => {
+    fixture.componentRef.setInput('film', mockFilm);
+    fixture.componentRef.setInput('filmRating', mockFilmRating);
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const initialRatingSection = compiled.querySelector(
+      '[data-testid="film-display-initial-rating"]',
+    );
+    expect(initialRatingSection).toBeTruthy();
+  });
+
+  it('should render initial rating stars', () => {
+    fixture.componentRef.setInput('film', mockFilm);
+    fixture.componentRef.setInput('filmRating', mockFilmRating);
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const initialRatingSection = compiled.querySelector(
+      '[data-testid="film-display-initial-rating"]',
+    );
+    const stars = initialRatingSection?.querySelectorAll('.star');
+    expect(stars?.length).toBe(5);
+  });
+
+  it('should render a half star for 4.5 initial rating', () => {
+    fixture.componentRef.setInput('film', mockFilm);
+    fixture.componentRef.setInput('filmRating', {
+      ...mockFilmRating,
+      initialRating: 4.5,
+    });
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const stars = compiled.querySelectorAll(
+      '[data-testid="film-display-initial-rating"] .star',
+    );
+
+    expect(stars[4]?.classList.contains('half')).toBe(true);
+    expect(stars[4]?.classList.contains('filled')).toBe(false);
+  });
+
   it('should display number of comparisons', () => {
     fixture.componentRef.setInput('film', mockFilm);
     fixture.componentRef.setInput('filmRating', mockFilmRating);
@@ -139,6 +181,12 @@ describe('FilmDisplayComponent', () => {
     const posterUrl = component.getPosterUrl('/test-poster.jpg');
     expect(posterUrl).toBeTruthy();
     expect(posterUrl).toContain('test-poster.jpg');
+  });
+
+  it('should compute stars for half ratings', () => {
+    const stars = component.getStars(3.5);
+
+    expect(stars).toEqual(['full', 'full', 'full', 'half', 'empty']);
   });
 
   it('should have film-section class on container', () => {
